@@ -6,6 +6,19 @@ import CardShowcase from './ui/card-showcase'
 import { CardProps } from './lib/definitions'
 import { RadioButton } from './ui/input'
 
+import { HeroSection } from '@/components/hero-section'
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSearch } from '@fortawesome/free-solid-svg-icons'
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+
 const showcases: CardProps[] = [
   {
     id: 1,
@@ -43,6 +56,7 @@ const showcases: CardProps[] = [
 ]
 
 export default function page() {
+  // return <HeroSection />
   return (
     <main className="">
       <div className="w-full md:h-[80vh] md:flex">
@@ -54,36 +68,83 @@ export default function page() {
           priority
           className="w-full md:w-[40%] md:order-1 sm:h-2/4 md:h-auto object-cover"
         />
-        <section className="bg-primary w-full flex flex-col gap-3 md:w-[60%] md:justify-center">
+        <section className="bg-primary w-full h-[904px] md:w-[1112px] md:h-[904px] flex flex-col gap-3 md:justify-center">
+          {/* Conteúdo da seção */}
           <div className="flex flex-col p-5 space-y-3 sm:space-y-4 xl:pl-28">
-            <p className="text-secondary md:text-2xl">Bem vindo!</p>
-            <h1 className="text-secondary max-w-64 text-left font-bold text-xl w-full sm:text-3xl md:max-w-lg lg:text-3xl text xl:text-4xl">
-              Conecte-se com Empresas e Parceiros da Comunidade UFC
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#4E690B] leading-tight">
+              Conecte-se com
+              <br />
+              Empresas e Parceiros da Comunidade UFC
             </h1>
-            <p className="md:max-w-96 text-secondary text-xs sm:text-sm md:text-lg">
+            <p className="text-lg md:text-lg lg:text-xl  max-w-[690px] bold text-[#618506]">
               Promovemos a conexão entre você, iniciativas da UFC e empresas
               parceiras externas!
             </p>
-            <div className="flex flex-row items-center text-secondary">
-              <form className="flex flex-row gap-2 items-center w-full">
-                <p className="text-xs md:text-sm">Busco por..</p>
-                <select
-                  defaultValue=""
-                  className="w-full max-w-60 bg-white px-1 rounded-full text-xs py-1 border-gray-200 border-2"
-                >
-                  <option className="text-xs" value="">
-                    Ex: IA, Software, Saúde
-                  </option>
-                  <option value="US">United States</option>
-                </select>
-                <p className="text-xs md:text-sm">em..</p>
-                <select
-                  defaultValue=""
-                  className="w-full max-w-40 bg-white px-2 rounded-full text-xs py-1 border-gray-200 border-2"
-                >
-                  <option value="">Startups</option>
-                  <option value="US">Laboratórios</option>
-                </select>
+            <div className="flex flex-col items-center text-secondary">
+              <form className="flex flex-col gap-2 items-start w-full">
+                <p className="font-regular text-base text-[#41580F]">
+                  Estou buscando um(a)
+                </p>
+
+                {/* Container para Seleções */}
+                <div className="flex flex-col md:flex-row gap-2 w-full md:items-center sm:items-left">
+                  {/* Componente de Seleção 1 */}
+                  <Select className="flex-1">
+                    <SelectTrigger className="w-full md:w-1/3 text-[#41580F]">
+                      <SelectValue placeholder="Software" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem className="text-[#41580F]" value="software">
+                        Solução em Software
+                      </SelectItem>
+                      <SelectItem className="text-[#41580F]" value="hardware">
+                        Solução em Hardware
+                      </SelectItem>
+                      <SelectItem
+                        className="text-[#0e100b]"
+                        value="extension_projeto"
+                      >
+                        Projeto de Extensão
+                      </SelectItem>
+                      <SelectItem
+                        className="text-[#41580F]"
+                        value="entrepreneur_project"
+                      >
+                        Projeto Empreendedor
+                      </SelectItem>
+                      <SelectItem className="text-[#41580F]" value="docente">
+                        Pesquisador(a)
+                      </SelectItem>
+                      <SelectItem
+                        className="text-[#41580F]"
+                        value="research_group"
+                      >
+                        Grupo de Pesquisa
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <p className="font-regular text-sm text-[#41580F]">em...</p>
+
+                  {/* Componente de Seleção 2 */}
+                  <Select className="flex-1">
+                    <SelectTrigger className="w-full md:w-1/3 text-[#41580F]">
+                      <SelectValue placeholder="Startups" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="startups">Startups</SelectItem>
+                      <SelectItem value="laboratorios">Laboratórios</SelectItem>
+                      <SelectItem value="competencias">
+                        Competências (pesquisa, tcc e etc.)
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <button className="flex items-center text-sm w-full md:w-24 h-8 md:h-9 bg-[#41580F] text-white rounded px-3 py-1 mt-2">
+                  <FontAwesomeIcon icon={faSearch} className="mr-1" />
+                  <p>Buscar</p>
+                </button>
               </form>
             </div>
           </div>

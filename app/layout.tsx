@@ -5,7 +5,10 @@ import Header from './ui/header'
 import Footer from './ui/footer'
 // import Footer from './ui/footer'
 
-const poppins = Poppins({ subsets: ['latin'], weight: ['200', '600', '400'] })
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['200', '600', '400', '500', '600', '700', '800', '900'],
+})
 
 export const metadata: Metadata = {
   title: 'Link@ - Plataforma',

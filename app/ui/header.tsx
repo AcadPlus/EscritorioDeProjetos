@@ -5,7 +5,8 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 import { links } from '../lib/arrays'
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -22,11 +23,11 @@ export default function Header() {
       <nav className="flex items-center justify-between p-4 md:w-full px-7 w-full xl:pl-28">
         <div className="flex items-center space-x-4">
           <Image
-            src="/logo.svg"
+            src="/logo_svg.svg"
             alt="Logo"
-            className="h-12 w-12"
-            width={48}
-            height={48}
+            className=""
+            width={140}
+            height={65}
           />
           <div>
             <h1 className="text-sm max-w-20 text-left hidden">
@@ -60,9 +61,19 @@ export default function Header() {
                 key={item.name}
                 className="hover:underline hover:ease-in duration-300 transition-all"
               >
-                <a href={item.href} className="text-base font-medium">
-                  {item.name}
-                </a>
+<a
+  href={item.href}
+  className="text-lg font-regular text-[#213102] flex items-center"
+>
+  {item.name}
+  {item.expand ? (
+    <FontAwesomeIcon
+    icon={faChevronDown}
+    className="text-[#82AF01] ml-2 text-base md:text-lg lg:text-sm" // Tamanhos responsivos
+  />
+  ) : null}
+</a>
+
               </li>
             ))}
           </ul>
