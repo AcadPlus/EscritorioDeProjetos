@@ -1,11 +1,11 @@
 import React from 'react'
 import Image from 'next/image'
 import Badge from './ui/badge-group'
-import { RadioButton } from './ui/input'
 
 import { Escritorio } from '@/components/escritorio'
 import { Vitrines } from '@/components/vitrines'
-
+import { InteractivePartnershipSection } from '@/components/interactive-partnership-section'
+import { UniformizationProcess } from '@/components/uniformization-process'
 // import { HeroSection } from '@/components/hero-section'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -22,7 +22,7 @@ import {
 export default function page() {
   return (
     <main className="">
-      <div className="w-full md:h-[80vh] md:flex">
+      <div className="w-full md:h-[80vh] mt-20 md:flex">
         <Image
           src="/cei_3.jpg"
           alt="Imagem de pessoas conversando"
@@ -52,17 +52,23 @@ export default function page() {
                 </p>
 
                 {/* Container para Seleções */}
-                <div className="flex flex-col md:flex-row gap-2 w-full md:items-center sm:items-left">
+                <div className="flex flex-col md:flex-row gap-2  w-full md:items-center sm:items-left">
                   {/* Componente de Seleção 1 */}
                   <Select>
-                    <SelectTrigger className="w-full md:w-1/3 text-[#41580F]">
+                    <SelectTrigger className="bg-white w-full md:w-1/3 text-black">
                       <SelectValue placeholder="Software" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem className="text-[#41580F]" value="software">
+                    <SelectContent className="select-content bg-white">
+                      <SelectItem
+                        className="hover:text-[#41580F]"
+                        value="software"
+                      >
                         Solução em Software
                       </SelectItem>
-                      <SelectItem className="text-[#41580F]" value="hardware">
+                      <SelectItem
+                        className="hover:text-[#41580F]"
+                        value="hardware"
+                      >
                         Solução em Hardware
                       </SelectItem>
                       <SelectItem
@@ -72,16 +78,19 @@ export default function page() {
                         Projeto de Extensão
                       </SelectItem>
                       <SelectItem
-                        className="text-[#41580F]"
+                        className="hover:text-[#41580F]"
                         value="entrepreneur_project"
                       >
                         Projeto Empreendedor
                       </SelectItem>
-                      <SelectItem className="text-[#41580F]" value="docente">
+                      <SelectItem
+                        className="hover:text-[#41580F]"
+                        value="docente"
+                      >
                         Pesquisador(a)
                       </SelectItem>
                       <SelectItem
-                        className="text-[#41580F]"
+                        className="hover:text-[#41580F]"
                         value="research_group"
                       >
                         Grupo de Pesquisa
@@ -93,13 +102,26 @@ export default function page() {
 
                   {/* Componente de Seleção 2 */}
                   <Select>
-                    <SelectTrigger className="w-full md:w-1/3 text-[#41580F]">
+                    <SelectTrigger className=" bg-white w-full md:w-1/3 text-black">
                       <SelectValue placeholder="Startups" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="startups">Startups</SelectItem>
-                      <SelectItem value="laboratorios">Laboratórios</SelectItem>
-                      <SelectItem value="competencias">
+                    <SelectContent className="select-content bg-white">
+                      <SelectItem
+                        className="hover:text-[#41580F]"
+                        value="startups"
+                      >
+                        Startups
+                      </SelectItem>
+                      <SelectItem
+                        className="hover:text-[#41580F]"
+                        value="laboratorios"
+                      >
+                        Laboratórios
+                      </SelectItem>
+                      <SelectItem
+                        className="hover:text-[#41580F]"
+                        value="competencias"
+                      >
                         Competências (pesquisa, tcc e etc.)
                       </SelectItem>
                     </SelectContent>
@@ -134,6 +156,7 @@ export default function page() {
           className="text-blueText"
           posTexto="Exposição de vitrines"
           classTexto="text-[#1A2C32]"
+          textoFinal="Conheça as vitrines disponíveis na nossa plataforma LINK@, conecte-se e faça parte dessa rede!"
         />
         <Vitrines />
       </section>
@@ -145,26 +168,9 @@ export default function page() {
           className="text-secondary"
           posTexto="Quero ser parceiro"
           textoFinal="Participe da comunidade de pesquisa, startups, projetos e parceiras da
-          UFC através do preenchimento de um formulário de acordo com o seu
-          cenário atual!"
+          UFC através de cadastro na plataforma, integre seus dados e conecte-se!"
         />
-
-        <form action="">
-          {/* <label htmlFor=""></label>
-          <input type="radio" name="" id="" />
-          <label htmlFor=""></label>
-          <input type="radio" name="" id="" /> */}
-          <div className="flex flex-col space-y-6 mt-5 md:flex-row md:space-x-14 md:space-y-0">
-            <RadioButton
-              tittle="Quero ser parceiro da UFC"
-              content="Não sou da universidade federal do ceará, mas queria conexão"
-            />
-            <RadioButton
-              tittle="Quero ser parceiro da UFC"
-              content="Não sou da universidade federal do ceará, mas queria conexão"
-            />
-          </div>
-        </form>
+        <InteractivePartnershipSection />
       </section>
 
       <section className="p-3 flex flex-col gap-3">
@@ -173,59 +179,13 @@ export default function page() {
           title="Processos Internos"
           content="Nossos processos internos"
           className="text-blueText"
-          posTexto="Fluxo de Uniformização"
+          posTexto="Comitê de Uniformização"
           classTexto="text-[#1A2C32]"
           textoFinal="Descubra as etapas envolvidas por trás do processo de uniformização
 de setores implantando na Universidade Federal do Ceará"
         />
         <div className="flex items-center flex-col mb-10">
-          <div className="flex flex-col mt-6">
-            <div className="mt-3 flex flex-col gap-3 px-6">
-              <p className="text-sm">
-                A Universidade reconhece a importância de uma comunicação clara
-                e eficiente entre seus setores. Para isso, estamos empenhados em
-                uniformizar os fluxos e processos relacionados à definição de
-                temas, começando pelo processo de extensão.
-              </p>
-              <p className="text-sm">
-                Este guia detalhado descreve os passos que serão seguidos para
-                alcançar a uniformização desejada.
-              </p>
-              <p className="text-sm">
-                Acreditamos que a uniformização dos fluxos e processos de
-                definição de temas trará diversos benefícios para a
-                Universidade, como:
-              </p>
-              <ul className="list-disc ml-6">
-                <li>
-                  <p className="text-sm">
-                    Maior clareza e eficiência na comunicação entre os setores.
-                  </p>
-                </li>
-                <li>
-                  <p className="text-sm">Redução de tempo e burocracia.</p>
-                </li>
-                <li>
-                  <p className="text-sm">
-                    Melhor aproveitamento dos recursos humanos e materiais.
-                  </p>
-                </li>
-                <li>
-                  <p className="text-sm">
-                    Maior qualidade dos projetos de extensão.
-                  </p>
-                </li>
-                <li>
-                  <p className="text-sm">
-                    Maior clareza e eficiência na comunicação entre os setores.
-                  </p>
-                </li>
-              </ul>
-              <p className="text-sm">
-                Agradecemos a participação de todos os setores neste processo.
-              </p>
-            </div>
-          </div>
+          <UniformizationProcess />
         </div>
       </section>
     </main>

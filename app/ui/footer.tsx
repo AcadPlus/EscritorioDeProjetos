@@ -4,7 +4,7 @@ import { legal, links, social } from '../lib/arrays'
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-primary">
+    <footer className="w-full bg-primary ">
       <div className="flex flex-col justify-evenly md:w-full space-y-5 p-5 md:flex-row md:justify-around">
         <div className="space-y-4 flex justify-center items-center flex-col">
           <Image
@@ -14,8 +14,7 @@ export default function Footer() {
             height={40}
           />
           <p className="max-w-80 text-center">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit.
-            Reprehenderit, blanditiis iusto?
+            Escritório de Projetos e Parcerias da Universidade Federal do Ceará
           </p>
           <ul className="flex space-x-7">
             {social.map((item) => (
@@ -27,9 +26,9 @@ export default function Footer() {
         </div>
         <div>
           <p className="text-gray-500 font-semibold text-lg">Home</p>
-          <ul className="flex flex-col space-y-3 mt-1">
+          <ul className="flex flex-col space-y-3 mt-6">
             {links.map((item) => (
-              <li className="font-bold text-xl" key={item.name}>
+              <li className="font-regular" key={item.name}>
                 {item.name}
               </li>
             ))}
@@ -37,9 +36,9 @@ export default function Footer() {
         </div>
         <div>
           <p className="text-gray-500 font-semibold text-lg">Legal</p>
-          <ul className="flex flex-col space-y-3 mt-1">
+          <ul className="flex flex-col space-y-3 mt-6">
             {legal.map((item) => (
-              <li className="font-bold text-xl" key={item.name}>
+              <li className="font-regular" key={item.name}>
                 {item.name}
               </li>
             ))}
@@ -47,7 +46,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="flex justify-center items-center flex-col space-y-5 py-5">
-        <p className="text-center">
+        <p className="text-center text-sm">
           © 2024 Escritório de Projetos e Parcerias. All rights reserved.
         </p>
       </div>
