@@ -1,6 +1,8 @@
 import { Mail } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
+import { Inter } from 'next/font/google'
+
 interface ShowcaseItem {
   icon: string
   text: string
@@ -12,13 +14,10 @@ interface ShowcaseCardProps {
   items: ShowcaseItem[]
 }
 
-import { Inter } from 'next/font/google'
-
 const inter = Inter({
   subsets: ['latin'],
   weight: ['200', '600', '400', '500', '600', '700', '800', '900'],
 })
-
 
 export default function ShowcaseCard({
   title = 'Vitrine de Startups',
@@ -43,22 +42,28 @@ export default function ShowcaseCard({
       className="p-4 max-w-md" // Adicionando uma largura máxima para o card
       style={{ backgroundColor: 'rgba(242, 249, 249, 0.35)' }}
     >
-      <CardHeader className="space-y-4 pb-4"> {/* Reduzindo o espaço entre os elementos */}
+      <CardHeader className="space-y-4 pb-4">
+        {' '}
+        {/* Reduzindo o espaço entre os elementos */}
         <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#DDEFF0]">
           <Mail className="h-6 w-6 text-[#325158]" />
         </div>
         <CardTitle
-          style={{ fontWeight: 600, fontSize: '1.6rem', color: "#1A2C32" }} // Ajustando o tamanho da fonte
+          style={{ fontWeight: 600, fontSize: '1.6rem', color: '#1A2C32' }} // Ajustando o tamanho da fonte
           className={inter.className}
         >
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-5 text-[#475467]"> {/* Reduzindo o espaço no conteúdo */}
+      <CardContent className="space-y-5 text-[#475467]">
+        {' '}
+        {/* Reduzindo o espaço no conteúdo */}
         <p className={inter.className} style={{ maxWidth: 400 }}>
           {description}
         </p>
-        <ul className="space-y-2"> {/* Reduzindo o espaço entre os itens da lista */}
+        <ul className="space-y-2">
+          {' '}
+          {/* Reduzindo o espaço entre os itens da lista */}
           {items.map((item, index) => (
             <li key={index} className="flex items-start gap-2">
               <div className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#DDEFF0]">
@@ -73,5 +78,4 @@ export default function ShowcaseCard({
       </CardContent>
     </Card>
   )
-  
 }

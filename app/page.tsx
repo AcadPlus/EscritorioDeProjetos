@@ -1,9 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
 import Badge from './ui/badge-group'
-import CardShowcase from './ui/card-showcase'
-
-import { CardProps } from './lib/definitions'
 import { RadioButton } from './ui/input'
 
 import { Escritorio } from '@/components/escritorio'
@@ -21,49 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
-import { Inter } from 'next/font/google'
-
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['200', '600', '400', '500', '600', '700', '800', '900'],
-})
-
-const showcases: CardProps[] = [
-  {
-    id: 1,
-    title: 'Vitrine de Startups',
-    description:
-      'Descubra startups inovadoras, parceiras da UFC, que estão moldando o futuro com soluções disruptivas e transformando ideias em realidade.',
-    items: [
-      'Acesso a ideias inovadoras e tecnologias emergentes',
-      'Oportunidades de networking com empreendedores visionários',
-      'Parcerias estratégicas para desenvolvimento e crescimento',
-    ],
-  },
-  {
-    id: 2,
-    title: 'Vitrine de Competências',
-    description:
-      'Explore uma ampla gama de habilidades e talentos, desenvolvidos em parceria com a UFC, destacando competências essenciais para impulsionar carreiras e negócios.',
-    items: [
-      'Encontre professores com vasta experiência em TCC, teses e doutorados',
-      'Conecte-se com pesquisadores que lideram projetos inovadores',
-      'Aproveite o conhecimento de acadêmicos renomados da UFC',
-    ],
-  },
-  {
-    id: 3,
-    title: 'Vitrine de Laboratórios',
-    description:
-      'Conheça laboratórios de ponta, parceiros da UFC, onde ciência e tecnologia se encontram para criar avanços revolucionários e promover a inovação.',
-    items: [
-      'Acesso a equipamentos e tecnologias de última geração',
-      'Ambiente colaborativo para pesquisa e desenvolvimento',
-      'Suporte técnico especializado de profissionais da UFC',
-    ],
-  },
-]
 
 export default function page() {
   return (
@@ -100,7 +54,7 @@ export default function page() {
                 {/* Container para Seleções */}
                 <div className="flex flex-col md:flex-row gap-2 w-full md:items-center sm:items-left">
                   {/* Componente de Seleção 1 */}
-                  <Select className="flex-1">
+                  <Select>
                     <SelectTrigger className="w-full md:w-1/3 text-[#41580F]">
                       <SelectValue placeholder="Software" />
                     </SelectTrigger>
@@ -138,7 +92,7 @@ export default function page() {
                   <p className="font-regular text-sm text-[#41580F]">em...</p>
 
                   {/* Componente de Seleção 2 */}
-                  <Select className="flex-1">
+                  <Select>
                     <SelectTrigger className="w-full md:w-1/3 text-[#41580F]">
                       <SelectValue placeholder="Startups" />
                     </SelectTrigger>
@@ -160,7 +114,6 @@ export default function page() {
             </div>
           </div>
         </section>
-        
       </div>
 
       <section className="w-full flex items-center flex-col my-2 px-3">
@@ -170,7 +123,7 @@ export default function page() {
           className="text-secondary"
           posTexto="O que é o Escritório de Projetos e Parcerias?"
         />
-        
+
         <Escritorio />
       </section>
       <section className="w-full mt-2 p-1 flex flex-col justify-center items-center">
@@ -183,8 +136,7 @@ export default function page() {
           classTexto="text-[#1A2C32]"
         />
         <Vitrines />
-      </section> 
-
+      </section>
 
       <section className="w-full mt-2 p-1 flex flex-col justify-center items-center">
         <Badge

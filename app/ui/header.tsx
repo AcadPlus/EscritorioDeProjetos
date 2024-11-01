@@ -5,8 +5,8 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 import { links } from '../lib/arrays'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -61,19 +61,18 @@ export default function Header() {
                 key={item.name}
                 className="hover:underline hover:ease-in duration-300 transition-all"
               >
-<a
-  href={item.href}
-  className="text-lg font-regular text-[#213102] flex items-center"
->
-  {item.name}
-  {item.expand ? (
-    <FontAwesomeIcon
-    icon={faChevronDown}
-    className="text-[#82AF01] ml-2 text-base md:text-lg lg:text-sm" // Tamanhos responsivos
-  />
-  ) : null}
-</a>
-
+                <a
+                  href={item.href}
+                  className="text-lg font-regular text-[#213102] flex items-center"
+                >
+                  {item.name}
+                  {item.expand ? (
+                    <FontAwesomeIcon
+                      icon={faChevronDown}
+                      className="text-[#82AF01] ml-2 text-base md:text-lg lg:text-sm" // Tamanhos responsivos
+                    />
+                  ) : null}
+                </a>
               </li>
             ))}
           </ul>
