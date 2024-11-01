@@ -3,7 +3,7 @@ import { Button, Input, TextArea } from '../ui/input'
 
 export default function Page() {
   return (
-    <div className="flex flex-col justify-center md:max-w-screen-lg mx-auto w-full md:mb-10">
+    <div className="flex flex-col justify-center md:max-w-screen-lg mx-auto w-full md:mb-10 mt-8">
       <div className="mt-5 flex flex-col  md:flex-row md:items-center md:gap-32">
         <form
           action=""

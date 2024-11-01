@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom styles for select options */
+.custom-select {
+  background-color: #fff; /* Cor de fundo */
+}
+
+.custom-select option {
+  background-color: #ECF2FF; /* Cor de fundo das opções */
+  color: #213102; /* Cor do texto das opções */
+}
+
+.custom-select option:hover {
+  background-color: #ECF2FF; /* Cor de fundo das opções */
+  color: #213102; /* Cor do texto das opções */
+}
+
 /* :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;

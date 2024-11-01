@@ -24,3 +24,8 @@ export type CardProps = {
   description: string
   items: string[]
 }
+
+export type RadioButtomProps = ComponentProps<'input'> & {
+  tittle: string
+  content: string
+}

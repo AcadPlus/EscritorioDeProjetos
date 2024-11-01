@@ -1,41 +1,56 @@
 import React from 'react'
-import { FacebookIcon, Twitter, Linkedin, GithubIcon } from 'lucide-react'
 import Image from 'next/image'
+import { legal, links, social } from '../lib/arrays'
 
 export default function Footer() {
   return (
-    <footer>
-      <section className="mb-6">
-        <div className="flex flex-col items-center gap-2">
+    <footer className="w-full bg-primary">
+      <div className="flex flex-col justify-evenly md:w-full space-y-5 p-5 md:flex-row md:justify-around">
+        <div className="space-y-4 flex justify-center items-center flex-col">
           <Image
             src="/logo.svg"
-            alt="Imagem de pessoas conversando"
-            width={60}
-            height={60}
-            className="py-2 mb-4"
+            alt="Logo do escritório de projetos"
+            width={40}
+            height={40}
           />
-          <p className="text-sm">Nos Siga nas redes sociais</p>
-          <div className="flex gap-5 mt-4">
-            <FacebookIcon color="gray" size={40} />
-            <Twitter color="gray" size={40} />
-            <GithubIcon color="gray" size={40} />
-            <Linkedin color="gray" size={40} />
-          </div>
-          <div className="px-7">
-            <ul className="flex flex-col text-2xl text-gray-400 gap-8 mb-6 mt-6">
-              <li>
-                <p>Social</p>
+          <p className="max-w-80 text-center">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit.
+            Reprehenderit, blanditiis iusto?
+          </p>
+          <ul className="flex space-x-7">
+            {social.map((item) => (
+              <li key={item.name}>
+                {<item.icon color="gray" width={30} height={30} />}
               </li>
-              <li>
-                <p>Twitter</p>
-              </li>
-            </ul>
-            <p className="text-center text-xs italic text-gray-400">
-              © 2024 Escritório de Projetos e Parcerias. All rights reserved.
-            </p>
-          </div>
+            ))}
+          </ul>
         </div>
-      </section>
+        <div>
+          <p className="text-gray-500 font-semibold text-lg">Home</p>
+          <ul className="flex flex-col space-y-3 mt-1">
+            {links.map((item) => (
+              <li className="font-bold text-xl" key={item.name}>
+                {item.name}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <p className="text-gray-500 font-semibold text-lg">Legal</p>
+          <ul className="flex flex-col space-y-3 mt-1">
+            {legal.map((item) => (
+              <li className="font-bold text-xl" key={item.name}>
+                {item.name}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <div className="flex justify-center items-center flex-col space-y-5 py-5">
+        <p className="text-center">
+          © 2024 Escritório de Projetos e Parcerias. All rights reserved.
+        </p>
+      </div>
     </footer>
   )
 }

@@ -1,61 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
-import { usePathname } from 'next/navigation'
-
-const links = [
-  { name: 'Home', href: '/' },
-  { name: 'Sobre', href: '/' },
-  { name: 'Vitrines', href: '/' },
-  { name: 'Link@', href: '/' },
-  { name: 'Fluxos', href: '/' },
-]
-
+import { links } from '../lib/arrays'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
-
-  const pathname = usePathname()
-
-  console.log(pathname)
-
-  const myRef = useRef<HTMLElement>(null)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY
-      if (
-        (scrollPosition > 400 && window.innerWidth > 768) ||
-        pathname !== '/'
-      ) {
-        myRef.current?.classList.remove('lg:w-auto')
-        console.log(myRef)
-        myRef.current?.children[0].classList.remove('lg:w-[48vw]')
-        myRef.current?.children[0].classList.add('w-full')
-        myRef.current?.children[1].classList.add('hidden')
-        const a = document.getElementById('hidden')
-        a?.classList.remove('md:hidden')
-        myRef.current?.classList.add('shadow-md')
-      }
-
-      if (pathname === '/') {
-        if (scrollPosition === 0 && window.innerWidth > 768) {
-          myRef.current?.classList.add('lg:w-auto')
-          myRef.current?.children[0].classList.add('lg:w-[48vw]')
-          myRef.current?.children[1].classList.remove('hidden')
-          const a = document.getElementById('hidden')
-          a?.classList.add('md:hidden')
-          myRef.current?.classList.remove('shadow-md')
-        }
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll)
-
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [pathname])
 
   useEffect(() => {
     if (isOpen) {
@@ -66,18 +19,15 @@ export default function Header() {
   }, [isOpen])
 
   return (
-    <header
-      ref={myRef}
-      className="bg-primary flex flex-row fixed top-0 w-full lg:w-auto transition duration-500 items-center"
-    >
-      <nav className="flex items-center justify-between p-4 lg:w-[48vw] md:w-full px-7 w-full xl:pl-28">
+    <header className="bg-primary flex flex-row fixed top-0 w-full  transition duration-500 items-center">
+      <nav className="flex items-center justify-between p-4 md:w-full px-7 w-full xl:pl-28">
         <div className="flex items-center space-x-4">
           <Image
-            src="/logo.svg"
+            src="/logo_svg.svg"
             alt="Logo"
-            className="h-12 w-12"
-            width={48}
-            height={48}
+            className=""
+            width={140}
+            height={65}
           />
           <div>
             <h1 className="text-sm max-w-20 text-left hidden">
@@ -111,27 +61,23 @@ export default function Header() {
                 key={item.name}
                 className="hover:underline hover:ease-in duration-300 transition-all"
               >
-                <a href="#" className="text-base font-medium">
+                <a
+                  href={item.href}
+                  className="text-lg font-regular text-[#213102] flex items-center"
+                >
                   {item.name}
+                  {item.expand ? (
+                    <FontAwesomeIcon
+                      icon={faChevronDown}
+                      className="text-[#82AF01] ml-2 text-base md:text-lg lg:text-sm" // Tamanhos responsivos
+                    />
+                  ) : null}
                 </a>
               </li>
             ))}
-            <li
-              id="hidden"
-              className="hover:underline hover:ease-in duration-300 transition-all md:hidden"
-            >
-              <a href="/contact" className="text-base font-medium	 ">
-                Contato
-              </a>
-            </li>
           </ul>
         </div>
       </nav>
-      <div className="w-[50vw] absolute left-[1200px] right-0">
-        <a href="/contact" className=" bg-primary p-2 text-base font-medium	">
-          Contato
-        </a>
-      </div>
     </header>
   )
 }
