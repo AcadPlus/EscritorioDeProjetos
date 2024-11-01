@@ -42,11 +42,12 @@ export function UniformizationProcess() {
   ]
 
   const committeeMembers = [
-    'COLEG - Coordenadoria de Legislação',
-    'PF - Procuradoria Federal',
+    'PROINTER - Pró-Reitoria de Inovação e Relações Interinstitucionais',
     'PREX - Pró-Reitoria de Extensão',
     'PRPPG - Pró-Reitoria de Pesquisa e Pós-Graduação',
-    'PROGEP - Pró-Reitoria de Gestão de Pessoas',
+    'PF - Procuradoria Federal',
+    'COLEG - Coordenadoria de Legislação',
+    'Fundações de Apoio',
   ]
 
   const toggleStep = (index: number) => {
@@ -125,7 +126,7 @@ export function UniformizationProcess() {
               A Universidade reconhece a importância de uma comunicação clara e
               eficiente entre seus setores. Para isso, estamos empenhados em
               uniformizar os fluxos e processos relacionados à definição de
-              temas, começando pelo processo de extensão.
+              temas específicos relacionados ao novo Marco Legal de Ciência, Tecnologia e Inovação - MLCTI.
             </p>
             <p className="text-muted-foreground">
               Este guia detalhado descreve os passos que serão seguidos para
@@ -142,7 +143,7 @@ export function UniformizationProcess() {
               </li>
               <li>Redução de tempo e burocracia.</li>
               <li>Melhor aproveitamento dos recursos humanos e materiais.</li>
-              <li>Maior qualidade dos projetos de extensão.</li>
+              <li>Maior efetividade na consolidação dos projetos.</li>
             </ul>
 
             <div className="pt-6">
@@ -165,7 +166,7 @@ export function UniformizationProcess() {
         </div>
 
         {/* Flowchart */}
-        <div className="h-[600px] w-full relative">
+        <div className="h-[700px] w-full ">
           <ReactFlowProvider>
             <ReactFlow
               nodes={nodes}

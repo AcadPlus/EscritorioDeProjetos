@@ -23,7 +23,7 @@ export default function Header() {
       <nav className="flex items-center justify-between p-4 md:w-full px-7 w-full xl:pl-28">
         <div className="flex items-center space-x-4">
           <Image
-            src="/logo_svg.svg"
+            src="/projetos_pp.svg"
             alt="Logo"
             className=""
             width={140}
