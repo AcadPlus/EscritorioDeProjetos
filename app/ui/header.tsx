@@ -52,7 +52,7 @@ export default function Header() {
         </div>
         <div
           data-isopen={isOpen}
-          className="data-[isopen=true]:block hidden absolute top-16 left-0 z-10 w-full bg-primary px-4 py-2 md:static
+          className="data-[isopen=true]:block hidden absolute top-[6rem] left-0 z-10 w-full bg-primary px-4 py-2 md:static
           md:block md:w-auto md:px-0 md:py-0"
         >
           <ul className="space-y-2 md:flex md:space-x-10 md:space-y-0 text-center">

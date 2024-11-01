@@ -51,7 +51,7 @@ export default function Badge({
         <ArrowRight size={15} />
       </button>
       <h2
-        className={`${classTexto} text-2xl md:text-5xl font-inter md:max-w-90 text-center text-secondary font-semibold`}
+        className={`${classTexto || 'text-secondary'} text-2xl md:text-5xl font-inter md:max-w-90 text-center font-semibold`}
       >
         {posTexto}
       </h2>
