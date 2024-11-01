@@ -6,7 +6,10 @@ import CardShowcase from './ui/card-showcase'
 import { CardProps } from './lib/definitions'
 import { RadioButton } from './ui/input'
 
-import { HeroSection } from '@/components/hero-section'
+import { Escritorio } from '@/components/escritorio'
+import { Vitrines } from '@/components/vitrines'
+
+// import { HeroSection } from '@/components/hero-section'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSearch } from '@fortawesome/free-solid-svg-icons'
@@ -18,6 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+
+import { Inter } from 'next/font/google'
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['200', '600', '400', '500', '600', '700', '800', '900'],
+})
 
 const showcases: CardProps[] = [
   {
@@ -56,19 +66,20 @@ const showcases: CardProps[] = [
 ]
 
 export default function page() {
-  // return <HeroSection />
   return (
     <main className="">
       <div className="w-full md:h-[80vh] md:flex">
         <Image
-          src="/image-home.svg"
+          src="/cei_3.jpg"
           alt="Imagem de pessoas conversando"
-          width={40}
-          height={40}
+          width={0}
+          height={0}
+          sizes="100vw"
           priority
-          className="w-full md:w-[40%] md:order-1 sm:h-2/4 md:h-auto object-cover"
+          className="w-full md:w-[45%] md:order-1 sm:h-2/4 md:h-auto"
         />
-        <section className="bg-primary w-full h-[904px] md:w-[1112px] md:h-[904px] flex flex-col gap-3 md:justify-center">
+
+        <section className="bg-primary w-100 h-[600px] md:w-[1112px] md:h-auto flex flex-col gap-3 md:justify-center">
           {/* Conteúdo da seção */}
           <div className="flex flex-col p-5 space-y-3 sm:space-y-4 xl:pl-28">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#4E690B] leading-tight">
@@ -149,78 +160,43 @@ export default function page() {
             </div>
           </div>
         </section>
+        
       </div>
+
       <section className="w-full flex items-center flex-col my-2 px-3">
         <Badge
           content="Entenda do que se trata o escritório!"
           title="O Escritório"
           className="text-secondary"
+          posTexto="O que é o Escritório de Projetos e Parcerias?"
         />
-        <h2 className="text-xl md:text-2xl max-w-90 text-center text-secondary font-semibold">
-          O que é o Escritório de Projetos e Parcerias?
-        </h2>
-        <div className="flex flex-row mt-5 w-full max-w-80 md:max-w-4xl justify-center md:gap-10 gap-7">
-          <div className="self-start justify-center items-center flex flex-col">
-            <Image
-              src="/logo.svg"
-              alt="Logo escritório de projetos"
-              width={80}
-              height={80}
-            />
-            <p className="text-xs max-w-40 text-center">
-              Escritório de projetos da UFC
-            </p>
-          </div>
-          <div className="">
-            <p className="text-xs md:text-base md:text-justify leading-5 text-slate-700">
-              O Escritório de Projetos e Parcerias da Universidade Federal do
-              Ceará (UFC) é uma entidade dedicada a fornecer suporte e
-              assistência em todas as etapas do processo de desenvolvimento de
-              projetos de Pesquisa, Desenvolvimento e Inovação (PD&I). Sua
-              missão é facilitar a formatação, negociação e implementação de
-              parcerias institucionais, garantindo a conformidade com as
-              diretrizes da UFC e promovendo a valorização das atividades
-              institucionais.
-            </p>
-          </div>
-        </div>
+        
+        <Escritorio />
       </section>
-      <section className="w-full mt-2 p-1 flex flex-col justify-center">
+      <section className="w-full mt-2 p-1 flex flex-col justify-center items-center">
         <Badge
           color="tertiary"
           title="Nossas Vitrines"
           content="Acesse por categorias!"
           className="text-blueText"
+          posTexto="Exposição de vitrines"
+          classTexto="text-[#1A2C32]"
         />
-        {/* melhorar */}
-        <h2 className="text-xl sm:text-2xl md:text-2xl italic text-center font-semibold">
-          Exposição de vitrines
-        </h2>
-        <div className="flex flex-row gap-5 overflow-y-hidden p-6 container mx-auto">
-          {showcases.map((item) => (
-            <CardShowcase
-              description={item.description}
-              title={item.title}
-              items={item.items}
-              key={item.id}
-            />
-          ))}
-        </div>
-      </section>
+        <Vitrines />
+      </section> 
+
+
       <section className="w-full mt-2 p-1 flex flex-col justify-center items-center">
         <Badge
           content="Faça parte da comunidade!"
           title="Link@!"
           className="text-secondary"
-        />
-        <h2 className="text-xl sm:text-2xl md:text-2xl italic text-center font-semibold">
-          Quero ser parceiro
-        </h2>
-        <p className="text-xs text-center max-w-96 italic leading-3 mt-2">
-          Participe da comunidade de pesquisa, startups, projetos e parceiras da
+          posTexto="Quero ser parceiro"
+          textoFinal="Participe da comunidade de pesquisa, startups, projetos e parceiras da
           UFC através do preenchimento de um formulário de acordo com o seu
-          cenário atual!
-        </p>
+          cenário atual!"
+        />
+
         <form action="">
           {/* <label htmlFor=""></label>
           <input type="radio" name="" id="" />
@@ -238,21 +214,19 @@ export default function page() {
           </div>
         </form>
       </section>
+
       <section className="p-3 flex flex-col gap-3">
         <Badge
           color="tertiary"
           title="Processos Internos"
           content="Nossos processos internos"
           className="text-blueText"
+          posTexto="Fluxo de Uniformização"
+          classTexto="text-[#1A2C32]"
+          textoFinal="Descubra as etapas envolvidas por trás do processo de uniformização
+de setores implantando na Universidade Federal do Ceará"
         />
         <div className="flex items-center flex-col mb-10">
-          <h2 className="text-xl sm:text-2xl md:text-3xl text-center italic font-semibold mb-4">
-            Fluxo de Uniformização
-          </h2>
-          <p className="text-xs text-center italic md:max-w-96">
-            Descubra as etapas envolvidas por trás do processo de uniformização
-            de setores implantando na Universidade Federal do Ceará
-          </p>
           <div className="flex flex-col mt-6">
             <div className="mt-3 flex flex-col gap-3 px-6">
               <p className="text-sm">

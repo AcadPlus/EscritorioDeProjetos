@@ -21,6 +21,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ['Poppins', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
       },
       fontWeight: {
         'light': 300,
