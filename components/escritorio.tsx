@@ -5,13 +5,12 @@ export function Escritorio() {
     <>
       <div className="flex flex-row mt-5 w-full max-w-80 md:max-w-5xl justify-center md:gap-32 gap-7">
         <div className="self-start justify-center items-center flex flex-col">
-        <Image
+          <Image
             src="/projetos_pp.svg"
             alt="Logo"
             className=""
             width={1000}
             height={1000}
-            
           />
         </div>
         <div className="">

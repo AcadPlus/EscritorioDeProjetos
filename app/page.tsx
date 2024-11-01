@@ -42,7 +42,8 @@ export default function page() {
               Empresas e Parceiros da Comunidade UFC
             </h1>
             <p className="text-lg md:text-lg lg:text-xl  max-w-[690px] bold text-[#618506]">
-              Promovemos a conexão entre você, iniciativas da UFC e parceiros externos!
+              Promovemos a conexão entre você, iniciativas da UFC e parceiros
+              externos!
             </p>
             <div className="flex flex-col items-center text-secondary">
               <form className="flex flex-col gap-2 items-start w-full">

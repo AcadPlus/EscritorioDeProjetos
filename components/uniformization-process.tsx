@@ -126,7 +126,8 @@ export function UniformizationProcess() {
               A Universidade reconhece a importância de uma comunicação clara e
               eficiente entre seus setores. Para isso, estamos empenhados em
               uniformizar os fluxos e processos relacionados à definição de
-              temas específicos relacionados ao novo Marco Legal de Ciência, Tecnologia e Inovação - MLCTI.
+              temas específicos relacionados ao novo Marco Legal de Ciência,
+              Tecnologia e Inovação - MLCTI.
             </p>
             <p className="text-muted-foreground">
               Este guia detalhado descreve os passos que serão seguidos para
