@@ -9,6 +9,13 @@ import {
 
 import { LinkIcon } from '@heroicons/react/outline'
 
+interface LinkCardProps {
+  title: string
+  subtitle: string
+  url: string
+  isLast?: boolean // isLast é opcional
+}
+
 const links1 = [
   {
     title: 'Constituição Federal, Art. 218, XVI',
@@ -83,7 +90,12 @@ const links1 = [
   },
 ]
 
-const LinkCard = ({ title, subtitle, url, isLast }) => (
+const LinkCard: React.FC<LinkCardProps> = ({
+  title,
+  subtitle,
+  url,
+  isLast,
+}) => (
   <div className={`relative ${!isLast ? 'pb-10' : ''}`}>
     <Card
       className="cursor-pointer hover:bg-gray-100 hover:shadow-lg transition-shadow duration-300"
