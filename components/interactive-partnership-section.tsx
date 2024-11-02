@@ -36,7 +36,11 @@ const options = [
     description: 'Quero estabelecer parcerias e conexões',
     icon: Briefcase,
     color: 'bg-[#618506]',
-    suboptions: ['Parcerias Empresariais', 'Projetos de Inovação', 'Público-geral'],
+    suboptions: [
+      'Parcerias Empresariais',
+      'Projetos de Inovação',
+      'Público-geral',
+    ],
   },
 ]
 
