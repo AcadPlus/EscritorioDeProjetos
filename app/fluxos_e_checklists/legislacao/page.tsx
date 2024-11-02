@@ -52,41 +52,41 @@ const links1 = [
     title: 'Lei de Inovação – Lei 10.973/2004',
     subtitle:
       'Dispõe sobre incentivos à inovação e à pesquisa científica e tecnológica no ambiente produtivo e dá outras providências.',
-    url: 'https://www.planalto.gov.br/ccivil_03/leis/L10973.htm',
+    url: 'http://www.planalto.gov.br/ccivil_03/_ato2004-2006/2004/lei/l10.973.htm',
   },
   {
     title:
       'Lei sobre a proteção à propriedade intelectual das topografias de circuitos integrados – Lei 11.484/2007',
     subtitle:
       'Dispõe sobre os incentivos às indústrias de equipamentos para TV Digital e de componentes eletrônicos semicondutores e sobre a proteção à propriedade intelectual das topografias de circuitos integrados, instituindo o Programa de Apoio ao Desenvolvimento Tecnológico da Indústria de Semicondutores – PADIS e o Programa de Apoio ao Desenvolvimento Tecnológico da Indústria de Equipamentos para a TV Digital – PATVD; altera a Lei no 8.666, de 21 de junho de 1993; e revoga o art. 26 da Lei no 11.196, de 21 de novembro de 2005.',
-    url: 'https://www.planalto.gov.br/ccivil_03/leis/L11484.htm',
+    url: 'http://www.planalto.gov.br/ccivil_03/_Ato2007-2010/2007/Lei/L11484.htm',
   },
   {
     title:
       'Lei de acesso ao patrimônio genético e proteção ao conhecimento tradicional – Lei 13.123/2015',
     subtitle:
       'Regulamenta o inciso II do § 1º e o § 4º do art. 225 da Constituição Federal, o Artigo 1, a alínea j do Artigo 8, a alínea c do Artigo 10, o Artigo 15 e os §§ 3º e 4º do Artigo 16 da Convenção sobre Diversidade Biológica, promulgada pelo Decreto nº 2.519, de 16 de março de 1998; dispõe sobre o acesso ao patrimônio genético, sobre a proteção e o acesso ao conhecimento tradicional associado e sobre a repartição de benefícios para conservação e uso sustentável da biodiversidade; revoga a Medida Provisória nº 2.186-16, de 23 de agosto de 2001; e dá outras providências.',
-    url: 'https://www.planalto.gov.br/ccivil_03/leis/L13123.htm',
+    url: 'http://www.planalto.gov.br/ccivil_03/_Ato2015-2018/2015/Lei/L13123.htm',
   },
   {
     title: 'Marco Legal da Ciência e Tecnologia – Lei 13.243/2016',
     subtitle:
       'Dispõe sobre estímulos ao desenvolvimento científico, à pesquisa, à capacitação científica e tecnológica e à inovação e altera a Lei nº 10.973, de 2 de dezembro de 2004, a Lei nº 6.815, de 19 de agosto de 1980, a Lei nº 8.666, de 21 de junho de 1993, a Lei nº 12.462, de 4 de agosto de 2011, a Lei nº 8.745, de 9 de dezembro de 1993, a Lei nº 8.958, de 20 de dezembro de 1994, a Lei nº 8.010, de 29 de março de 1990, a Lei nº 8.032, de 12 de abril de 1990, e a Lei nº 12.772, de 28 de dezembro de 2012, nos termos da Emenda Constitucional nº 85, de 26 de fevereiro de 2015.',
-    url: 'https://www.planalto.gov.br/ccivil_03/leis/L13243.htm',
+    url: 'http://www.planalto.gov.br/ccivil_03/_ato2015-2018/2016/lei/l13243.htm',
   },
   {
     title:
       'Política de propriedade intelectual da UFC – Resolução CONSUNI 38/2017',
     subtitle:
       'Dispõe sobre a definição, geração e gestão de direitos relativos à Propriedade Intelectual e à Inovação Tecnológica no âmbito da Universidade Federal do Ceará, delega competências e dá outras providências.',
-    url: 'https://www.ufc.br/sobre/propriedade-intelectual',
+    url: 'https://www.ufc.br/images/_files/a_universidade/consuni/resolucao_consuni_2017/resolucao38_consuni_2017.pdf',
   },
   {
     title:
       'Decreto Nº 9.283 de 2018 – Regulamenta os dispositivos do Marco Legal de Ciência, Tecnologia e Inovação',
     subtitle:
       "Regulamenta a Lei nº 10.973, de 2 de dezembro de 2004, a Lei nº 13.243, de 11 de janeiro de 2016, o art. 24, § 3º, e o art. 32, § 7º, da Lei nº 8.666, de 21 de junho de 1993, o art. 1º da Lei nº 8.010, de 29 de março de 1990, e o art. 2º, caput, inciso I, alínea 'g', da Lei nº 8.032, de 12 de abril de 1990, e altera o Decreto nº 6.759, de 5 de fevereiro de 2009, para estabelecer medidas de incentivo à inovação e à pesquisa científica e tecnológica no ambiente produtivo, com vistas à capacitação tecnológica, ao alcance da autonomia tecnológica e ao desenvolvimento do sistema produtivo nacional e regional.",
-    url: 'https://www.planalto.gov.br/ccivil_03/leis/L9283.htm',
+    url: 'http://www.planalto.gov.br/ccivil_03/_Ato2015-2018/2018/Decreto/D9283.htm',
   },
 ]
 
