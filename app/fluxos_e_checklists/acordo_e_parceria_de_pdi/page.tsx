@@ -113,7 +113,8 @@ const LinkCard: React.FC<LinkCardProps> = ({
 const LinksPage = () => (
   <div className="container mx-auto p-4 mt-32">
     <h1 className="text-2xl font-semibold mb-20">
-      Documentos de Acordos de Parceria e Serviços Técnicos Especializados
+      Fluxos e Documentos de Acordos de Parceria e Serviços Técnicos
+      Especializados
     </h1>
 
     {/* Container para as colunas */}
