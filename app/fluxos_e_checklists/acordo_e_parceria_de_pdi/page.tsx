@@ -15,7 +15,6 @@ interface LinkCardProps {
   url: string
   isLast?: boolean // isLast é opcional
 }
-
 const links1 = [
   {
     title: 'Fluxo de PD&I',
@@ -98,10 +97,12 @@ const LinkCard: React.FC<LinkCardProps> = ({
     >
       <CardHeader className="flex items-center">
         <div>
-          <CardTitle>{title}</CardTitle>
-          <CardDescription className="mt-2">{subtitle}</CardDescription>
+          <CardTitle className="text-[#1A2C32]">{title}</CardTitle>
+          <CardDescription className="mt-2 text-gray-600">
+            {subtitle}
+          </CardDescription>
         </div>
-        <LinkIcon className="h-5 w-5 mr-2 text-gray-500" />
+        <LinkIcon className="h-5 w-5 mr-2 text-gray-700" />
       </CardHeader>
     </Card>
     {!isLast && (
@@ -111,18 +112,18 @@ const LinkCard: React.FC<LinkCardProps> = ({
 )
 
 const LinksPage = () => (
-  <div className="container mx-auto p-4 mt-32">
-    <h1 className="text-2xl font-semibold mb-20">
-      Fluxos e Documentos de Acordos de Parceria e Serviços Técnicos
+  <div className="text-gray-900 container mx-auto p-4 mt-32 overflow-x-hidden">
+    <h1 className=" text-[#41580F] text-3xl font-semibold mb-20 text-center">
+      Fluxos e Checklists de Acordos de Parceria e Serviços Técnicos
       Especializados
     </h1>
 
     {/* Container para as colunas */}
-    <div className="flex justify-between space-x-6">
+    <div className="flex flex-wrap justify-center md:gap-32 gap-6">
       {/* Renderizando a primeira seção */}
-      <div className="flex flex-col items-center max-w-sm">
-        <h2 className="text-xl font-semibold mb-4 ">
-          Links de acordo e parceria PD&I
+      <div className="flex flex-col items-center max-w-xs w-full md:w-1/3">
+        <h2 className="  text-xl font-semibold mb-4 text-center">
+          Aacordo e parceria PD&I
         </h2>
         {links1.map((link, index) => (
           <LinkCard
@@ -136,8 +137,8 @@ const LinksPage = () => (
       </div>
 
       {/* Renderizando a segunda seção */}
-      <div className="flex flex-col items-center max-w-xs">
-        <h2 className="text-xl font-semibold mb-4 ">
+      <div className="flex flex-col items-center max-w-xs w-full md:w-1/3">
+        <h2 className="text-xl font-semibold mb-4 text-center">
           Prestação de Serviços Técnicos Especializados (STE)
         </h2>
         {links2.map((link, index) => (
@@ -152,8 +153,8 @@ const LinksPage = () => (
       </div>
 
       {/* Renderizando a terceira seção */}
-      <div className="flex flex-col items-center max-w-xs">
-        <h2 className="text-xl font-semibold mb-4">
+      <div className="flex flex-col items-center max-w-xs w-full md:w-1/3">
+        <h2 className="text-xl font-semibold mb-4 text-center">
           Prestação de Serviços Técnicos Especializados em PD&I
         </h2>
         {links3.map((link, index) => (

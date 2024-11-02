@@ -103,10 +103,12 @@ const LinkCard: React.FC<LinkCardProps> = ({
     >
       <CardHeader className="flex items-center">
         <div>
-          <CardTitle>{title}</CardTitle>
-          <CardDescription className="mt-2">{subtitle}</CardDescription>
+          <CardTitle className="text-[#1A2C32]">{title}</CardTitle>
+          <CardDescription className="mt-2 text-gray-600">
+            {subtitle}
+          </CardDescription>
         </div>
-        <LinkIcon className="h-5 w-5 mr-2 text-gray-500" />
+        <LinkIcon className="h-5 w-5 mr-2 text-gray-700" />
       </CardHeader>
     </Card>
     {!isLast && (
@@ -117,7 +119,7 @@ const LinkCard: React.FC<LinkCardProps> = ({
 
 const LinksPage = () => (
   <div className="container mx-auto p-4 mt-32">
-    <h1 className="text-2xl font-semibold mb-20">Legislação</h1>
+    <h1 className="text-3xl text-[#41580F] font-semibold mb-20">Legislação</h1>
 
     {/* Container para as colunas */}
     <div className="flex justify-between space-x-6">

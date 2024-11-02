@@ -22,6 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html className="scroll-smooth" lang="en">
+      <link rel="icon" href="/logo.svg" type="image/svg+xml" />
       <body className={poppins.className}>
         <Header />
         {children}

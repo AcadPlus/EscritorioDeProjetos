@@ -28,7 +28,7 @@ export default function Footer() {
               height={60}
               className="hover:opacity-80 transition-opacity"
             />
-            <p className="max-w-xs text-center md:text-left text-sm">
+            <p className=" text-center md:text-left text-sm">
               Escritório de Projetos e Parcerias da Universidade Federal do
               Ceará
             </p>
@@ -64,11 +64,7 @@ export default function Footer() {
             <ul className="space-y-2">
               {legal.map((item) => (
                 <li key={item.name}>
-                  <div
-                    className="text-sm transition-all"
-                  >
-                    {item.name}
-                  </div>
+                  <div className="text-sm transition-all">{item.name}</div>
                 </li>
               ))}
             </ul>

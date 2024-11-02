@@ -30,7 +30,7 @@ const links = [
     href: '/',
     expand: [
       {
-        name: 'Fluxos e Documentos de Acordos de Parceria e Serviços Técnicos Especializados',
+        name: 'Fluxos e Checklists de Acordos de Parceria e Serviços Técnicos Especializados',
         href: '/fluxos_e_checklists/acordo_e_parceria_de_pdi',
       },
       {
@@ -42,6 +42,10 @@ const links = [
         href: '/fluxos_e_checklists/fluxo_agencia_de_fomento',
       },
       { name: 'Legislação', href: '/fluxos_e_checklists/legislacao' },
+      {
+        name: 'Fluxos de Processos',
+        href: '/fluxos_e_checklists/fluxos_de_processos',
+      },
       { name: 'Fluxos visuais', href: '/fluxos_e_checklists/fluxos_visuais' },
     ],
   },
