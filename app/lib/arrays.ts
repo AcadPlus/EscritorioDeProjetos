@@ -30,7 +30,7 @@ const links = [
     href: '/',
     expand: [
       {
-        name: 'Documentos de Acordos de Parceria e Serviços Técnicos Especializados',
+        name: 'Fluxos e Documentos de Acordos de Parceria e Serviços Técnicos Especializados',
         href: '/fluxos_e_checklists/acordo_e_parceria_de_pdi',
       },
       {
