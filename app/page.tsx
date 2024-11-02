@@ -129,8 +129,8 @@ export default function page() {
                 </div>
 
                 <button className="flex items-center text-sm w-full md:w-24 h-8 md:h-9 bg-[#41580F] text-white rounded px-3 py-1 mt-2">
-                  <FontAwesomeIcon icon={faSearch} className="mr-1" />
-                  <p>Buscar</p>
+                  <FontAwesomeIcon icon={faSearch} className="mr-2 max-w-4 " />
+                  <p className="font-inter font-semibold">Buscar</p>
                 </button>
               </form>
             </div>

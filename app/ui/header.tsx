@@ -1,83 +1,115 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Menu, X } from 'lucide-react'
+import Link from 'next/link'
+import { Menu, X, ChevronDown } from 'lucide-react'
 import { links } from '../lib/arrays'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
+import { motion, AnimatePresence } from 'framer-motion'
+
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
 
   useEffect(() => {
     if (isOpen) {
-      document.body.classList.add('overflow-hidden')
+      document.body.style.overflow = 'hidden'
     } else {
-      document.body.classList.remove('overflow-hidden')
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
     }
   }, [isOpen])
 
+  const handleExpandClick = (index: number) => {
+    setExpandedIndex(expandedIndex === index ? null : index)
+  }
+
   return (
-    <header className="bg-primary flex flex-row fixed top-0 w-full  transition duration-500 items-center">
-      <nav className="flex items-center justify-between p-4 md:w-full px-7 w-full xl:pl-28">
-        <div className="flex items-center space-x-4">
-          <Image
-            src="/projetos_pp.svg"
-            alt="Logo"
-            className=""
-            width={140}
-            height={65}
-          />
-          <div>
-            <h1 className="text-sm max-w-20 text-left hidden">
-              Escritório de projetos da UFC
-            </h1>
-          </div>
-        </div>
+    <header className="bg-primary fixed top-0 w-full z-50 shadow-md">
+      <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <Link href="/" className="flex items-center space-x-4">
+          <Image src="/projetos_pp.svg" alt="Logo" width={140} height={65} />
+        </Link>
         <div className="md:hidden">
           <button
             type="button"
-            className="rounded-md bg-primary p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 
-            focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+            className="p-2 text-[#213102] focus:outline-none"
             onClick={() => setIsOpen(!isOpen)}
+            aria-label="Toggle menu"
           >
-            <span className="sr-only">Open main menu</span>
             {isOpen ? (
-              <X className="block h-6 w-6" aria-hidden="true" />
+              <X className="h-6 w-6" aria-hidden="true" />
             ) : (
-              <Menu className="block h-6 w-6" aria-hidden="true" />
+              <Menu className="h-6 w-6" aria-hidden="true" />
             )}
           </button>
         </div>
-        <div
-          data-isopen={isOpen}
-          className="data-[isopen=true]:block hidden absolute top-[6rem] left-0 z-10 w-full bg-primary px-4 py-2 md:static
-          md:block md:w-auto md:px-0 md:py-0"
-        >
-          <ul className="space-y-2 md:flex md:space-x-10 md:space-y-0 text-center">
-            {links.map((item) => (
-              <li
-                key={item.name}
-                className="hover:underline hover:ease-in duration-300 transition-all"
-              >
-                <a
-                  href={item.href}
-                  className="text-lg font-regular text-[#213102] flex items-center"
-                >
-                  {item.name}
-                  {item.expand ? (
-                    <FontAwesomeIcon
-                      icon={faChevronDown}
-                      className="text-[#82AF01] ml-2 text-base md:text-lg lg:text-sm" // Tamanhos responsivos
-                    />
-                  ) : null}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <AnimatePresence>
+          {(isOpen || !isMobile()) && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className={`${
+                isOpen
+                  ? 'absolute top-full left-0 right-0 bg-primary shadow-lg'
+                  : 'hidden md:block'
+              } py-4 md:py-0 md:relative`}
+            >
+              <ul className="flex flex-col md:flex-row md:space-x-8 space-y-4 md:space-y-0 px-4 md:px-0">
+                {links.map((item, index) => (
+                  <li key={item.name} className="relative group">
+                    <Link
+                      href={item.expand ? '#' : item.href} // Se o item tiver subitens, não redireciona imediatamente
+                      onClick={(e) => {
+                        if (item.expand) {
+                          e.preventDefault() // Impede o redirecionamento
+                          handleExpandClick(index)
+                        }
+                      }}
+                      className="text-lg font-regular text-[#213102] hover:text-[#82AF01] transition-colors duration-300 flex items-center"
+                    >
+                      {item.name}
+                      {item.expand && (
+                        <ChevronDown className="ml-1 h-4 w-4 text-[#82AF01] transition-transform duration-300 group-hover:rotate-180" />
+                      )}
+                    </Link>
+                    <AnimatePresence>
+                      {expandedIndex === index && item.expand && (
+                        <motion.ul
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.2 }}
+                          className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-10"
+                        >
+                          {item.expand.map((subItem, subIndex) => (
+                            <li key={subIndex}>
+                              <Link
+                                href={item.href} // Redireciona para o link específico do subitem
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#82AF01] transition-colors duration-200"
+                              >
+                                {subItem}
+                              </Link>
+                            </li>
+                          ))}
+                        </motion.ul>
+                      )}
+                    </AnimatePresence>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
     </header>
   )
+}
+
+function isMobile() {
+  return typeof window !== 'undefined' && window.innerWidth < 768
 }

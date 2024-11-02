@@ -21,13 +21,13 @@ const options = [
   {
     id: 'student',
     title: 'Faço parte da UFC',
-    description: 'Quero cadastrar meus projetos e pesquisas',
+    description: 'Quero cadastrar meus projetos e competências',
     icon: GraduationCap,
     color: 'bg-[#618506]',
     suboptions: [
-      'Iniciação Científica',
+      'Laboratórios',
       'Projetos de Extensão',
-      'Estágios Internos',
+      'Startups e muito mais!',
     ],
   },
   {
@@ -36,12 +36,21 @@ const options = [
     description: 'Quero estabelecer parcerias e conexões',
     icon: Briefcase,
     color: 'bg-[#618506]',
-    suboptions: ['Parcerias Empresariais', 'Projetos de Inovação', 'Mentoria'],
+    suboptions: [
+      'Parcerias Empresariais',
+      'Projetos de Inovação',
+      'Público-geral',
+    ],
   },
 ]
 
 export function InteractivePartnershipSection() {
   const [selected, setSelected] = useState<string | null>(null)
+
+  const handleCardClick = (id: string) => {
+    console.log(selected)
+    setSelected((prev) => (prev === id ? null : id))
+  }
 
   return (
     <section className="lg:w-full md:w-full py-4 md:py-8 lg:py-12 bg-background">
@@ -50,9 +59,7 @@ export function InteractivePartnershipSection() {
           <Card key={option.id} className="relative overflow-hidden">
             <CardHeader
               className={`cursor-pointer transition-colors ${selected === option.id ? option.color : 'hover:bg-muted'}`}
-              onClick={() =>
-                setSelected(selected === option.id ? null : option.id)
-              }
+              onClick={() => handleCardClick(option.id)}
             >
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xl flex items-center gap-2">
@@ -80,7 +87,7 @@ export function InteractivePartnershipSection() {
               </CardDescription>
             </CardHeader>
             <AnimatePresence>
-              {selected === option.id && (
+              {option.id === selected && (
                 <motion.div
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
