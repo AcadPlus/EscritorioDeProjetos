@@ -14,12 +14,12 @@ const legal = [
 ]
 
 const links = [
-  { name: 'Home', href: '/', expand: false },
-  { name: 'Sobre', href: '/', expand: false },
-  { name: 'Vitrines', href: '/', expand: true },
-  { name: 'LINK@', href: '/', expand: true },
-  { name: 'Fluxos', href: '/', expand: true },
-  { name: 'Contato', href: 'contact', expand: false },
+  { name: 'Home', href: '/', expand: null },
+  { name: 'Sobre', href: '/', expand: null },
+  { name: 'Vitrines', href: '/', expand: null },
+  { name: 'LINK@', href: '/', expand: null },
+  { name: 'Comitê de Uniformização', href: '/', expand: ['Sobre', 'Conferir'] },
+  { name: 'Contato', href: 'contact', expand: null },
 ]
 
 export { social, legal, links }
