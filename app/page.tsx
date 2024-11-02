@@ -30,30 +30,26 @@ export default function page() {
           height={0}
           sizes="100vw"
           priority
-          className="w-full md:w-[45%] md:order-1 sm:h-2/4 md:h-auto"
+          className="w-full md:w-[45%] md:order-1 sm:h-2/4 md:h-auto transform transition duration-700 ease-in-out scale-100 hover:scale-105 opacity-0 animate-fadeIn"
         />
 
         <section className="bg-primary w-100 h-[600px] md:w-[1112px] md:h-auto flex flex-col gap-3 md:justify-center">
-          {/* Conteúdo da seção */}
-          <div className="flex flex-col p-5 space-y-3 sm:space-y-4 xl:pl-28">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#4E690B] leading-tight">
+          <div className="flex flex-col p-5 space-y-3 sm:space-y-4 xl:pl-28 animate-slideIn">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#4E690B] leading-tight ">
               Conecte-se com
               <br />
               Empresas e Parceiros da Comunidade UFC
             </h1>
-            <p className="text-lg md:text-lg lg:text-xl  max-w-[690px] bold text-[#618506]">
+            <p className="text-lg md:text-lg lg:text-xl max-w-[690px] bold text-[#618506] opacity-0 animate-fadeIn delay-200">
               Promovemos a conexão entre você, iniciativas da UFC e parceiros
               externos!
             </p>
-            <div className="flex flex-col items-center text-secondary">
+            <div className="flex flex-col items-center text-secondary opacity-0 animate-fadeIn delay-400">
               <form className="flex flex-col gap-2 items-start w-full">
                 <p className="font-regular text-base text-[#41580F]">
                   Estou buscando um(a)
                 </p>
-
-                {/* Container para Seleções */}
-                <div className="flex flex-col md:flex-row gap-2  w-full md:items-center sm:items-left">
-                  {/* Componente de Seleção 1 */}
+                <div className="flex flex-col md:flex-row gap-2 w-full md:items-center sm:items-left">
                   <Select>
                     <SelectTrigger className="bg-white w-full md:w-1/3 text-black">
                       <SelectValue placeholder="Software" />
@@ -97,12 +93,9 @@ export default function page() {
                       </SelectItem>
                     </SelectContent>
                   </Select>
-
                   <p className="font-regular text-sm text-[#41580F]">em...</p>
-
-                  {/* Componente de Seleção 2 */}
                   <Select>
-                    <SelectTrigger className=" bg-white w-full md:w-1/3 text-black">
+                    <SelectTrigger className="bg-white w-full md:w-1/3 text-black">
                       <SelectValue placeholder="Startups" />
                     </SelectTrigger>
                     <SelectContent className="select-content bg-white">
@@ -127,9 +120,8 @@ export default function page() {
                     </SelectContent>
                   </Select>
                 </div>
-
-                <button className="flex items-center text-sm w-full md:w-24 h-8 md:h-9 bg-[#41580F] text-white rounded px-3 py-1 mt-2">
-                  <FontAwesomeIcon icon={faSearch} className="mr-2 max-w-4 " />
+                <button className="flex items-center text-sm w-full md:w-24 h-8 md:h-9 bg-[#41580F] text-white rounded px-3 py-1 mt-2 transform transition duration-200 ease-in-out hover:scale-105">
+                  <FontAwesomeIcon icon={faSearch} className="mr-2 max-w-4" />
                   <p className="font-inter font-semibold">Buscar</p>
                 </button>
               </form>
