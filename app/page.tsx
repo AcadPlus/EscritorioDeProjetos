@@ -1,15 +1,13 @@
+'use client'
 import React from 'react'
 import Image from 'next/image'
 import Badge from './ui/badge-group'
+import Link from 'next/link'
 
 import { Escritorio } from '@/components/escritorio'
 import { Vitrines } from '@/components/vitrines'
 import { InteractivePartnershipSection } from '@/components/interactive-partnership-section'
 import { UniformizationProcess } from '@/components/uniformization-process'
-// import { HeroSection } from '@/components/hero-section'
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSearch } from '@fortawesome/free-solid-svg-icons'
 
 import {
   Select,
@@ -20,6 +18,7 @@ import {
 } from '@/components/ui/select'
 
 export default function page() {
+
   return (
     <main className="">
       <div className="w-full md:h-[80vh] mt-20 md:flex">
@@ -120,10 +119,12 @@ export default function page() {
                     </SelectContent>
                   </Select>
                 </div>
-                <button className="flex items-center text-sm w-full md:w-24 h-8 md:h-9 bg-[#41580F] text-white rounded px-3 py-1 mt-2 transform transition duration-200 ease-in-out hover:scale-105">
-                  <FontAwesomeIcon icon={faSearch} className="mr-2 max-w-4" />
-                  <p className="font-inter font-semibold">Buscar</p>
-                </button>
+                <Link
+                href={'linka'}
+                  className="flex items-center text-sm w-full md:w-40 h-8 md:h-9 bg-[#41580F] text-white rounded px-3 py-1 mt-2 transform transition duration-200 ease-in-out hover:scale-105"
+                >
+                  Ir para Dashboard
+                </Link>
               </form>
             </div>
           </div>

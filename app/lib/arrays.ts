@@ -16,7 +16,6 @@ const links = [
   { name: 'Home', href: '/', expand: null },
   { name: 'Sobre', href: '/', expand: null },
   { name: 'Vitrines', href: '/', expand: null },
-  { name: 'LINK@', href: '/', expand: null },
   {
     name: 'Comitê de Uniformização',
     href: '/',
@@ -50,6 +49,7 @@ const links = [
     ],
   },
   { name: 'Contato', href: '/contact', expand: null },
+  { name: 'LINK@', href: '/linka', expand: null, special: true },
 ]
 
 export { social, legal, links }

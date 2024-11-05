@@ -60,6 +60,44 @@
   animation: typewriter 2s steps(60, end) forwards;
 }
 
+:root {
+  --gradient: #00FF7F;
+
+  --background: hsl(159 65% 4%);
+  --foreground: hsl(159, 10%, 97.5%);
+
+  --muted: hsl(159, 50%, 15%);
+  --muted-foreground: hsl(159, 10%, 55%);
+
+  --popover: hsl(179, 52.28%, 4.16%);
+  --popover-foreground: hsl(179, 5.3%, 97.6%);
+  --card: hsl(179, 52.28%, 4.16%);
+  --card-foreground: hsl(179, 5.3%, 97.6%);
+
+  --popover: hsl(159, 45%, 6.5%);
+  --popover-foreground: hsl(159, 10%, 97.5%);
+
+  --card: hsl(159, 45%, 6.5%);
+  --card-foreground: hsl(159, 10%, 97.5%);
+
+  --border: hsl(159, 50%, 15%);
+  --input: hsl(159, 50%, 15%);
+
+  --primary: hsl(159 100% 50%);
+  --primary-foreground: hsl(159 10% 5%);
+
+  --secondary: hsl(159, 50%, 15%);
+  --secondary-foreground: hsl(159 10% 97.5%);
+
+  --accent: hsl(159, 50%, 15%);
+  --accent-foreground: hsl(159 10% 97.5%);
+
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(159 10% 97.5%);
+
+  --ring: hsl(159 100% 50%);
+}
+
 
 /* :root {
   --foreground-rgb: 0, 0, 0;

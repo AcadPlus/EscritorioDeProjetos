@@ -18,24 +18,26 @@ export default function Header() {
     }
   }, [isOpen])
 
-  const handleExpandClick = (index: number) => {
-    setExpandedIndex(expandedIndex === index ? null : index)
-  }
-
   const handleLinkClick = () => {
-    setIsOpen(false) // Fecha o menu ao clicar fora
+    setIsOpen(false)
   }
 
   const handleSubItemClick = () => {
-    setExpandedIndex(null) // Fecha a expansão ao clicar em subitem
-    setIsOpen(false) // Fecha o menu ao clicar em subitem
+    setExpandedIndex(null)
+    setIsOpen(false)
   }
 
   return (
     <header className="bg-primary fixed top-0 w-full z-50 shadow-md">
       <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center space-x-4">
-          <Image src="/projetos_pp.svg" alt="Logo" width={140} height={65} />
+          <Image
+            src="/projetos_pp.svg"
+            priority
+            alt="Logo"
+            width={140}
+            height={65}
+          />
         </Link>
         <button
           type="button"
@@ -64,18 +66,34 @@ export default function Header() {
               } flex flex-col md:flex-row items-center py-4 md:py-0`}
             >
               {links.map((item, index) => (
-                <li key={item.name} className="relative group">
+                <li
+                  key={item.name}
+                  className="relative group"
+                  onClick={() => {
+                    if (isMobile()) {
+                      setExpandedIndex(expandedIndex === index ? null : index)
+                    } else {
+                      handleLinkClick()
+                    }
+                  }}
+                  onPointerEnter={() => {
+                    if (!isMobile() && item.expand) {
+                      setExpandedIndex(index)
+                    }
+                  }}
+                  onPointerLeave={() => {
+                    if (!isMobile() && item.expand) {
+                      setExpandedIndex(null)
+                    }
+                  }}
+                >
                   <Link
-                    href={item.expand ? '#' : item.href} // Define href condicionalmente
-                    onClick={(e) => {
-                      if (item.expand) {
-                        e.preventDefault() // Previne a navegação se for expansível
-                        handleExpandClick(index) // Gerencia a expansão
-                      } else {
-                        handleLinkClick() // Fecha o menu ao clicar em link não expansível
-                      }
-                    }}
-                    className="text-lg font-regular text-[#213102] hover:text-[#82AF01] transition-colors duration-300 flex items-center"
+                    href={item.expand ? '#' : item.href}
+                    className={`text-lg font-regular transition-colors duration-300 flex items-center ${
+                      item.special
+                        ? 'bg-[#213102] pt-2 pb-2 pl-4 pr-4 rounded text-white'
+                        : 'text-[#213102] hover:text-[#82AF01]'
+                    }`}
                   >
                     {item.name}
                     {item.expand && (
@@ -95,7 +113,7 @@ export default function Header() {
                           <li key={subIndex}>
                             <Link
                               href={subItem.href}
-                              onClick={handleSubItemClick} // Fecha o menu ao clicar nos subitens
+                              onClick={handleSubItemClick}
                               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#82AF01] transition-colors duration-200"
                             >
                               {subItem.name}
