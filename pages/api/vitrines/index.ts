@@ -1,5 +1,8 @@
-import dbConnect from '../database/connection/dbConnect'
-import Vitrines from '../database/models/Vitrines'
+import dbConnect from '@/pages/database/connection/dbConnect'
+import Vitrines from '@/pages/database/models/Vitrines'
+import Startup from '@/pages/database/models/Startup'
+import Competencia from '@/pages/database/models/Competencia'
+import Laboratorio from '@/pages/database/models/Laboratorio'
 import multer from 'multer'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { Readable } from 'stream'
@@ -45,8 +48,8 @@ export default async function handler(
         vitrines = vitrines.map((item) => ({
           ...item._doc,
           logo: {
-            data: item.logo.data.toString('base64'),
-            contentType: item.logo.contentType,
+            data: item.logo?.data?.toString('base64'),
+            contentType: item.logo?.contentType,
           },
         }))
         return res.status(200).json({ vitrines })
@@ -71,6 +74,7 @@ export default async function handler(
               ...body,
               tags: JSON.parse(body.tags || '[]'),
               involvedCourses: JSON.parse(body.involvedCourses || '[]'),
+              status: 'pending', // Add status field
             })
 
             if (files.logo && files.logo[0]) {
@@ -96,23 +100,50 @@ export default async function handler(
       if (!req.body) {
         req.body = JSON.parse(await getRawBody(req))
       }
-      const { id, creatorId, ...updateData } = req.body
+      console.log(req.body)
+      const { id, action, responsibleUser, ...updateData } = req.body
       try {
         const item = await Vitrines.findById(id)
         if (!item) return res.status(404).json({ error: 'Item not found' })
 
-        if (item.responsibleUser !== creatorId) {
-          return res
-            .status(403)
-            .json({ error: 'Permission denied to edit this item' })
-        }
+        if (action === 'approve' || action === 'reject') {
+          // Handle approval/rejection
+          if (action === 'approve') {
+            item.status = 'approved'
+            let newItem
+            switch (item.type) {
+              case 'startup':
+                newItem = new Startup(item.toObject())
+                break
+              case 'competencia':
+                newItem = new Competencia(item.toObject())
+                break
+              case 'laboratorio':
+                newItem = new Laboratorio(item.toObject())
+                break
+            }
+            await newItem.save()
+            await Vitrines.findByIdAndDelete(id)
+          } else {
+            item.status = 'rejected'
+            await item.save()
+          }
+          return res.status(200).json({ message: `Item ${action}d successfully` })
+        } else {
+          // Handle regular update
+          if (item.responsibleUser !== responsibleUser) {
+            return res
+              .status(403)
+              .json({ error: 'Permission denied to edit this item' })
+          }
 
-        const updatedItem = await Vitrines.findByIdAndUpdate(id, updateData, {
-          new: true,
-        })
-        return res
-          .status(200)
-          .json({ message: 'Item successfully updated', updatedItem })
+          const updatedItem = await Vitrines.findByIdAndUpdate(id, updateData, {
+            new: true,
+          })
+          return res
+            .status(200)
+            .json({ message: 'Item successfully updated', updatedItem })
+        }
       } catch (error) {
         console.error('Error updating item:', error)
         return res.status(500).json({ error: 'Error updating item' })
@@ -143,4 +174,4 @@ export default async function handler(
     default:
       res.status(405).json({ error: 'Method not allowed' })
   }
-}
+} 

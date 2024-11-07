@@ -19,10 +19,10 @@ const links = [
   {
     name: 'Comitê de Uniformização',
     href: '/',
-    expand: [
-      { name: 'Sobre', href: '/sobre' },
-      { name: 'Conferir', href: '/conferir' },
-    ],
+    // expand: [
+    //   { name: 'Sobre', href: '/sobre' },
+    //   { name: 'Conferir', href: '/conferir' },
+    // ],
   },
   {
     name: 'Fluxos e Checklists',

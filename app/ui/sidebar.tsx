@@ -4,22 +4,40 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
-import { BarChart, Network, UserCircle, LogOut, LogIn, Home, ChevronRight, Menu } from 'lucide-react'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet'
+import {
+  BarChart,
+  Network,
+  UserCircle,
+  LogOut,
+  LogIn,
+  Home,
+  ChevronRight,
+  Menu,
+  GitPullRequestArrow,
+} from 'lucide-react'
 
 const handleLogout = () => {
-  localStorage.removeItem('token'); // Remove o token do localStorage
-};
+  localStorage.removeItem('token') // Remove o token do localStorage
+}
 
 const linkaItems = [
   { name: 'Vitrines', icon: BarChart, href: 'dashboard' },
   { name: 'Rede', icon: Network, href: 'network' },
-];
+  { name: 'Painel de Controle', icon: GitPullRequestArrow, href: 'admin' },
+]
 
 const menuItems = [
   { name: 'Perfil do Usuário', icon: UserCircle, href: 'profile' },
-];
+]
 
 export function Sidebar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -38,7 +56,7 @@ export function Sidebar() {
     router.push('/linka/login')
   }
 
-  const renderMenuItems = (items) => (
+  const renderMenuItems = (items) =>
     items.map((item) => (
       <Button
         key={item.name}
@@ -52,7 +70,6 @@ export function Sidebar() {
         </Link>
       </Button>
     ))
-  );
 
   const SidebarContent = (
     <ScrollArea className="h-full py-6 pl-6 pr-6 bg-white">
@@ -82,22 +99,14 @@ export function Sidebar() {
             Logout
           </Button>
         ) : (
-          <Button
-            variant="ghost"
-            className="w-full justify-start"
-            asChild
-          >
+          <Button variant="ghost" className="w-full justify-start" asChild>
             <Link href="/linka/login">
               <LogIn className="mr-2 h-4 w-4" />
               Login
             </Link>
           </Button>
         )}
-        <Button
-          variant="ghost"
-          className="w-full justify-start"
-          asChild
-        >
+        <Button variant="ghost" className="w-full justify-start" asChild>
           <Link href="/" rel="noopener noreferrer">
             <Home className="mr-2 h-4 w-4" />
             Voltar pro EP
@@ -115,7 +124,11 @@ export function Sidebar() {
       </aside>
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="md:hidden  fixed top-4 right-4 z-40">
+          <Button
+            variant="outline"
+            size="icon"
+            className="md:hidden  fixed top-4 right-4 z-40"
+          >
             <Menu className="h-4 w-4" />
           </Button>
         </SheetTrigger>

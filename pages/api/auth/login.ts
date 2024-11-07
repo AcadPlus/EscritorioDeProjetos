@@ -20,6 +20,7 @@ export default async function handler(
 
     try {
       // Check if the user exists
+      console.log(await User.find({}))
       const user = await User.findOne({ email }).select('+password')
       if (!user) {
         return res.status(401).json({ message: 'Usuário não encontrado' })

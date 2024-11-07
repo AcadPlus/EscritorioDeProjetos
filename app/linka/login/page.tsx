@@ -163,12 +163,12 @@ export default function LoginScreen() {
           <Button className="w-full bg-black text-white" onClick={handleSubmit}>
             Entrar
           </Button>
-          <Link
+          {/* <Link
             href="/forgot-password"
             className="text-sm text-blue-500 hover:underline"
           >
             Esqueceu sua senha?
-          </Link>
+          </Link> */}
           <div className="text-sm text-gray-500">
             Não tem uma conta?{' '}
             <Link

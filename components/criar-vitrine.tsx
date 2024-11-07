@@ -24,6 +24,25 @@ import useCampusOptions from '@/hooks/useCampusOptions'
 import axios from 'axios'
 import { Loader2, Plus } from 'lucide-react'
 import jwt from 'jsonwebtoken'
+import { z } from 'zod'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+
+const formSchema = z.object({
+  type: z.enum(['startup', 'competencia', 'laboratorio']),
+  title: z.string().min(1, 'Título é obrigatório'),
+  description: z.string().min(1, 'Descrição é obrigatória'),
+  tags: z.string().min(1, 'Tags são obrigatórias'),
+  logo: z.instanceof(File).or(z.null()),
+  category: z.string().min(1, 'Categoria é obrigatória'),
+  detailedDescription: z.string().min(1, 'Descrição detalhada é obrigatória'),
+  email: z.string().email('Email inválido'),
+  portfolioLink: z.string().url('Link inválido'),
+  campus: z.string().min(1, 'Campus é obrigatório'),
+  involvedCourses: z.string().min(1, 'Cursos envolvidos são obrigatórios'),
+})
+
+type FormData = z.infer<typeof formSchema>
 
 export default function CreateItemModal({
   onItemCreated,
@@ -34,61 +53,59 @@ export default function CreateItemModal({
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [uid, setUid] = useState('')
-  const [formData, setFormData] = useState({
-    type: '',
-    title: '',
-    description: '',
-    tags: '',
-    // image: null as File | null,
-    logo: null as File | null,
-    category: '',
-    detailedDescription: '',
-    email: '',
-    portfolioLink: '',
-    campus: '',
-    involvedCourses: '',
+  const [isOpen, setIsOpen] = useState(false)
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      type: undefined,
+      title: '',
+      description: '',
+      tags: '',
+      logo: null,
+      category: '',
+      detailedDescription: '',
+      email: '',
+      portfolioLink: '',
+      campus: '',
+      involvedCourses: '',
+    },
   })
 
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (token) {
       const decoded = jwt.decode(token)
-      setUid(decoded.uid as string)
+      setUid(decoded?.uid as string)
     }
   }, [])
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, files } = e.target
-    if (files && files[0]) {
-      setFormData((prev) => ({ ...prev, [name]: files[0] }))
-    }
-  }
-
-  const handleSubmit = async () => {
+  const onSubmit = async (data: FormData) => {
     setIsLoading(true)
     const formDataToSend = new FormData()
 
-    Object.entries(formData).forEach(([key, value]) => {
+    Object.entries(data).forEach(([key, value]) => {
       if (value !== null) {
         if (key === 'tags' || key === 'involvedCourses') {
           formDataToSend.append(
             key,
             JSON.stringify(value.split(',').map((item) => item.trim())),
           )
-        } else {
+        } else if (key === 'logo' && value instanceof File) {
           formDataToSend.append(key, value)
+        } else {
+          formDataToSend.append(key, value as string)
         }
       }
     })
 
     formDataToSend.append('responsibleUser', uid)
+    console.log(formDataToSend)
 
     try {
       const response = await axios.post('/api/vitrines', formDataToSend, {
@@ -97,20 +114,8 @@ export default function CreateItemModal({
 
       if (response.status === 201) {
         onItemCreated(response.data.newItem)
-        setFormData({
-          type: '',
-          title: '',
-          description: '',
-          tags: '',
-          // image: null,
-          logo: null,
-          category: '',
-          detailedDescription: '',
-          email: '',
-          portfolioLink: '',
-          campus: '',
-          involvedCourses: '',
-        })
+        reset()
+        setIsOpen(false)
         toast({
           title: 'Sucesso',
           description: 'Item criado com sucesso!',
@@ -131,7 +136,7 @@ export default function CreateItemModal({
   }
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="bg-blue-500 hover:bg-blue-600">
           <Plus className="mr-2 h-4 w-4" /> Adicionar
@@ -142,175 +147,261 @@ export default function CreateItemModal({
           <DialogTitle>Criar Novo Item para a Vitrine</DialogTitle>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="type" className="text-right">
               Tipo
             </Label>
-            <Select
-              onValueChange={(value) =>
-                setFormData((prev) => ({ ...prev, type: value }))
-              }
-              value={formData.type}
-            >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Tipo de Item" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="startup">Startup</SelectItem>
-                <SelectItem value="competencia">Competência</SelectItem>
-                <SelectItem value="laboratorio">Laboratório</SelectItem>
-              </SelectContent>
-            </Select>
+            <Controller
+              name="type"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Tipo de Item" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="startup">Startup</SelectItem>
+                    <SelectItem value="competencia">Competência</SelectItem>
+                    <SelectItem value="laboratorio">Laboratório</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.type && (
+              <p className="text-red-500 text-sm col-span-4 text-right">
+                {errors.type.message}
+              </p>
+            )}
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="title" className="text-right">
               Título
             </Label>
-            <Input
-              id="title"
+            <Controller
               name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              className="col-span-3"
+              control={control}
+              render={({ field }) => (
+                <Input id="title" {...field} className="col-span-3" />
+              )}
             />
+            {errors.title && (
+              <p className="text-red-500 text-sm col-span-4 text-right">
+                {errors.title.message}
+              </p>
+            )}
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="description" className="text-right">
               Descrição
             </Label>
-            <Textarea
-              id="description"
+            <Controller
               name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              className="col-span-3"
+              control={control}
+              render={({ field }) => (
+                <Textarea id="description" {...field} className="col-span-3" />
+              )}
             />
+            {errors.description && (
+              <p className="text-red-500 text-sm col-span-4 text-right">
+                {errors.description.message}
+              </p>
+            )}
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="tags" className="text-right">
               Tags
             </Label>
-            <Input
-              id="tags"
+            <Controller
               name="tags"
-              value={formData.tags}
-              onChange={handleInputChange}
-              placeholder="Separadas por vírgula"
-              className="col-span-3"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  id="tags"
+                  {...field}
+                  placeholder="Separadas por vírgula"
+                  className="col-span-3"
+                />
+              )}
             />
+            {errors.tags && (
+              <p className="text-red-500 text-sm col-span-4 text-right">
+                {errors.tags.message}
+              </p>
+            )}
           </div>
-          {/* <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="image" className="text-right">Imagem</Label>
-            <Input id="image" name="image" type="file" onChange={handleFileChange} className="col-span-3" />
-          </div> */}
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="logo" className="text-right">
               Logo
             </Label>
-            <Input
-              id="logo"
+            <Controller
               name="logo"
-              type="file"
-              onChange={handleFileChange}
-              className="col-span-3"
+              control={control}
+              render={({ field: { value, onChange, ...field } }) => (
+                <Input
+                  id="logo"
+                  type="file"
+                  onChange={(e) => onChange(e.target.files?.[0] || null)}
+                  {...field}
+                  className="col-span-3"
+                />
+              )}
             />
+            {errors.logo && (
+              <p className="text-red-500 text-sm col-span-4 text-right">
+                {errors.logo.message}
+              </p>
+            )}
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="category" className="text-right">
               Categoria
             </Label>
-            <Input
-              id="category"
+            <Controller
               name="category"
-              value={formData.category}
-              onChange={handleInputChange}
-              className="col-span-3"
+              control={control}
+              render={({ field }) => (
+                <Input id="category" {...field} className="col-span-3" />
+              )}
             />
+            {errors.category && (
+              <p className="text-red-500 text-sm col-span-4 text-right">
+                {errors.category.message}
+              </p>
+            )}
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="detailedDescription" className="text-right">
               Descrição Detalhada
             </Label>
-            <Textarea
-              id="detailedDescription"
+            <Controller
               name="detailedDescription"
-              value={formData.detailedDescription}
-              onChange={handleInputChange}
-              className="col-span-3"
+              control={control}
+              render={({ field }) => (
+                <Textarea
+                  id="detailedDescription"
+                  {...field}
+                  className="col-span-3"
+                />
+              )}
             />
+            {errors.detailedDescription && (
+              <p className="text-red-500 text-sm col-span-4 text-right">
+                {errors.detailedDescription.message}
+              </p>
+            )}
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="email" className="text-right">
               Email
             </Label>
-            <Input
-              id="email"
+            <Controller
               name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className="col-span-3"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  id="email"
+                  type="email"
+                  {...field}
+                  className="col-span-3"
+                />
+              )}
             />
+            {errors.email && (
+              <p className="text-red-500 text-sm col-span-4 text-right">
+                {errors.email.message}
+              </p>
+            )}
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="portfolioLink" className="text-right">
               Link do Portfólio
             </Label>
-            <Input
-              id="portfolioLink"
+            <Controller
               name="portfolioLink"
-              value={formData.portfolioLink}
-              onChange={handleInputChange}
-              className="col-span-3"
+              control={control}
+              render={({ field }) => (
+                <Input id="portfolioLink" {...field} className="col-span-3" />
+              )}
             />
+            {errors.portfolioLink && (
+              <p className="text-red-500 text-sm col-span-4 text-right">
+                {errors.portfolioLink.message}
+              </p>
+            )}
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="campus" className="text-right">
               Campus
             </Label>
-            <Select
-              onValueChange={(value) =>
-                setFormData((prev) => ({ ...prev, campus: value }))
-              }
-              value={formData.campus}
-            >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Selecione o campus" />
-              </SelectTrigger>
-              <SelectContent>
-                {campusOptions.map((campus) => (
-                  <SelectItem key={campus} value={campus}>
-                    {campus}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Controller
+              name="campus"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Selecione o campus" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {campusOptions.map((campus) => (
+                      <SelectItem key={campus} value={campus}>
+                        {campus}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.campus && (
+              <p className="text-red-500 text-sm col-span-4 text-right">
+                {errors.campus.message}
+              </p>
+            )}
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="involvedCourses" className="text-right">
               Cursos Envolvidos
             </Label>
-            <Input
-              id="involvedCourses"
+            <Controller
               name="involvedCourses"
-              value={formData.involvedCourses}
-              onChange={handleInputChange}
-              placeholder="Separados por vírgula"
-              className="col-span-3"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  id="involvedCourses"
+                  {...field}
+                  placeholder="Separados por vírgula"
+                  className="col-span-3"
+                />
+              )}
             />
+            {errors.involvedCourses && (
+              <p className="text-red-500 text-sm col-span-4 text-right">
+                {errors.involvedCourses.message}
+              </p>
+            )}
           </div>
-        </div>
-        <Button onClick={handleSubmit} className="w-full" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Criando...
-            </>
-          ) : (
-            'Criar Item'
-          )}
-        </Button>
+
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Criando...
+              </>
+            ) : (
+              'Criar Item'
+            )}
+          </Button>
+        </form>
       </DialogContent>
     </Dialog>
   )

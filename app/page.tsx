@@ -9,16 +9,7 @@ import { Vitrines } from '@/components/vitrines'
 import { InteractivePartnershipSection } from '@/components/interactive-partnership-section'
 import { UniformizationProcess } from '@/components/uniformization-process'
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-
 export default function page() {
-
   return (
     <main className="">
       <div className="w-full md:h-[80vh] mt-20 md:flex">
@@ -46,10 +37,10 @@ export default function page() {
             <div className="flex flex-col items-center text-secondary opacity-0 animate-fadeIn delay-400">
               <form className="flex flex-col gap-2 items-start w-full">
                 <p className="font-regular text-base text-[#41580F]">
-                  Estou buscando um(a)
+                  Está procurando uma Startup, Profissional ou Laboratório?
                 </p>
                 <div className="flex flex-col md:flex-row gap-2 w-full md:items-center sm:items-left">
-                  <Select>
+                  {/* <Select>
                     <SelectTrigger className="bg-white w-full md:w-1/3 text-black">
                       <SelectValue placeholder="Software" />
                     </SelectTrigger>
@@ -91,9 +82,9 @@ export default function page() {
                         Grupo de Pesquisa
                       </SelectItem>
                     </SelectContent>
-                  </Select>
-                  <p className="font-regular text-sm text-[#41580F]">em...</p>
-                  <Select>
+                  </Select> */}
+                  {/* <p className="font-regular text-sm text-[#41580F]">em...</p> */}
+                  {/* <Select>
                     <SelectTrigger className="bg-white w-full md:w-1/3 text-black">
                       <SelectValue placeholder="Startups" />
                     </SelectTrigger>
@@ -117,13 +108,13 @@ export default function page() {
                         Competências (pesquisa, tcc e etc.)
                       </SelectItem>
                     </SelectContent>
-                  </Select>
+                  </Select> */}
                 </div>
                 <Link
-                href={'linka'}
-                  className="flex items-center text-sm w-full md:w-40 h-8 md:h-9 bg-[#41580F] text-white rounded px-3 py-1 mt-2 transform transition duration-200 ease-in-out hover:scale-105"
+                  href={'linka'}
+                  className="flex items-center text-sm w-36 h-8 md:h-9 bg-[#41580F] text-white rounded px-3 py-1 mt-2 transform transition duration-200 ease-in-out hover:scale-105"
                 >
-                  Ir para Dashboard
+                  Ir para o LINK@
                 </Link>
               </form>
             </div>
@@ -138,7 +129,6 @@ export default function page() {
           className="text-secondary"
           posTexto="O que é o Escritório de Projetos e Parcerias?"
         />
-
         <Escritorio />
       </section>
       <section className="w-full mt-2 p-1 flex flex-col justify-center items-center">
