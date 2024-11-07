@@ -16,14 +16,13 @@ const links = [
   { name: 'Home', href: '/', expand: null },
   { name: 'Sobre', href: '/', expand: null },
   { name: 'Vitrines', href: '/', expand: null },
-  { name: 'LINK@', href: '/', expand: null },
   {
     name: 'Comitê de Uniformização',
     href: '/',
-    expand: [
-      { name: 'Sobre', href: '/sobre' },
-      { name: 'Conferir', href: '/conferir' },
-    ],
+    // expand: [
+    //   { name: 'Sobre', href: '/sobre' },
+    //   { name: 'Conferir', href: '/conferir' },
+    // ],
   },
   {
     name: 'Fluxos e Checklists',
@@ -50,6 +49,7 @@ const links = [
     ],
   },
   { name: 'Contato', href: '/contact', expand: null },
+  { name: 'LINK@', href: '/linka', expand: null, special: true },
 ]
 
 export { social, legal, links }
