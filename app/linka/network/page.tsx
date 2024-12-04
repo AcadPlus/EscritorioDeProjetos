@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -37,21 +37,9 @@ import {
   GraduationCap,
   Calendar,
 } from 'lucide-react'
+import { IUser, UserCardProps, ProfileModalProps } from '@/types/network'
 
-interface IUser {
-  uid: string
-  displayName: string
-  photoURL: string
-  role: string
-  campus: string
-  email: string
-  phone: string
-  course: string
-  createdAt: string
-  lastLogin: string
-}
-
-const UserCard = ({
+const UserCard: React.FC<UserCardProps> = ({
   user,
   showActions = true,
   renderActionButtons,
@@ -96,7 +84,11 @@ const UserCard = ({
   </motion.div>
 )
 
-const ProfileModal = ({ user, isOpen, onClose }) => (
+const ProfileModal: React.FC<ProfileModalProps> = ({
+  user,
+  isOpen,
+  onClose,
+}) => (
   <Dialog open={isOpen} onOpenChange={onClose}>
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
@@ -149,7 +141,7 @@ export default function Network() {
   const { requests, handleRequestAction, handleRemoveRequest, decodedToken } =
     useRequests()
 
-  const renderStatusTag = (user) => {
+  const renderStatusTag = (user: IUser) => {
     const status = requests[user.uid] ? requests[user.uid][0] : null
     let className =
       'px-2 py-1 rounded-full text-xs font-semibold flex items-center'
@@ -182,7 +174,7 @@ export default function Network() {
     )
   }
 
-  const renderActionButtons = (user) => {
+  const renderActionButtons = (user: IUser) => {
     const requestStatus = requests[user.uid]
 
     if (requestStatus === undefined) {
@@ -305,8 +297,8 @@ export default function Network() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-white"
-                  icon={<Search className="w-4 h-4 text-gray-500" />}
                 />
+                <Search className="w-4 h-4 text-gray-500 absolute top-3 right-3" />
               </div>
               <Select value={roleFilter} onValueChange={setRoleFilter}>
                 <SelectTrigger className="w-[180px] bg-white">
@@ -327,9 +319,9 @@ export default function Network() {
                 </SelectTrigger>
                 <SelectContent className="bg-white">
                   <SelectItem value="all">Todos</SelectItem>
-                  {campusOptions.map((campus, index) => (
-                    <SelectItem key={index} value={campus}>
-                      {campus}
+                  {campusOptions.map((campusName, index) => (
+                    <SelectItem key={index} value={campusName}>
+                      {campusName}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -367,7 +359,8 @@ export default function Network() {
               <div className="text-center text-gray-500 mt-8">
                 <p>Você ainda não tem conexões.</p>
                 <p>
-                  Explore a aba "Todos" para encontrar pessoas para se conectar!
+                  Explore a aba &quot;Todos&quot; para encontrar pessoas para se
+                  conectar!
                 </p>
               </div>
             )}

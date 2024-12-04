@@ -14,7 +14,7 @@ const competenciaSchema = new mongoose.Schema(
       enum: ['Pesquisa', 'Consultoria', 'Lecionamento', 'Mentoria', 'Inovação'], // Exemplos de categorias
     },
     detailedDescription: String,
-    email: { type: String, required: true, match: /.+\@.+\..+/ }, // Validação de e-mail
+    email: { type: String, required: true, match: /.+@.+\..+/ }, // Validação de e-mail
     campus: String,
     involvedCourses: [{ type: String }], // Cursos envolvidos, caso haja múltiplos
     expertiseArea: String, // Nova área de conhecimento
@@ -29,7 +29,7 @@ const competenciaSchema = new mongoose.Schema(
 
 // Middleware para atualizar automaticamente updatedAt
 competenciaSchema.pre('save', function (next) {
-  this.updatedAt = Date.now()
+  this.updatedAt = new Date()
   next()
 })
 

@@ -7,10 +7,22 @@ import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import SidebarWrapper from '@/lib/sidebar_wrapper'
 
+interface Vitrine {
+  _id: string
+  title: string
+  type: string
+  description: string
+  tags: string[]
+  email: string
+  responsibleUser: string
+}
+
 const AdminVitrines = () => {
-  const [vitrines, setVitrines] = useState([])
+  const [vitrines, setVitrines] = useState<Vitrine[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [userDisplayNames, setUserDisplayNames] = useState({})
+  const [userDisplayNames, setUserDisplayNames] = useState<
+    Record<string, string>
+  >({})
   const { toast } = useToast()
 
   useEffect(() => {
@@ -19,12 +31,13 @@ const AdminVitrines = () => {
       try {
         const {
           data: { vitrines: vitrinesData },
-        } = await axios.get('/api/vitrines')
+        } = await axios.get<{ vitrines: Vitrine[] }>('/api/vitrines')
         setVitrines(vitrinesData)
 
-        const userIds = [
-          ...new Set(vitrinesData.map((vitrine) => vitrine.responsibleUser)),
-        ]
+        const userIds = Array.from(
+          new Set(vitrinesData.map((vitrine) => vitrine.responsibleUser)),
+        ) as string[]
+
         fetchUserDisplayNames(userIds)
       } catch (error) {
         console.error('Erro ao buscar vitrines:', error)
@@ -41,19 +54,22 @@ const AdminVitrines = () => {
     fetchVitrines()
   }, [toast])
 
-  const fetchUserDisplayNames = async (userIds) => {
+  const fetchUserDisplayNames = async (userIds: string[]) => {
     try {
       const promises = userIds.map((id) =>
         fetch(`/api/users/${id}`).then((res) => res.json()),
       )
       const users = await Promise.all(promises)
 
-      const displayNamesMap = users.reduce((acc, user) => {
-        if (user?.displayName) {
-          acc[user._id] = user.displayName
-        }
-        return acc
-      }, {})
+      const displayNamesMap = users.reduce(
+        (acc, user) => {
+          if (user?.displayName) {
+            acc[user._id] = user.displayName
+          }
+          return acc
+        },
+        {} as Record<string, string>,
+      )
 
       setUserDisplayNames((prevNames) => ({ ...prevNames, ...displayNamesMap }))
     } catch (error) {
@@ -61,7 +77,11 @@ const AdminVitrines = () => {
     }
   }
 
-  const handleAction = async (id, action, responsibleUser) => {
+  const handleAction = async (
+    id: string,
+    action: string,
+    responsibleUser: string,
+  ) => {
     try {
       await axios.put('/api/vitrines', { id, action, responsibleUser })
       toast({
@@ -69,7 +89,6 @@ const AdminVitrines = () => {
         description: `Vitrine ${action === 'approve' ? 'aprovada' : 'rejeitada'} com sucesso.`,
         variant: 'default',
       })
-      fetchVitrines()
     } catch (error) {
       console.error('Erro ao processar ação:', error)
       toast({
@@ -129,7 +148,7 @@ const AdminVitrines = () => {
                     </td>
                     <td className="border border-gray-300 p-2">
                       <div className="flex flex-wrap gap-1">
-                        {tags.map((tag, index) => (
+                        {tags?.map((tag, index) => (
                           <Badge key={index} variant="secondary">
                             {tag}
                           </Badge>

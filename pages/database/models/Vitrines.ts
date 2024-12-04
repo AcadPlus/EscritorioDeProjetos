@@ -29,4 +29,5 @@ const vitrineSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 })
 
-export default mongoose.models.Vitrine || mongoose.model('Vitrine', vitrineSchema)
+export default mongoose.models.Vitrine ||
+  mongoose.model('Vitrine', vitrineSchema)

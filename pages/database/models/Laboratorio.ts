@@ -14,7 +14,7 @@ const laboratorioSchema = new mongoose.Schema(
       enum: ['Research', 'Innovation', 'Development', 'Collaboration'], // Exemplos de categorias
     },
     detailedDescription: String,
-    email: { type: String, required: true, match: /.+\@.+\..+/ }, // Validação de e-mail
+    email: { type: String, required: true, match: /.+@.+\..+/ }, // Validação de e-mail
     campus: String,
     involvedCourses: [{ type: String }], // Cursos envolvidos no laboratório
     responsibleUser: { type: String, required: true }, // Quem gerencia o laboratório
@@ -29,7 +29,7 @@ const laboratorioSchema = new mongoose.Schema(
 
 // Middleware para atualizar automaticamente updatedAt
 laboratorioSchema.pre('save', function (next) {
-  this.updatedAt = Date.now()
+  this.updatedAt = new Date()
   next()
 })
 

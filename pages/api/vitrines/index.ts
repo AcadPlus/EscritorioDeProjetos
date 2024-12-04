@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import dbConnect from '@/pages/database/connection/dbConnect'
 import Vitrines from '@/pages/database/models/Vitrines'
 import Startup from '@/pages/database/models/Startup'
@@ -6,6 +7,13 @@ import Laboratorio from '@/pages/database/models/Laboratorio'
 import multer from 'multer'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { Readable } from 'stream'
+
+// Extend NextApiRequest to be compatible with Multer
+export interface NextApiRequestWithFiles extends NextApiRequest {
+  files: {
+    [fieldname: string]: Express.Multer.File[]
+  }
+}
 
 const upload = multer()
 
@@ -25,8 +33,8 @@ export const config = {
   },
 }
 
-async function getRawBody(req) {
-  const chunks = []
+async function getRawBody(req: NextApiRequest): Promise<string> {
+  const chunks: Buffer[] = []
   for await (const chunk of req) {
     chunks.push(chunk)
   }
@@ -60,8 +68,8 @@ export default async function handler(
 
     case 'POST':
       upload.fields([{ name: 'logo' }, { name: 'image' }])(
-        req,
-        res,
+        req as unknown as never,
+        res as unknown as never,
         async (err) => {
           if (err) {
             console.error('File upload error:', err)
@@ -69,12 +77,12 @@ export default async function handler(
           }
 
           try {
-            const { files, body } = req as any
+            const { files, body } = req as NextApiRequestWithFiles
             const newItem = new Vitrines({
               ...body,
               tags: JSON.parse(body.tags || '[]'),
               involvedCourses: JSON.parse(body.involvedCourses || '[]'),
-              status: 'pending', // Add status field
+              status: 'pending',
             })
 
             if (files.logo && files.logo[0]) {
@@ -96,7 +104,7 @@ export default async function handler(
       )
       break
 
-    case 'PUT':
+    case 'PUT': {
       if (!req.body) {
         req.body = JSON.parse(await getRawBody(req))
       }
@@ -128,7 +136,9 @@ export default async function handler(
             item.status = 'rejected'
             await item.save()
           }
-          return res.status(200).json({ message: `Item ${action}d successfully` })
+          return res
+            .status(200)
+            .json({ message: `Item ${action}d successfully` })
         } else {
           // Handle regular update
           if (item.responsibleUser !== responsibleUser) {
@@ -148,9 +158,9 @@ export default async function handler(
         console.error('Error updating item:', error)
         return res.status(500).json({ error: 'Error updating item' })
       }
-      break
+    }
 
-    case 'DELETE':
+    case 'DELETE': {
       const { id: deleteId, creatorId: deleteCreatorId } = req.query
 
       try {
@@ -169,9 +179,9 @@ export default async function handler(
         console.error('Error deleting item:', error)
         return res.status(500).json({ error: 'Error deleting item' })
       }
-      break
+    }
 
     default:
       res.status(405).json({ error: 'Method not allowed' })
   }
-} 
+}

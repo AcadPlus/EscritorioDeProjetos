@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -16,19 +17,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import jwt from 'jsonwebtoken'
+import jwt, { JwtPayload } from 'jsonwebtoken'
 
 import getProfileUserData from '@/hooks/profileUserData'
 import useDeleteUser from '@/hooks/useDeleteUser'
 import SidebarWrapper from '@/lib/sidebar_wrapper'
 import useUpdateUser from '@/hooks/useUpdateUser'
 import { useToast } from '@/hooks/use-toast'
+import { IUser } from '@/types/user'
 
 export default function Perfil() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const [user, setUser] = useState<Object | null>(null)
+  const [user, setUser] = useState<IUser | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [editedUser, setEditedUser] = useState<Partial<IUser>>({})
   const { toast } = useToast()
@@ -41,7 +43,7 @@ export default function Perfil() {
   const { updateUser } = useUpdateUser()
 
   const handleDeleteProfile = async () => {
-    if (confirm('Tem certeza que deseja deletar seu perfil?')) {
+    if (user && confirm('Tem certeza que deseja deletar seu perfil?')) {
       const success = await deleteUser(user.uid)
 
       if (success) {
@@ -60,7 +62,13 @@ export default function Perfil() {
         return
       }
 
-      const decoded = jwt.decode(token)
+      const decoded = jwt.decode(token) as JwtPayload & { uid: string }
+      if (!decoded || !decoded.uid) {
+        setError('Token inválido')
+        setLoading(false)
+        return
+      }
+
       try {
         const userData = await getProfileUserData(decoded.uid)
         if (userData) {
@@ -84,6 +92,8 @@ export default function Perfil() {
   }
 
   const handleSaveProfile = async () => {
+    if (!user) return
+
     setLoading(true)
     try {
       const updatedUser = await updateUser(user.uid, editedUser)
@@ -282,7 +292,7 @@ export default function Perfil() {
                   >
                     {deletingLoading ? 'Deletando...' : 'Deletar Perfil'}
                   </Button>
-                  {deleteError && <p className="text-red-500">{deleteError}</p>}{' '}
+                  {deleteError && <p className="text-red-500">{deleteError}</p>}
                   <Button variant="outline" className="w-full">
                     Alterar Senha
                   </Button>

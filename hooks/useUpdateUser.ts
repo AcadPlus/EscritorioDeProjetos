@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { IUser } from '@/types/network'
 
 const useUpdateUser = () => {
   const [loading, setLoading] = useState(false)
@@ -24,8 +25,12 @@ const useUpdateUser = () => {
       const updatedUser = await response.json()
       return updatedUser // Retorna os dados do usuário atualizado
     } catch (err) {
-      setError(err.message)
-      return null // Atualização falhou
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Erro desconhecido') // Handle non-Error objects
+      }
+      return false // Deletion failed
     } finally {
       setLoading(false)
     }

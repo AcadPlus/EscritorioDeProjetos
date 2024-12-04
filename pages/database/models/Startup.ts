@@ -17,4 +17,5 @@ const startupSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 })
 
-export default mongoose.models.Startup || mongoose.model('Startup', startupSchema)
+export default mongoose.models.Startup ||
+  mongoose.model('Startup', startupSchema)

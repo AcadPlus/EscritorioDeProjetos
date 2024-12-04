@@ -1,5 +1,4 @@
-'use client'
-
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from 'react'
 import {
   Dialog,
@@ -24,16 +23,18 @@ import useCampusOptions from '@/hooks/useCampusOptions'
 import axios from 'axios'
 import { Loader2, Plus } from 'lucide-react'
 import jwt from 'jsonwebtoken'
-import { z } from 'zod'
+import { unknown, z } from 'zod'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { DecodedToken } from '@/hooks/useVitrineData'
+import { CampusOption } from '@/types/campusOptions'
 
 const formSchema = z.object({
   type: z.enum(['startup', 'competencia', 'laboratorio']),
   title: z.string().min(1, 'Título é obrigatório'),
   description: z.string().min(1, 'Descrição é obrigatória'),
   tags: z.string().min(1, 'Tags são obrigatórias'),
-  logo: z.instanceof(File).or(z.null()),
+  logo: z.instanceof(File).nullable(),
   category: z.string().min(1, 'Categoria é obrigatória'),
   detailedDescription: z.string().min(1, 'Descrição detalhada é obrigatória'),
   email: z.string().email('Email inválido'),
@@ -47,12 +48,12 @@ type FormData = z.infer<typeof formSchema>
 export default function CreateItemModal({
   onItemCreated,
 }: {
-  onItemCreated: (item: any) => void
+  onItemCreated: (item: unknown) => void
 }) {
   const campusOptions = useCampusOptions()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
-  const [uid, setUid] = useState('')
+  const [uid, setUid] = useState<string | null>(null)
   const [isOpen, setIsOpen] = useState(false)
 
   const {
@@ -80,22 +81,41 @@ export default function CreateItemModal({
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (token) {
-      const decoded = jwt.decode(token)
-      setUid(decoded?.uid as string)
+      try {
+        const decoded = JSON.parse(atob(token.split('.')[1])) as DecodedToken
+        if (decoded && decoded.uid) {
+          setUid(decoded.uid)
+        }
+      } catch (error) {
+        console.error('Error decoding token:', error)
+      }
     }
   }, [])
 
   const onSubmit = async (data: FormData) => {
+    if (!uid) {
+      toast({
+        title: 'Erro',
+        description: 'Usuário não autenticado',
+        variant: 'destructive',
+      })
+      return
+    }
+
     setIsLoading(true)
     const formDataToSend = new FormData()
 
     Object.entries(data).forEach(([key, value]) => {
       if (value !== null) {
         if (key === 'tags' || key === 'involvedCourses') {
-          formDataToSend.append(
-            key,
-            JSON.stringify(value.split(',').map((item) => item.trim())),
-          )
+          if (typeof value === 'string') {
+            formDataToSend.append(
+              key,
+              JSON.stringify(
+                value.split(',').map((item: string) => item.trim()),
+              ),
+            )
+          }
         } else if (key === 'logo' && value instanceof File) {
           formDataToSend.append(key, value)
         } else {
@@ -105,7 +125,6 @@ export default function CreateItemModal({
     })
 
     formDataToSend.append('responsibleUser', uid)
-    console.log(formDataToSend)
 
     try {
       const response = await axios.post('/api/vitrines', formDataToSend, {
@@ -149,28 +168,32 @@ export default function CreateItemModal({
 
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="type" className="text-right">
-              Tipo
+            <Label htmlFor="campus" className="text-right">
+              Campus
             </Label>
             <Controller
-              name="type"
+              name="campus"
               control={control}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Tipo de Item" />
+                    <SelectValue placeholder="Selecione o campus" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="startup">Startup</SelectItem>
-                    <SelectItem value="competencia">Competência</SelectItem>
-                    <SelectItem value="laboratorio">Laboratório</SelectItem>
+                    {(campusOptions as unknown as CampusOption[]).map(
+                      (option) => (
+                        <SelectItem key={option.id} value={option.name}>
+                          {option.name}
+                        </SelectItem>
+                      ),
+                    )}
                   </SelectContent>
                 </Select>
               )}
             />
-            {errors.type && (
+            {errors.campus && (
               <p className="text-red-500 text-sm col-span-4 text-right">
-                {errors.type.message}
+                {errors.campus.message}
               </p>
             )}
           </div>
@@ -329,7 +352,12 @@ export default function CreateItemModal({
               name="portfolioLink"
               control={control}
               render={({ field }) => (
-                <Input id="portfolioLink" {...field} className="col-span-3" />
+                <Input
+                  id="portfolioLink"
+                  type="url"
+                  {...field}
+                  className="col-span-3"
+                />
               )}
             />
             {errors.portfolioLink && (
@@ -352,9 +380,9 @@ export default function CreateItemModal({
                     <SelectValue placeholder="Selecione o campus" />
                   </SelectTrigger>
                   <SelectContent>
-                    {campusOptions.map((campus) => (
-                      <SelectItem key={campus} value={campus}>
-                        {campus}
+                    {campusOptions.map((campusName, index) => (
+                      <SelectItem key={index} value={campusName}>
+                        {campusName}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -391,12 +419,9 @@ export default function CreateItemModal({
             )}
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="mt-4 w-full" disabled={isLoading}>
             {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Criando...
-              </>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               'Criar Item'
             )}

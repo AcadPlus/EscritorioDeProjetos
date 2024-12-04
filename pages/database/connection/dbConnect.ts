@@ -1,16 +1,10 @@
 'use server'
 import mongoose from 'mongoose'
 
-const MONGODB_URI = process.env.MONGODB_URI
-// const credentials = 'public/X509-cert-8496722399756930850.pem'
-const clientOptions = {
-  // tlsCertificateKeyFile: credentials,
-  serverApi: { version: '1' },
-}
+const MONGODB_URI = process.env.MONGODB_URI as string
+
 if (!MONGODB_URI) {
   throw new Error('Por favor defina a variável de ambiente MONGODB_URI')
-} else {
-  console.log(MONGODB_URI)
 }
 
 let cached = global.mongoose
@@ -25,9 +19,12 @@ async function dbConnect() {
   }
 
   if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+    }
 
     cached.promise = mongoose
-      .connect(MONGODB_URI, clientOptions)
+      .connect(MONGODB_URI, opts)
       .then((mongoose) => {
         console.log('Connected to MongoDB')
         return mongoose

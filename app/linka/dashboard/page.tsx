@@ -1,13 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Link as LinkIcon, Loader2, Filter } from 'lucide-react'
+import { Search, Loader2, Filter } from 'lucide-react'
 import ItemCard from '@/components/base-item-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-
 import { useToast } from '@/hooks/use-toast'
 import {
   DropdownMenu,
@@ -20,24 +19,28 @@ import { motion, AnimatePresence } from 'framer-motion'
 import CreateItemModal from '@/components/criar-vitrine'
 import axios from 'axios'
 import jwt from 'jsonwebtoken'
-
-import { useVitrineData } from '@/hooks/useVitrineData'
+import { VitrineItem, VitrineType, SortType } from '@/types/vitrine-items'
+import {
+  useVitrineData,
+  DecodedToken,
+  UserDisplayName,
+} from '@/hooks/useVitrineData'
 
 export default function VitrinesComponent() {
   const [searchQuery, setSearchQuery] = useState('')
   const [currentUser, setCurrentUser] = useState('')
-  const [activeTab, setActiveTab] = useState('startup')
+  const [activeTab, setActiveTab] = useState<VitrineType>('startup')
   const [page, setPage] = useState(1)
-  const [sortBy, setSortBy] = useState('recent')
+  const [sortBy, setSortBy] = useState<SortType>('recent')
   const { toast } = useToast()
-  const [selectedItem, setSelectedItem] = useState(null)
-
-  const [userDisplayNames, setUserDisplayNames] = useState({})
-
-  const [editingItem, setEditingItem] = useState(null)
+  const [selectedItem, setSelectedItem] = useState<VitrineItem | null>(null)
+  const [userDisplayNames, setUserDisplayNames] = useState<
+    Record<string, string>
+  >({})
+  const [editingItem, setEditingItem] = useState<VitrineItem | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [editDescription, setEditDescription] = useState('')
-  const [editTags, setEditTags] = useState([])
+  const [editTags, setEditTags] = useState<string[]>([])
 
   const {
     data: vitrines,
@@ -49,12 +52,12 @@ export default function VitrinesComponent() {
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (token) {
-      const decoded = jwt.decode(token)
-      setCurrentUser(decoded?.uid)
+      const decoded = jwt.decode(token) as DecodedToken
+      setCurrentUser(decoded?.uid || '')
     }
   }, [])
 
-  const handleEdit = (itemId) => {
+  const handleEdit = (itemId: string) => {
     const itemToEdit = vitrines.find((item) => item._id === itemId)
     if (itemToEdit) {
       setEditingItem(itemToEdit)
@@ -67,7 +70,7 @@ export default function VitrinesComponent() {
   const handleEditSubmit = async () => {
     if (editingItem) {
       try {
-        const response = await axios.put(
+        const response = await axios.put<{ success: boolean }>(
           '/api/vitrines',
           {
             id: editingItem._id,
@@ -85,18 +88,6 @@ export default function VitrinesComponent() {
         )
 
         if (response.status === 200) {
-          setVitrines(
-            vitrines.map((item) =>
-              item._id === editingItem._id
-                ? {
-                    ...item,
-                    title: editTitle,
-                    description: editDescription,
-                    tags: editTags,
-                  }
-                : item,
-            ),
-          )
           toast({
             title: 'Item Atualizado',
             description: 'O item foi atualizado com sucesso.',
@@ -104,7 +95,11 @@ export default function VitrinesComponent() {
           })
           setEditingItem(null)
         } else {
-          alert('Erro ao atualizar o item.')
+          toast({
+            title: 'Erro',
+            description: 'Erro ao atualizar o item.',
+            variant: 'destructive',
+          })
         }
       } catch (error) {
         console.error('Erro ao atualizar o item:', error)
@@ -122,7 +117,7 @@ export default function VitrinesComponent() {
     fetchUserDisplayNames(vitrines.map((item) => item.responsibleUser))
   }, [vitrines])
 
-  const fetchUserDisplayNames = async (userIds) => {
+  const fetchUserDisplayNames = async (userIds: string[]) => {
     try {
       const uniqueIds = [...new Set(userIds)]
       const promises = uniqueIds.map((id) =>
@@ -130,8 +125,8 @@ export default function VitrinesComponent() {
       )
 
       const users = await Promise.all(promises)
-      const displayNamesMap = {}
-      users.forEach((user) => {
+      const displayNamesMap: Record<string, string> = {}
+      users.forEach((user: UserDisplayName) => {
         if (user && user.displayName) {
           displayNamesMap[user.uid] = user.displayName
         }
@@ -143,7 +138,7 @@ export default function VitrinesComponent() {
     }
   }
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setPage(1)
   }
@@ -160,25 +155,12 @@ export default function VitrinesComponent() {
     })
   }
 
-  const handleSortChange = (value) => {
+  const handleSortChange = (value: SortType) => {
     setSortBy(value)
     setPage(1)
   }
 
-  // useEffect(() => {
-  //   if (!vitrines) return
-  //   const filteredItemsTemp = vitrines.filter(
-  //     (vitrine) =>
-  //       vitrine.type === activeTab &&
-  //       (vitrine.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //         vitrine.description
-  //           .toLowerCase()
-  //           .includes(searchQuery.toLowerCase())),
-  //   )
-  //   setFilteredItems(filteredItemsTemp)
-  // }, [vitrines])
-
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Tem certeza que deseja excluir este item?')) {
       try {
         const response = await axios.delete('/api/vitrines', {
@@ -209,6 +191,59 @@ export default function VitrinesComponent() {
           variant: 'destructive',
         })
       }
+    }
+  }
+
+  const renderDetails = (item: VitrineItem): JSX.Element => {
+    switch (item.type) {
+      case 'startup':
+        return (
+          <div>
+            <p>
+              <strong>Email:</strong> {item.email}
+            </p>
+            <p>
+              <strong>Descrição Detalhada:</strong> {item.detailedDescription}
+            </p>
+          </div>
+        )
+      case 'laboratorio':
+        return (
+          <div>
+            <p>
+              <strong>Email:</strong> {item.email}
+            </p>
+            <p>
+              <strong>Descrição Detalhada:</strong> {item.detailedDescription}
+            </p>
+          </div>
+        )
+      case 'competencia':
+        return (
+          <div>
+            <p>
+              <strong>Área:</strong> {item.area}
+            </p>
+            <p>
+              <strong>Nível:</strong> {item.level}
+            </p>
+            <p>
+              <strong>Experiência:</strong> {item.experience} anos
+            </p>
+            <p>
+              <strong>Currículo:</strong>{' '}
+              <a
+                href={item.curriculum}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Ver currículo
+              </a>
+            </p>
+          </div>
+        )
+      default:
+        return <div>Detalhes não disponíveis</div>
     }
   }
 
@@ -279,7 +314,7 @@ export default function VitrinesComponent() {
             <Tabs
               value={activeTab}
               onValueChange={(value) => {
-                setActiveTab(value)
+                setActiveTab(value as VitrineType)
                 setPage(1)
               }}
             >
@@ -303,12 +338,13 @@ export default function VitrinesComponent() {
                   <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {vitrines.map((item) => (
                       <ItemCard
-                        key={item.id}
-                        item={item}
+                        key={item._id}
+                        item={item as VitrineItem}
                         currentUser={currentUser}
                         userDisplayNames={userDisplayNames}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
+                        renderDetails={renderDetails}
                       />
                     ))}
                   </motion.div>
