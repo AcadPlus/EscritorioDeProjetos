@@ -81,14 +81,8 @@ export default function page() {
 
         <motion.div {...fadeIn} className="space-y-8">
           <div className="aspect-w-16 aspect-h-9 rounded-3xl overflow-hidden">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7962.607471935136!2d-38.58177999241675!3d-3.74386398168883!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x7c74bdc77884127%3A0xbdd638b525926bfa!2sUniversidade%20Federal%20do%20Cear%C3%A1%20-%20UFC!5e0!3m2!1spt-BR!2sbr!4v1720570318517!5m2!1spt-BR!2sbr"
-              width="600"
-              height="450"
-              className="border-0 w-full h-full"
-              loading="lazy"
-              title="Mapa da Universidade Federal do Ceará"
-            ></iframe>
+
+            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d15925.271969167099!2d-38.5695664!3d-3.7407273!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x7c74b9a30e7eacd%3A0xebd1f33eefe87b1!2sBloco%20334%20-%20CEI%20-%20Condom%C3%ADnio%20de%20Empreendedorismo%20e%20Inova%C3%A7%C3%A3o!5e0!3m2!1spt-BR!2sbr!4v1733355896827!5m2!1spt-BR!2sbr" width="600" height="450" loading="lazy" title="Mapa da Universidade Federal do Ceará" className="border-0 w-full h-full"></iframe>
           </div>
           <div className="bg-[#F9FAFB] rounded-2xl p-6 space-y-4">
             <h2 className="font-semibold text-2xl text-[#101828]">
@@ -98,7 +92,8 @@ export default function page() {
               <div className="flex items-center space-x-3 text-[#475467]">
                 <MapPin className="h-5 w-5" />
                 <span>
-                  Av. da Universidade, 2853 - Benfica, Fortaleza - CE, 60020-181
+                  Bloco 334 - CEI - Condomínio de Empreendedorismo e Inovação
+                  Campus do Pici s/n - Pici, Fortaleza - CE, 60355-636
                 </span>
               </div>
               <div className="flex items-center space-x-3 text-[#475467]">
@@ -107,7 +102,7 @@ export default function page() {
               </div>
               <div className="flex items-center space-x-3 text-[#475467]">
                 <Mail className="h-5 w-5" />
-                <span>escritoriodeprojetoseparcerias@ufc.br</span>
+                <span>ep@ufc.br</span>
               </div>
             </div>
           </div>

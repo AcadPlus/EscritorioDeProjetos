@@ -14,11 +14,11 @@ const legal = [
 ]
 const links = [
   { name: 'Home', href: '/', expand: null },
-  { name: 'Sobre', href: '/', expand: null },
-  { name: 'Vitrines', href: '/', expand: null },
+  { name: 'Sobre', href: '#sobre-escritorio', expand: null },
+  { name: 'Vitrines', href: '#vitrines', expand: null },
   {
     name: 'Comitê de Uniformização',
-    href: '/',
+    href: '#comite',
     // expand: [
     //   { name: 'Sobre', href: '/sobre' },
     //   { name: 'Conferir', href: '/conferir' },
@@ -33,7 +33,7 @@ const links = [
         href: '/fluxos_e_checklists/acordo_e_parceria_de_pdi',
       },
       {
-        name: 'Termo de Confidenciabilidade (NDA)',
+        name: 'Termo de Confidencialidade (NDA)',
         href: '/fluxos_e_checklists/termo_de_confidenciabilidade',
       },
       {
