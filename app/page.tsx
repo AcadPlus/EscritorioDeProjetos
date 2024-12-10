@@ -122,7 +122,10 @@ export default function page() {
         </section>
       </div>
 
-      <section className="w-full flex items-center flex-col my-2 px-3" id='sobre-escritorio'>
+      <section
+        className="w-full flex items-center flex-col my-2 px-3"
+        id="sobre-escritorio"
+      >
         <Badge
           content="Entenda do que se trata o escritório!"
           title="O Escritório"
@@ -131,7 +134,10 @@ export default function page() {
         />
         <Escritorio />
       </section>
-      <section className="w-full mt-2 p-1 flex flex-col justify-center items-center" id='vitrines'>
+      <section
+        className="w-full mt-2 p-1 flex flex-col justify-center items-center"
+        id="vitrines"
+      >
         <Badge
           color="tertiary"
           title="Nossas Vitrines"
@@ -156,7 +162,7 @@ export default function page() {
         <InteractivePartnershipSection />
       </section>
 
-      <section id='comite' className="p-3 flex flex-col gap-3">
+      <section id="comite" className="p-3 flex flex-col gap-3">
         <Badge
           color="tertiary"
           title="Processos Internos"

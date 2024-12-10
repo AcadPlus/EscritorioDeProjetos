@@ -115,8 +115,8 @@ export default function BaseItemCard({
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <ImageDisplay
-                    image={selectedItem.logo}
-                    className="w-full h-48 object-cover rounded-lg"
+                    image={item.logo ?? undefined} // Converte null para undefined
+                    className="w-full h-48 object-cover rounded-lg mb-4"
                   />
                   <ScrollArea className="h-[200px] w-full rounded-md border p-4">
                     <p>{selectedItem.description}</p>

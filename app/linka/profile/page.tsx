@@ -39,16 +39,16 @@ import useDeleteUser from '@/hooks/useDeleteUser'
 import SidebarWrapper from '@/lib/sidebar_wrapper'
 import useUpdateUser from '@/hooks/useUpdateUser'
 import { useToast } from '@/hooks/use-toast'
-import { IUser } from '@/types/user'
+import { IUserProfile } from '@/types/user'
 import useCampusOptions from '@/hooks/useCampusOptions'
 
 export default function Profile() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const [user, setUser] = useState<IUser | null>(null)
+  const [user, setUser] = useState<IUserProfile | null>(null)
   const [isEditing, setIsEditing] = useState(false)
-  const [editedUser, setEditedUser] = useState<Partial<IUser>>({})
+  const [editedUser, setEditedUser] = useState<Partial<IUserProfile>>({})
   const { toast } = useToast()
   const campusOptions = useCampusOptions()
   const {

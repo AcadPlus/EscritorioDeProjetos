@@ -4,11 +4,12 @@ import Image from 'next/image'
 interface ImageProps {
   image?:
     | {
-        data: string // Base64 string for the image data
-        contentType: string // Content type (e.g., 'image/png')
+        data: string
+        contentType: string
       }
-    | string // Allow the image to be a base64 string directly
-  className?: string // Optional className for styling
+    | string
+    | null // Adicione null aqui
+  className?: string
 }
 
 const ImageDisplay: React.FC<ImageProps> = ({ image, className }) => {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react'
 import { DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -141,13 +142,13 @@ export default function GenericForm({
               <Controller
                 name={field.name}
                 control={control}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
+                render={({ field: { onChange, value } }) => (
+                  <Select onValueChange={onChange} value={value}>
                     <SelectTrigger className="col-span-3">
                       <SelectValue placeholder={`Selecione ${field.label}`} />
                     </SelectTrigger>
                     <SelectContent>
-                      {field.options?.map((option) => (
+                      {field.options?.map((option: string) => (
                         <SelectItem key={option} value={option}>
                           {option}
                         </SelectItem>
@@ -190,7 +191,7 @@ export default function GenericForm({
                 render={({ field }) => (
                   <Input
                     id={field.name}
-                    type={field.type || 'text'}
+                    type={'text'}
                     {...field}
                     className="col-span-3"
                   />
@@ -199,7 +200,7 @@ export default function GenericForm({
             )}
             {errors[field.name] && (
               <p className="text-red-500 text-sm col-span-4 text-right">
-                {errors[field.name]?.message}
+                {(errors[field.name]?.message as string) || 'Error'}
               </p>
             )}
           </div>

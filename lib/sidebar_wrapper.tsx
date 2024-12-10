@@ -7,5 +7,5 @@ export default function SidebarWrapper() {
   const pathname = usePathname()
   const showSidebar = pathname?.startsWith('/linka')
 
-  return showSidebar ? <Sidebar/> : null
+  return showSidebar ? <Sidebar /> : null
 }

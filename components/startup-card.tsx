@@ -1,7 +1,7 @@
 import BaseItemCard from './base-item-card'
 import { ExternalLink, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Startup, VitrineItem } from '@/types/vitrine-items'
+import { Startup } from '@/types/vitrine-items'
 
 interface StartupCardProps {
   item: Startup

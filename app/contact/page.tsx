@@ -81,8 +81,14 @@ export default function page() {
 
         <motion.div {...fadeIn} className="space-y-8">
           <div className="aspect-w-16 aspect-h-9 rounded-3xl overflow-hidden">
-
-            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d15925.271969167099!2d-38.5695664!3d-3.7407273!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x7c74b9a30e7eacd%3A0xebd1f33eefe87b1!2sBloco%20334%20-%20CEI%20-%20Condom%C3%ADnio%20de%20Empreendedorismo%20e%20Inova%C3%A7%C3%A3o!5e0!3m2!1spt-BR!2sbr!4v1733355896827!5m2!1spt-BR!2sbr" width="600" height="450" loading="lazy" title="Mapa da Universidade Federal do Ceará" className="border-0 w-full h-full"></iframe>
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d15925.271969167099!2d-38.5695664!3d-3.7407273!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x7c74b9a30e7eacd%3A0xebd1f33eefe87b1!2sBloco%20334%20-%20CEI%20-%20Condom%C3%ADnio%20de%20Empreendedorismo%20e%20Inova%C3%A7%C3%A3o!5e0!3m2!1spt-BR!2sbr!4v1733355896827!5m2!1spt-BR!2sbr"
+              width="600"
+              height="450"
+              loading="lazy"
+              title="Mapa da Universidade Federal do Ceará"
+              className="border-0 w-full h-full"
+            ></iframe>
           </div>
           <div className="bg-[#F9FAFB] rounded-2xl p-6 space-y-4">
             <h2 className="font-semibold text-2xl text-[#101828]">

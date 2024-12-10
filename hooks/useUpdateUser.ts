@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { IUser } from '@/types/network'
+import { IUserProfile } from '@/types/user'
 
 const useUpdateUser = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const updateUser = async (uid: string, userData: Partial<IUser>) => {
+  const updateUser = async (uid: string, userData: Partial<IUserProfile>) => {
     setLoading(true)
     setError(null)
     try {
