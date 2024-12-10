@@ -4,7 +4,15 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Mail, Calendar, School, GraduationCap, Loader2 } from 'lucide-react'
+import {
+  Mail,
+  Calendar,
+  School,
+  GraduationCap,
+  Building2,
+  BadgeIcon as IdCard,
+  Loader2,
+} from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -17,6 +25,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 
 import getProfileUserData from '@/hooks/profileUserData'
@@ -25,8 +40,9 @@ import SidebarWrapper from '@/lib/sidebar_wrapper'
 import useUpdateUser from '@/hooks/useUpdateUser'
 import { useToast } from '@/hooks/use-toast'
 import { IUser } from '@/types/user'
+import useCampusOptions from '@/hooks/useCampusOptions'
 
-export default function Perfil() {
+export default function Profile() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -34,6 +50,7 @@ export default function Perfil() {
   const [isEditing, setIsEditing] = useState(false)
   const [editedUser, setEditedUser] = useState<Partial<IUser>>({})
   const { toast } = useToast()
+  const campusOptions = useCampusOptions()
   const {
     deleteUser,
     loading: deletingLoading,
@@ -41,6 +58,8 @@ export default function Perfil() {
   } = useDeleteUser()
 
   const { updateUser } = useUpdateUser()
+
+  const isUfcBrEmail = user?.email.endsWith('@ufc.br')
 
   const handleDeleteProfile = async () => {
     if (user && confirm('Tem certeza que deseja deletar seu perfil?')) {
@@ -58,7 +77,7 @@ export default function Perfil() {
       const token = localStorage.getItem('token')
       if (!token) {
         setLoading(false)
-        setError(null) // Clear any previous error
+        setError(null)
         return
       }
 
@@ -162,7 +181,13 @@ export default function Perfil() {
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <Avatar className="h-20 w-20">
-                  <AvatarImage src={user.photoURL} />
+                  <AvatarImage
+                    src={
+                      user.profilePicture?.data
+                        ? `data:${user.profilePicture.contentType};base64,${Buffer.from(user.profilePicture.data).toString('base64')}`
+                        : undefined
+                    }
+                  />
                   <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
@@ -176,12 +201,27 @@ export default function Perfil() {
                   <Mail className="h-5 w-5 mr-2 text-gray-500" />
                   <span>{user.email}</span>
                 </div>
+                {isUfcBrEmail ? (
+                  <div className="flex items-center">
+                    <IdCard className="h-5 w-5 mr-2 text-gray-500" />
+                    <span>SIAPE: {user.siape}</span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center">
+                      <IdCard className="h-5 w-5 mr-2 text-gray-500" />
+                      <span>Matrícula: {user.matricula}</span>
+                    </div>
+                    {user.course && (
+                      <div className="flex items-center">
+                        <GraduationCap className="h-5 w-5 mr-2 text-gray-500" />
+                        <span>{user.course}</span>
+                      </div>
+                    )}
+                  </>
+                )}
                 <div className="flex items-center">
-                  <GraduationCap className="h-5 w-5 mr-2 text-gray-500" />
-                  <span>{user.course}</span>
-                </div>
-                <div className="flex items-center">
-                  <School className="h-5 w-5 mr-2 text-gray-500" />
+                  <Building2 className="h-5 w-5 mr-2 text-gray-500" />
                   <span>{user.campus}</span>
                 </div>
               </div>
@@ -196,13 +236,15 @@ export default function Perfil() {
                       Criado em: {new Date(user.createdAt).toLocaleDateString()}
                     </span>
                   </div>
-                  <div className="flex items-center">
-                    <Calendar className="h-5 w-5 mr-2 text-gray-500" />
-                    <span>
-                      Último login:{' '}
-                      {new Date(user.lastLogin).toLocaleDateString()}
-                    </span>
-                  </div>
+                  {user.lastLogin && (
+                    <div className="flex items-center">
+                      <Calendar className="h-5 w-5 mr-2 text-gray-500" />
+                      <span>
+                        Último login:{' '}
+                        {new Date(user.lastLogin).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -216,11 +258,15 @@ export default function Perfil() {
                 <div className="flex justify-between">
                   <div>
                     <h3 className="font-semibold">Conexões</h3>
-                    <p className="text-2xl font-bold">{user.connections}</p>
+                    <p className="text-2xl font-bold">
+                      {Object.keys(user.connections || {}).length}
+                    </p>
                   </div>
                   <div>
                     <h3 className="font-semibold">Favoritos</h3>
-                    <p className="text-2xl font-bold">{user.favorites}</p>
+                    <p className="text-2xl font-bold">
+                      {Object.keys(user.favorites || {}).length}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -252,32 +298,36 @@ export default function Perfil() {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="role">Cargo</Label>
-                          <Input
-                            id="role"
-                            name="role"
-                            value={editedUser.role || ''}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                        <div>
                           <Label htmlFor="campus">Campus</Label>
-                          <Input
-                            id="campus"
-                            name="campus"
-                            value={editedUser.campus || ''}
-                            onChange={handleInputChange}
-                          />
+                          <Select
+                            value={editedUser.campus}
+                            onValueChange={(value) =>
+                              setEditedUser({ ...editedUser, campus: value })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione o campus" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {campusOptions.map((campus) => (
+                                <SelectItem key={campus} value={campus}>
+                                  {campus}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
-                        <div>
-                          <Label htmlFor="course">Curso</Label>
-                          <Input
-                            id="course"
-                            name="course"
-                            value={editedUser.course || ''}
-                            onChange={handleInputChange}
-                          />
-                        </div>
+                        {!isUfcBrEmail && (
+                          <div>
+                            <Label htmlFor="course">Curso</Label>
+                            <Input
+                              id="course"
+                              name="course"
+                              value={editedUser.course || ''}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+                        )}
                         <Button onClick={handleSaveProfile}>
                           Salvar Alterações
                         </Button>
