@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-case-declarations */
 import { NextApiRequest, NextApiResponse } from 'next'
-import dbConnect from '@/pages/database/connection/dbConnect'
-import Startup from '@/pages/database/models/Startup'
+import dbConnect from '@/database/connection/dbConnect'
+import Startup from '@/database/models/Startup'
 import multer from 'multer'
 import { Readable } from 'stream'
 import { NextApiRequestWithFiles } from '.'

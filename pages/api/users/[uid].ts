@@ -1,5 +1,5 @@
-import dbConnect from '@/pages/database/connection/dbConnect'
-import User from '@/pages/database/models/Users'
+import dbConnect from '@/database/connection/dbConnect'
+import User from '@/database/models/Users'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(

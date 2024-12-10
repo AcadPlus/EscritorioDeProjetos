@@ -1,6 +1,6 @@
-import dbConnect from '@/pages/database/connection/dbConnect'
+import dbConnect from '@/database/connection/dbConnect'
 import { NextApiRequest, NextApiResponse } from 'next'
-import Processes from '@/pages/database/models/Processes'
+import Processes from '@/database/models/Processes'
 
 export default async function handler(
   req: NextApiRequest,

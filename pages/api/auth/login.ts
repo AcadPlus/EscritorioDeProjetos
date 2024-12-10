@@ -1,5 +1,5 @@
-import dbConnect from '@/pages/database/connection/dbConnect'
-import User from '@/pages/database/models/Users'
+import dbConnect from '@/database/connection/dbConnect'
+import User from '@/database/models/Users'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import { NextApiRequest, NextApiResponse } from 'next'

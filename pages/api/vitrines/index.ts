@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import dbConnect from '@/pages/database/connection/dbConnect'
-import Startup from '@/pages/database/models/Startup'
+import dbConnect from '@/database/connection/dbConnect'
+import Startup from '@/database/models/Startup'
 import multer from 'multer'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { Readable } from 'stream'

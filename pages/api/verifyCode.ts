@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import checkCodeInDatabase from '@/hooks/checkCodeInDatabase'
-import User from '@/pages/database/models/Users'
-import dbConnect from '../database/connection/dbConnect'
+import User from '@/database/models/Users'
+import dbConnect from '../../database/connection/dbConnect'
 
 export default async function handler(
   req: NextApiRequest,

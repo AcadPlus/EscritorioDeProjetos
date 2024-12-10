@@ -1,5 +1,5 @@
-import dbConnect from '../database/connection/dbConnect'
-import Solicitacao from '../database/models/Solicitacao'
+import dbConnect from '../../database/connection/dbConnect'
+import Solicitacao from '../../database/models/Solicitacao'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(

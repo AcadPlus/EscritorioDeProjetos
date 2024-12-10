@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import saveCodeToDatabase from '@/hooks/saveCodeToDatabase'
-import User from '@/pages/database/models/Users'
-import dbConnect from '../database/connection/dbConnect'
+import User from '@/database/models/Users'
+import dbConnect from '../../database/connection/dbConnect'
 import { sendVerificationEmail, generateCode } from '@/utils/email'
 
 export default async function handler(
