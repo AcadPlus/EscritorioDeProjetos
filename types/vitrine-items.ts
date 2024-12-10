@@ -1,55 +1,46 @@
-export type VitrineType = 'startup' | 'competencia' | 'laboratorio'
+import { JwtPayload } from 'jsonwebtoken'
 
-export interface BaseVitrineItem {
+export type VitrineType = 'startup'
+
+export interface VitrineItem {
   _id: string
   id: string
   title: string
   description: string
-  detailedDescription?: string
-  tags: string[]
-  logo: string | { data: string; contentType: string }
+  foundationYear: string
+  sector: string
+  location: string
+  website: string | null
+  logo: string | { data: string; contentType: string } | null
   email: string
   responsibleUser: string
   creatorId: string
-  type: VitrineType
   createdAt: string
   updatedAt: string
+  type: VitrineType
+  tags: string[]
+  problem: string
+  solution: string
+  strategicArea: string
+  potentialImpact: string
 }
 
-export interface Startup extends BaseVitrineItem {
-  type: 'startup'
-  foundationYear: string
-  sector: string
-  stage: string
-  website: string
-}
+export type Startup = VitrineItem
 
-export interface Laboratorio extends BaseVitrineItem {
-  type: 'laboratorio'
-  department: string
-  researchArea: string
-  equipment: string[]
-  location: string
-}
-
-export interface Competencia extends BaseVitrineItem {
-  type: 'competencia'
-  area: string
-  level: string
-  experience: number
-  curriculum: string
-}
-
-export type VitrineItem = Startup | Laboratorio | Competencia
-
-export type SortType = 'recent' | 'oldest' | 'alphabetical'
-
-export interface DecodedToken {
+export interface DecodedToken extends JwtPayload {
   uid: string
-  [key: string]: unknown
 }
 
 export interface UserDisplayName {
   uid: string
   displayName: string
 }
+
+export interface VitrineDataResponse {
+  data: VitrineItem[]
+  isLoading: boolean
+  error: string | null
+  hasMore: boolean
+}
+
+export type SortType = 'recent' | 'oldest' | 'alphabetical'
