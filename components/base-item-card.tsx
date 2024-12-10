@@ -119,10 +119,7 @@ export default function BaseItemCard({
                     className="w-full h-48 object-cover rounded-lg"
                   />
                   <ScrollArea className="h-[200px] w-full rounded-md border p-4">
-                    <p>
-                      {selectedItem.detailedDescription ||
-                        selectedItem.description}
-                    </p>
+                    <p>{selectedItem.description}</p>
                   </ScrollArea>
                   <div className="flex flex-wrap gap-2">
                     {selectedItem.tags.map((tag, tagIndex) => (
