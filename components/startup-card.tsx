@@ -18,10 +18,7 @@ export default function StartupCard({
   onEdit,
   onDelete,
 }: StartupCardProps) {
-  const renderDetails = (startup: VitrineItem): JSX.Element => {
-    if (startup.type !== 'startup') {
-      return <div>Tipo de item inválido</div>
-    }
+  const renderDetails = (startup: Startup): JSX.Element => {
     return (
       <div className="space-y-2">
         <h4 className="font-semibold">Informações da Startup</h4>
@@ -32,21 +29,41 @@ export default function StartupCard({
           <strong>Setor:</strong> {startup.sector}
         </p>
         <p>
-          <strong>Estágio:</strong> {startup.stage}
+          <strong>Localização:</strong> {startup.location}
+        </p>
+        <p>
+          <strong>Problema:</strong> {startup.problem}
+        </p>
+        <p>
+          <strong>Solução:</strong> {startup.solution}
+        </p>
+        <p>
+          <strong>Área Estratégica:</strong> {startup.strategicArea}
+        </p>
+        <p>
+          <strong>Potencial de Impacto:</strong> {startup.potentialImpact}
         </p>
         <div className="flex space-x-2 mt-2">
-          <Button variant="outline" size="sm" asChild>
-            <a href={startup.website} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Website
-            </a>
-          </Button>
-          <Button variant="outline" size="sm" asChild>
-            <a href={`mailto:${startup.email}`}>
-              <Mail className="w-4 h-4 mr-2" />
-              Contato
-            </a>
-          </Button>
+          {startup.website && (
+            <Button variant="outline" size="sm" asChild>
+              <a
+                href={startup.website}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Website
+              </a>
+            </Button>
+          )}
+          {startup.email && (
+            <Button variant="outline" size="sm" asChild>
+              <a href={`mailto:${startup.email}`}>
+                <Mail className="w-4 h-4 mr-2" />
+                Contato
+              </a>
+            </Button>
+          )}
         </div>
       </div>
     )
