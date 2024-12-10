@@ -34,7 +34,7 @@ export default async function handler(
 
       // Generate a JWT token
       const token = jwt.sign(
-        { uid: user.uid, email: user.email },
+        { uid: user.uid, email: user.email, privilege: user.privilege },
         process.env.JWT_SECRET || 'your_jwt_secret',
         { expiresIn: '1h' },
       )
@@ -47,6 +47,7 @@ export default async function handler(
           email: user.email,
           userType: user.role,
           campus: user.campus,
+          privilege: user.privilege,
         },
         token,
       })
