@@ -21,7 +21,7 @@ import Link from 'next/link'
 const options = [
   {
     id: 'student',
-    title: 'Faço parte da UFC',
+    title: 'Sou da UFC',
     description: 'Quero cadastrar meus projetos e competências',
     icon: GraduationCap,
     color: 'bg-[#618506]',
