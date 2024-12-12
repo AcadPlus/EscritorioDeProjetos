@@ -25,7 +25,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 export default function LoginScreen() {
-  const [accountType, setAccountType] = useState('internal')
   const [emailDomain, setEmailDomain] = useState('@ufc.br')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -44,10 +43,9 @@ export default function LoginScreen() {
   }, [isLoggedIn, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    const email =
-      accountType === 'internal' ? `${username}${emailDomain}` : username
     e.preventDefault()
 
+    const email = `${username}${emailDomain}`
     const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: {
@@ -59,8 +57,8 @@ export default function LoginScreen() {
     const data = await response.json()
 
     if (response.ok) {
-      localStorage.setItem('token', data.token) // Armazene o token
-      router.push('/linka/dashboard') // Redireciona o usuário
+      localStorage.setItem('token', data.token)
+      router.push('dashboard')
     } else {
       setError(data.message || 'Erro ao realizar login')
     }
@@ -76,60 +74,44 @@ export default function LoginScreen() {
               <p className="text-sm text-gray-500 ml-2">Voltar ao EP</p>
             </Link>
           </div>
-
           <CardTitle>Login</CardTitle>
-          <CardDescription>Acesse sua conta do Linka</CardDescription>
+          <CardDescription>Conteúdo do Link</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <RadioGroup
               defaultValue="internal"
-              onValueChange={(value) => setAccountType(value)}
+              onValueChange={(value) => console.log(value)}
               className="flex flex-col space-y-1"
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="internal" id="internal" />
                 <Label htmlFor="internal">Conta UFC</Label>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="external" id="external" />
-                <Label htmlFor="external">Conta Externa</Label>
-              </div>
             </RadioGroup>
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              {accountType === 'internal' ? (
-                <div className="flex">
-                  <Input
-                    id="email"
-                    type="text"
-                    placeholder="Nome de usuário"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="rounded-r-none"
-                    required
-                  />
-                  <Select value={emailDomain} onValueChange={setEmailDomain}>
-                    <SelectTrigger className="w-[140px] rounded-l-none">
-                      <SelectValue placeholder="Selecione o domínio" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="@ufc.br">@ufc.br</SelectItem>
-                      <SelectItem value="@alu.ufc.br">@alu.ufc.br</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              ) : (
+              <div className="flex">
                 <Input
                   id="email"
-                  type="email"
-                  placeholder="seu@email.com"
+                  type="text"
+                  placeholder="Nome de usuário"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  className="rounded-r-none"
                   required
                 />
-              )}
+                <Select value={emailDomain} onValueChange={setEmailDomain}>
+                  <SelectTrigger className="w-[140px] rounded-l-none">
+                    <SelectValue placeholder="Selecione o domínio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="@ufc.br">@ufc.br</SelectItem>
+                    <SelectItem value="@alu.ufc.br">@alu.ufc.br</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -163,18 +145,9 @@ export default function LoginScreen() {
           <Button className="w-full bg-black text-white" onClick={handleSubmit}>
             Entrar
           </Button>
-          {/* <Link
-            href="/forgot-password"
-            className="text-sm text-blue-500 hover:underline"
-          >
-            Esqueceu sua senha?
-          </Link> */}
           <div className="text-sm text-gray-500">
             Não tem uma conta?{' '}
-            <Link
-              href="/linka/signup"
-              className="text-blue-500 hover:underline"
-            >
+            <Link href="signup" className="text-blue-500 hover:underline">
               Cadastre-se
             </Link>
           </div>

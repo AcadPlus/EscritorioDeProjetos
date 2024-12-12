@@ -4,6 +4,8 @@ import './globals.css'
 import HeaderWrapper from '@/lib/head_wrapper'
 import FooterWrapper from '@/lib/footer_wrapper'
 import { Toaster } from '@/components/ui/toaster'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -22,6 +24,8 @@ export default function RootLayout({
 }>) {
   return (
     <html className="scroll-smooth" lang="en">
+      <Analytics />
+      <SpeedInsights />
       <link rel="icon" href="/logo.svg" type="image/svg+xml" />
       <body className={`${poppins.className} flex flex-col min-h-screen`}>
         <HeaderWrapper />

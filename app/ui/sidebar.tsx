@@ -56,8 +56,14 @@ export function Sidebar() {
     router.push('/linka/login')
   }
 
-  const renderMenuItems = (items) =>
-    items.map((item) => (
+  interface MenuItem {
+    name: string
+    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
+    href: string
+  }
+
+  const renderMenuItems = (items: MenuItem[]) =>
+    items.map((item: MenuItem) => (
       <Button
         key={item.name}
         variant="ghost"

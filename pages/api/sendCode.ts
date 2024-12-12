@@ -1,29 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import nodemailer from 'nodemailer'
 import saveCodeToDatabase from '@/hooks/saveCodeToDatabase'
-
-function generateCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString()
-}
-
-const sendVerificationEmail = async (email: string, code: string) => {
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: parseInt(process.env.EMAIL_PORT || '465'),
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  })
-
-  await transporter.sendMail({
-    from: `"Verificação de Conta" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: 'Seu Código de Verificação',
-    text: `Seu código de verificação é: ${code}`,
-  })
-}
+import User from '@/database/models/Users'
+import dbConnect from '../../database/connection/dbConnect'
+import { sendVerificationEmail, generateCode } from '@/utils/email'
 
 export default async function handler(
   req: NextApiRequest,
@@ -35,6 +14,12 @@ export default async function handler(
       return res
         .status(400)
         .json({ message: 'O campo de e-mail é obrigatório' })
+    }
+    await dbConnect()
+
+    const existingUser = await User.findOne({ email })
+    if (existingUser && existingUser.verified) {
+      return res.status(409).json({ message: 'Este email já está em uso' })
     }
 
     const code = generateCode()

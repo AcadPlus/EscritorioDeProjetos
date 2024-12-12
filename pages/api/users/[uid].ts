@@ -1,5 +1,5 @@
-import dbConnect from '@/pages/database/connection/dbConnect'
-import User from '@/pages/database/models/Users'
+import dbConnect from '@/database/connection/dbConnect'
+import User from '@/database/models/Users'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(
@@ -19,9 +19,7 @@ export default async function handler(
       return res.status(200).json(user)
     } catch (error) {
       console.error('Error fetching user:', error)
-      return res
-        .status(500)
-        .json({ message: 'Erro ao buscar usuário', error: error.message })
+      return res.status(500).json({ message: 'Erro ao buscar usuário' })
     }
   } else if (req.method === 'PUT') {
     try {
@@ -37,9 +35,7 @@ export default async function handler(
       return res.status(200).json(user)
     } catch (error) {
       console.error('Error updating user:', error)
-      return res
-        .status(500)
-        .json({ message: 'Erro ao atualizar usuário', error: error.message })
+      return res.status(500).json({ message: 'Erro ao atualizar usuário' })
     }
   } else if (req.method === 'DELETE') {
     try {
@@ -50,9 +46,7 @@ export default async function handler(
       return res.status(204).end() // No Content
     } catch (error) {
       console.error('Error deleting user:', error)
-      return res
-        .status(500)
-        .json({ message: 'Erro ao deletar usuário', error: error.message })
+      return res.status(500).json({ message: 'Erro ao deletar usuário' })
     }
   } else {
     res.setHeader('Allow', ['GET', 'PUT', 'DELETE'])

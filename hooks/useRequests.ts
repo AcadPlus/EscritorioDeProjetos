@@ -36,12 +36,18 @@ export function useRequests() {
       })
 
       const requestsData = Array.isArray(response.data.solicitacoes)
-        ? response.data.solicitacoes.reduce((acc, req) => {
-            const otherUserId =
-              req.requester === requesterId ? req.recipient : req.requester
-            acc[otherUserId] = [req.status, req.recipient, req.requester]
-            return acc
-          }, {} as Request)
+        ? response.data.solicitacoes.reduce(
+            (
+              acc: { [x: string]: unknown[] },
+              req: { requester: string; recipient: never; status: never },
+            ) => {
+              const otherUserId =
+                req.requester === requesterId ? req.recipient : req.requester
+              acc[otherUserId] = [req.status, req.recipient, req.requester]
+              return acc
+            },
+            {} as Request,
+          )
         : {}
 
       setRequests(requestsData)
@@ -52,7 +58,10 @@ export function useRequests() {
     }
   }
 
-  const handleRequestAction = async (action: 'send' | 'accept' | 'reject', recipientId: string) => {
+  const handleRequestAction = async (
+    action: 'send' | 'accept' | 'reject',
+    recipientId: string,
+  ) => {
     try {
       const token = localStorage.getItem('token')
       if (!token || !decodedToken) return

@@ -1,7 +1,11 @@
-import dbConnect from '../database/connection/dbConnect'
-import Solicitacao from '../database/models/Solicitacao'
+import dbConnect from '../../database/connection/dbConnect'
+import Solicitacao from '../../database/models/Solicitacao'
+import { NextApiRequest, NextApiResponse } from 'next'
 
-export default async function handler(req, res) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   await dbConnect()
 
   if (req.method === 'GET') {

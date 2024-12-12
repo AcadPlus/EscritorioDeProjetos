@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,9 +20,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
-import { BarChart, Loader2 } from 'lucide-react'
+import { BarChart, Loader2, Mail } from 'lucide-react'
 import Link from 'next/link'
 import axios from 'axios'
 import useCampusOptions from '@/hooks/useCampusOptions'
@@ -33,48 +39,35 @@ export default function SignupComponent() {
   const [emailDomain, setEmailDomain] = useState('@ufc.br')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [userType, setUserType] = useState('ufc')
   const [role, setRole] = useState('')
-  const [institution, setInstitution] = useState('')
-  const [ufcCampus, setUfcCampus] = useState('')
-  const [ufcId, setUfcId] = useState('')
-  const [company, setCompany] = useState('')
-  const [jobTitle, setJobTitle] = useState('')
-  const [email, setEmail] = useState('')
+  const [campus, setCampus] = useState('')
+  const [siape, setSiape] = useState('')
+  const [matricula, setMatricula] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false)
+  const [verificationCode, setVerificationCode] = useState('')
 
   const campusOptions = useCampusOptions()
 
   const router = useRouter()
   const { toast } = useToast()
 
-  useEffect(() => {
-    if (userType === 'ufc') {
-      setEmail(`${emailUsername}${emailDomain}`)
-    } else {
-      setEmail(emailUsername)
-    }
-  }, [userType, emailUsername, emailDomain])
-
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
     if (!name.trim()) newErrors.name = 'Nome é obrigatório'
-    if (!email.trim()) newErrors.email = 'Email é obrigatório'
+    if (!emailUsername.trim()) newErrors.email = 'Email é obrigatório'
     if (password.length < 8)
       newErrors.password = 'A senha deve ter pelo menos 8 caracteres'
     if (password !== confirmPassword)
       newErrors.confirmPassword = 'As senhas não coincidem'
-    if (!role && userType === 'ufc') newErrors.role = 'Função é obrigatória'
-    if (!ufcCampus && userType === 'ufc')
-      newErrors.ufcCampus = 'Campus é obrigatório'
-    if (!ufcId && userType === 'ufc')
-      newErrors.ufcId = 'Matrícula/SIAPE é obrigatório'
-    if (!institution && userType === 'external')
-      newErrors.institution = 'Instituição é obrigatória'
-    if (!jobTitle && userType === 'external')
-      newErrors.jobTitle = 'Cargo/Função é obrigatório'
+    if (!role) newErrors.role = 'Função é obrigatória'
+    if (!campus) newErrors.campus = 'Campus é obrigatório'
+    if (emailDomain === '@ufc.br' && !siape)
+      newErrors.siape = 'SIAPE é obrigatório'
+    if (emailDomain === '@alu.ufc.br' && !matricula)
+      newErrors.matricula = 'Matrícula é obrigatória'
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -82,41 +75,104 @@ export default function SignupComponent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
     if (!validateForm()) return
 
     setIsLoading(true)
+
     try {
-      const userData = {
+      const response = await axios.post('/api/auth/signup', {
         name,
-        email,
+        email: emailUsername,
         password,
-        userType,
-        role: userType === 'ufc' ? role : jobTitle,
-        campus: userType === 'ufc' ? ufcCampus : institution,
-        ufcId: userType === 'ufc' ? ufcId : undefined,
-        company: userType === 'external' ? company : undefined,
-      }
-
-      await axios.post('/api/auth/signup', userData)
-
-      toast({
-        title: 'Cadastro realizado com sucesso!',
-        description: 'Você será redirecionado para a página de login.',
+        emailDomain,
+        role,
+        campus,
+        siape: emailDomain === '@ufc.br' ? siape : undefined,
+        matricula: emailDomain === '@alu.ufc.br' ? matricula : undefined,
       })
 
-      setTimeout(() => {
-        router.push('login')
-      }, 2000)
+      if (response.status === 200) {
+        setShowConfirmationModal(true)
+        await sendVerificationCode(emailUsername + emailDomain)
+      } else {
+        toast({
+          title: 'Erro',
+          description: response.data.message,
+          variant: 'destructive',
+        })
+      }
     } catch (error) {
-      console.error('Signup error:', error)
       toast({
-        title: 'Erro no cadastro',
-        description:
-          'Ocorreu um erro ao tentar cadastrar. Por favor, tente novamente.',
+        title: 'Erro',
+        description: 'Ocorreu um erro ao cadastrar o usuário.',
         variant: 'destructive',
       })
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const sendVerificationCode = async (email: string) => {
+    try {
+      await axios.post('/api/sendCode', { email })
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Ocorreu um erro ao enviar o código de verificação.',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleVerifyCode = async () => {
+    setIsLoading(true)
+
+    try {
+      const response = await axios.post('/api/verifyCode', {
+        email: emailUsername + emailDomain,
+        code: verificationCode,
+      })
+
+      if (response.status === 200) {
+        toast({
+          title: 'Sucesso',
+          description: 'Código verificado com sucesso!',
+          variant: 'default',
+        })
+        router.push('login')
+      } else {
+        toast({
+          title: 'Erro',
+          description: response.data.message,
+          variant: 'destructive',
+        })
+      }
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Ocorreu um erro ao verificar o código.',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleResendCode = async () => {
+    try {
+      await axios.post('/api/sendCode', { email: emailUsername + emailDomain })
+      toast({
+        title: 'Sucesso',
+        description: 'Código de verificação reenviado.',
+        variant: 'default',
+      })
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Ocorreu um erro ao reenviar o código de verificação.',
+        variant: 'destructive',
+      })
     }
   }
 
@@ -150,37 +206,26 @@ export default function SignupComponent() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                {userType === 'ufc' ? (
-                  <div className="flex">
-                    <Input
-                      id="email"
-                      value={emailUsername}
-                      onChange={(e) => setEmailUsername(e.target.value)}
-                      className={`rounded-r-none ${errors.email ? 'border-red-500' : ''}`}
-                      required
-                    />
-                    <Select value={emailDomain} onValueChange={setEmailDomain}>
-                      <SelectTrigger
-                        className={`w-[140px] rounded-l-none ${errors.email ? 'border-red-500' : ''}`}
-                      >
-                        <SelectValue placeholder="Selecione o domínio" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="@ufc.br">@ufc.br</SelectItem>
-                        <SelectItem value="@alu.ufc.br">@alu.ufc.br</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ) : (
+                <div className="flex">
                   <Input
                     id="email"
-                    type="email"
                     value={emailUsername}
                     onChange={(e) => setEmailUsername(e.target.value)}
+                    className={`rounded-r-none ${errors.email ? 'border-red-500' : ''}`}
                     required
-                    className={errors.email ? 'border-red-500' : ''}
                   />
-                )}
+                  <Select value={emailDomain} onValueChange={setEmailDomain}>
+                    <SelectTrigger
+                      className={`w-[140px] rounded-l-none ${errors.email ? 'border-red-500' : ''}`}
+                    >
+                      <SelectValue placeholder="Selecione o domínio" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="@ufc.br">@ufc.br</SelectItem>
+                      <SelectItem value="@alu.ufc.br">@alu.ufc.br</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 {errors.email && (
                   <p className="text-red-500 text-sm">{errors.email}</p>
                 )}
@@ -218,124 +263,86 @@ export default function SignupComponent() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Tipo de Usuário</Label>
-                <RadioGroup
-                  defaultValue="ufc"
-                  onValueChange={setUserType}
-                  className="flex space-x-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="ufc" id="ufc" />
-                    <Label htmlFor="ufc">UFC</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="external" id="external" />
-                    <Label htmlFor="external">Externo</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-              {userType === 'ufc' ? (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="role">Função na UFC</Label>
-                    <Select value={role} onValueChange={setRole}>
-                      <SelectTrigger
-                        className={errors.role ? 'border-red-500' : ''}
-                      >
-                        <SelectValue placeholder="Selecione sua função" />
-                      </SelectTrigger>
-                      <SelectContent>
+                <Label htmlFor="role">Função na UFC</Label>
+                <Select value={role} onValueChange={setRole}>
+                  <SelectTrigger
+                    className={errors.role ? 'border-red-500' : ''}
+                  >
+                    <SelectValue placeholder="Selecione sua função" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {emailDomain === '@ufc.br' ? (
+                      <>
                         <SelectItem value="professor">Professor</SelectItem>
+                        <SelectItem value="pesquisador">Pesquisador</SelectItem>
+                        <SelectItem value="tecnico">
+                          Técnico Administrativo
+                        </SelectItem>
+                      </>
+                    ) : (
+                      <>
                         <SelectItem value="estudante_graduacao">
                           Estudante de Graduação
                         </SelectItem>
                         <SelectItem value="estudante_pos">
                           Estudante de Pós-Graduação
                         </SelectItem>
-                        <SelectItem value="pesquisador">Pesquisador</SelectItem>
-                        <SelectItem value="tecnico">
-                          Técnico Administrativo
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {errors.role && (
-                      <p className="text-red-500 text-sm">{errors.role}</p>
+                      </>
                     )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="ufcCampus">Campus UFC</Label>
-                    <Select value={ufcCampus} onValueChange={setUfcCampus}>
-                      <SelectTrigger
-                        className={errors.ufcCampus ? 'border-red-500' : ''}
-                      >
-                        <SelectValue placeholder="Selecione seu campus" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {campusOptions.map((campus, index) => (
-                          <SelectItem key={index} value={campus}>
-                            {campus}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.ufcCampus && (
-                      <p className="text-red-500 text-sm">{errors.ufcCampus}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="ufcId">Matrícula/SIAPE</Label>
-                    <Input
-                      id="ufcId"
-                      value={ufcId}
-                      onChange={(e) => setUfcId(e.target.value)}
-                      required
-                      className={errors.ufcId ? 'border-red-500' : ''}
-                    />
-                    {errors.ufcId && (
-                      <p className="text-red-500 text-sm">{errors.ufcId}</p>
-                    )}
-                  </div>
-                </>
+                  </SelectContent>
+                </Select>
+                {errors.role && (
+                  <p className="text-red-500 text-sm">{errors.role}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="campus">Campus UFC</Label>
+                <Select value={campus} onValueChange={setCampus}>
+                  <SelectTrigger
+                    className={errors.campus ? 'border-red-500' : ''}
+                  >
+                    <SelectValue placeholder="Selecione seu campus" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {campusOptions.map((campus, index) => (
+                      <SelectItem key={index} value={campus}>
+                        {campus}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.campus && (
+                  <p className="text-red-500 text-sm">{errors.campus}</p>
+                )}
+              </div>
+              {emailDomain === '@ufc.br' ? (
+                <div className="space-y-2">
+                  <Label htmlFor="siape">SIAPE</Label>
+                  <Input
+                    id="siape"
+                    value={siape}
+                    onChange={(e) => setSiape(e.target.value)}
+                    required
+                    className={errors.siape ? 'border-red-500' : ''}
+                  />
+                  {errors.siape && (
+                    <p className="text-red-500 text-sm">{errors.siape}</p>
+                  )}
+                </div>
               ) : (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="institution">Instituição</Label>
-                    <Input
-                      id="institution"
-                      value={institution}
-                      onChange={(e) => setInstitution(e.target.value)}
-                      required
-                      className={errors.institution ? 'border-red-500' : ''}
-                    />
-                    {errors.institution && (
-                      <p className="text-red-500 text-sm">
-                        {errors.institution}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="company">Empresa (se aplicável)</Label>
-                    <Input
-                      id="company"
-                      value={company}
-                      onChange={(e) => setCompany(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="jobTitle">Cargo/Função</Label>
-                    <Input
-                      id="jobTitle"
-                      value={jobTitle}
-                      onChange={(e) => setJobTitle(e.target.value)}
-                      required
-                      className={errors.jobTitle ? 'border-red-500' : ''}
-                    />
-                    {errors.jobTitle && (
-                      <p className="text-red-500 text-sm">{errors.jobTitle}</p>
-                    )}
-                  </div>
-                </>
+                <div className="space-y-2">
+                  <Label htmlFor="matricula">Matrícula</Label>
+                  <Input
+                    id="matricula"
+                    value={matricula}
+                    onChange={(e) => setMatricula(e.target.value)}
+                    required
+                    className={errors.matricula ? 'border-red-500' : ''}
+                  />
+                  {errors.matricula && (
+                    <p className="text-red-500 text-sm">{errors.matricula}</p>
+                  )}
+                </div>
               )}
             </div>
             <Button
@@ -363,6 +370,44 @@ export default function SignupComponent() {
           </div>
         </CardFooter>
       </Card>
+
+      <Dialog
+        open={showConfirmationModal}
+        onOpenChange={setShowConfirmationModal}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Confirmação de Email</DialogTitle>
+            <DialogDescription>
+              Enviamos um email para {emailUsername + emailDomain} para
+              confirmar a validade do seu endereço de email. Por favor, insira o
+              código de verificação abaixo.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="flex justify-center">
+              <Mail className="h-12 w-12 text-green-500" />
+            </div>
+            <div className="grid grid-cols-4 gap-4">
+              <Input
+                className="col-span-4"
+                id="verificationCode"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                placeholder="Código de verificação"
+              />
+            </div>
+          </div>
+          <div className="flex flex-col gap-4">
+            <Button onClick={handleVerifyCode} disabled={isLoading}>
+              {isLoading ? 'Verificando...' : 'Verificar'}
+            </Button>
+            <Button variant="outline" onClick={handleResendCode}>
+              Reenviar código
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

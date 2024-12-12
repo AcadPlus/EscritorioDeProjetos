@@ -1,11 +1,16 @@
-import dbConnect from '@/pages/database/connection/dbConnect'
-import Vitrines from '@/pages/database/models/Vitrines'
-import Startup from '@/pages/database/models/Startup'
-import Competencia from '@/pages/database/models/Competencia'
-import Laboratorio from '@/pages/database/models/Laboratorio'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import dbConnect from '@/database/connection/dbConnect'
+import Startup from '@/database/models/Startup'
 import multer from 'multer'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { Readable } from 'stream'
+
+// Extend NextApiRequest to be compatible with Multer
+export interface NextApiRequestWithFiles extends NextApiRequest {
+  files: {
+    [fieldname: string]: Express.Multer.File[]
+  }
+}
 
 const upload = multer()
 
@@ -25,8 +30,8 @@ export const config = {
   },
 }
 
-async function getRawBody(req) {
-  const chunks = []
+async function getRawBody(req: NextApiRequest): Promise<string> {
+  const chunks: Buffer[] = []
   for await (const chunk of req) {
     chunks.push(chunk)
   }
@@ -43,25 +48,31 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        let vitrines = await Vitrines.find({})
+        const { status } = req.query
+        let startups
+        if (status === 'pending') {
+          startups = await Startup.find({ status: 'pending' })
+        } else {
+          startups = await Startup.find({ status: 'approved' })
+        }
         // Convert binary data to base64 for JSON compatibility
-        vitrines = vitrines.map((item) => ({
-          ...item._doc,
+        const startupsWithBase64Logos = startups.map((startup) => ({
+          ...startup.toObject(),
           logo: {
-            data: item.logo?.data?.toString('base64'),
-            contentType: item.logo?.contentType,
+            data: startup.logo?.data?.toString('base64'),
+            contentType: startup.logo?.contentType,
           },
         }))
-        return res.status(200).json({ vitrines })
+        return res.status(200).json({ startups: startupsWithBase64Logos })
       } catch (error) {
-        console.error('Error fetching vitrines:', error)
-        return res.status(500).json({ error: 'Error fetching vitrines' })
+        console.error('Error fetching startups:', error)
+        return res.status(500).json({ error: 'Error fetching startups' })
       }
 
     case 'POST':
-      upload.fields([{ name: 'logo' }, { name: 'image' }])(
-        req,
-        res,
+      upload.fields([{ name: 'logo' }])(
+        req as unknown as never,
+        res as unknown as never,
         async (err) => {
           if (err) {
             console.error('File upload error:', err)
@@ -69,20 +80,29 @@ export default async function handler(
           }
 
           try {
-            const { files, body } = req as any
-            const newItem = new Vitrines({
-              ...body,
-              tags: JSON.parse(body.tags || '[]'),
-              involvedCourses: JSON.parse(body.involvedCourses || '[]'),
-              status: 'pending', // Add status field
+            const { files, body } = req as NextApiRequestWithFiles
+            const newItem = new Startup({
+              title: body.title,
+              description: body.description,
+              foundationYear: body.foundationYear,
+              sector: body.sector,
+              location: body.location,
+              website: body.website || null,
+              logo:
+                files.logo && files.logo[0]
+                  ? {
+                      data: files.logo[0].buffer,
+                      contentType: files.logo[0].mimetype,
+                    }
+                  : null,
+              email: body.email,
+              responsibleUser: body.responsibleUser,
+              problem: body.problem,
+              solution: body.solution,
+              strategicArea: body.strategicArea,
+              potentialImpact: body.potentialImpact,
+              status: 'pending', // Set initial status to pending
             })
-
-            if (files.logo && files.logo[0]) {
-              newItem.logo = {
-                data: files.logo[0].buffer,
-                contentType: files.logo[0].mimetype,
-              }
-            }
 
             await newItem.save()
             return res
@@ -96,39 +116,27 @@ export default async function handler(
       )
       break
 
-    case 'PUT':
+    case 'PUT': {
       if (!req.body) {
         req.body = JSON.parse(await getRawBody(req))
       }
-      console.log(req.body)
       const { id, action, responsibleUser, ...updateData } = req.body
       try {
-        const item = await Vitrines.findById(id)
+        const item = await Startup.findById(id)
         if (!item) return res.status(404).json({ error: 'Item not found' })
 
         if (action === 'approve' || action === 'reject') {
           // Handle approval/rejection
           if (action === 'approve') {
             item.status = 'approved'
-            let newItem
-            switch (item.type) {
-              case 'startup':
-                newItem = new Startup(item.toObject())
-                break
-              case 'competencia':
-                newItem = new Competencia(item.toObject())
-                break
-              case 'laboratorio':
-                newItem = new Laboratorio(item.toObject())
-                break
-            }
-            await newItem.save()
-            await Vitrines.findByIdAndDelete(id)
+            await item.save()
           } else {
             item.status = 'rejected'
             await item.save()
           }
-          return res.status(200).json({ message: `Item ${action}d successfully` })
+          return res
+            .status(200)
+            .json({ message: `Item ${action}d successfully` })
         } else {
           // Handle regular update
           if (item.responsibleUser !== responsibleUser) {
@@ -137,7 +145,7 @@ export default async function handler(
               .json({ error: 'Permission denied to edit this item' })
           }
 
-          const updatedItem = await Vitrines.findByIdAndUpdate(id, updateData, {
+          const updatedItem = await Startup.findByIdAndUpdate(id, updateData, {
             new: true,
           })
           return res
@@ -148,13 +156,13 @@ export default async function handler(
         console.error('Error updating item:', error)
         return res.status(500).json({ error: 'Error updating item' })
       }
-      break
+    }
 
-    case 'DELETE':
+    case 'DELETE': {
       const { id: deleteId, creatorId: deleteCreatorId } = req.query
 
       try {
-        const item = await Vitrines.findById(deleteId)
+        const item = await Startup.findById(deleteId)
         if (!item) return res.status(404).json({ error: 'Item not found' })
 
         if (item.responsibleUser !== deleteCreatorId) {
@@ -163,15 +171,15 @@ export default async function handler(
             .json({ error: 'Permission denied to delete this item' })
         }
 
-        await Vitrines.findByIdAndDelete(deleteId)
+        await Startup.findByIdAndDelete(deleteId)
         return res.status(204).json({ message: 'Item successfully deleted' })
       } catch (error) {
         console.error('Error deleting item:', error)
         return res.status(500).json({ error: 'Error deleting item' })
       }
-      break
+    }
 
     default:
       res.status(405).json({ error: 'Method not allowed' })
   }
-} 
+}

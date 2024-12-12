@@ -1,7 +1,9 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useEffect, useState } from 'react'
+import { IUser } from '@/types/network'
 
-const allUsers = () => {
-  const [users, setUsers] = useState<string[]>([])
+export default function allUsers(): IUser[] {
+  const [users, setUsers] = useState<IUser[]>([])
 
   const fetchAllUsers = async () => {
     try {
@@ -19,5 +21,3 @@ const allUsers = () => {
 
   return users
 }
-
-export default allUsers

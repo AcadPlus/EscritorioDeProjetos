@@ -21,7 +21,7 @@ import Link from 'next/link'
 const options = [
   {
     id: 'student',
-    title: 'Faço parte da UFC',
+    title: 'Sou da UFC',
     description: 'Quero cadastrar meus projetos e competências',
     icon: GraduationCap,
     color: 'bg-[#618506]',
@@ -106,9 +106,9 @@ export function InteractivePartnershipSection() {
                       ))}
                     </ul>
                     <Link href="linka/login">
-                    <Button className="w-full mt-4 bg-[#618506] hover:bg-[#82AF01] text-white">
-                      Saiba mais
-                    </Button>
+                      <Button className="w-full mt-4 bg-[#618506] hover:bg-[#82AF01] text-white">
+                        Saiba mais
+                      </Button>
                     </Link>
                   </CardContent>
                 </motion.div>

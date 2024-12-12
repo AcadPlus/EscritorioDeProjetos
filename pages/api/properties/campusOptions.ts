@@ -1,5 +1,5 @@
-import dbConnect from '@/pages/database/connection/dbConnect'
-import Properties from '@/pages/database/models/Properties'
+import dbConnect from '@/database/connection/dbConnect'
+import Properties from '@/database/models/Properties'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(

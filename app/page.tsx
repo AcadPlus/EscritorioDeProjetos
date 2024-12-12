@@ -25,7 +25,7 @@ export default function page() {
 
         <section className="bg-primary w-100 h-[600px] md:w-[1112px] md:h-auto flex flex-col gap-3 md:justify-center">
           <div className="flex flex-col p-5 space-y-3 sm:space-y-4 xl:pl-28 animate-slideIn">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#4E690B] leading-tight ">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#4E690B] leading-tight ">
               Conecte-se com
               <br />
               Empresas e Parceiros da Comunidade UFC
@@ -122,7 +122,10 @@ export default function page() {
         </section>
       </div>
 
-      <section className="w-full flex items-center flex-col my-2 px-3">
+      <section
+        className="w-full flex items-center flex-col my-2 px-3"
+        id="sobre-escritorio"
+      >
         <Badge
           content="Entenda do que se trata o escritório!"
           title="O Escritório"
@@ -131,7 +134,10 @@ export default function page() {
         />
         <Escritorio />
       </section>
-      <section className="w-full mt-2 p-1 flex flex-col justify-center items-center">
+      <section
+        className="w-full mt-2 p-1 flex flex-col justify-center items-center"
+        id="vitrines"
+      >
         <Badge
           color="tertiary"
           title="Nossas Vitrines"
@@ -156,7 +162,7 @@ export default function page() {
         <InteractivePartnershipSection />
       </section>
 
-      <section className="p-3 flex flex-col gap-3">
+      <section id="comite" className="p-3 flex flex-col gap-3">
         <Badge
           color="tertiary"
           title="Processos Internos"
@@ -165,7 +171,7 @@ export default function page() {
           posTexto="Comitê de Uniformização"
           classTexto="text-[#1A2C32]"
           textoFinal="Descubra as etapas envolvidas por trás do processo de uniformização
-de setores implantando na Universidade Federal do Ceará"
+            de setores implantando na Universidade Federal do Ceará"
         />
         <div className="flex items-center flex-col mb-10">
           <UniformizationProcess />

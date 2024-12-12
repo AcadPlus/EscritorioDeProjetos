@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -23,22 +21,37 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import ImageDisplay from '@/app/ui/imageDisplay'
+import { VitrineItem } from '@/types/vitrine-items'
 
-export default function ItemCard({
+interface BaseItemCardProps {
+  item: VitrineItem
+  currentUser: string
+  userDisplayNames: Record<string, string>
+  onEdit: (id: string) => void
+  onDelete: (id: string) => void
+  renderDetails: (item: VitrineItem) => JSX.Element
+}
+
+export default function BaseItemCard({
   item,
   currentUser,
   userDisplayNames,
   onEdit,
   onDelete,
-}) {
-  const [selectedItem, setSelectedItem] = useState(null)
+  renderDetails,
+}: BaseItemCardProps) {
+  const [selectedItem, setSelectedItem] = useState<VitrineItem | null>(null)
 
   const handleEdit = () => {
-    onEdit(selectedItem._id)
+    if (selectedItem) {
+      onEdit(selectedItem._id)
+    }
   }
 
   const handleDelete = () => {
-    onDelete(selectedItem._id)
+    if (selectedItem) {
+      onDelete(selectedItem._id)
+    }
   }
 
   return (
@@ -65,7 +78,10 @@ export default function ItemCard({
       <CardFooter className="flex justify-between items-center mt-auto">
         <div className="flex items-center space-x-2">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={item.image} alt={item.responsibleUser} />
+            <AvatarImage
+              src={typeof item.logo === 'string' ? item.logo : ''}
+              alt={item.responsibleUser}
+            />
             <AvatarFallback>
               {userDisplayNames[item.responsibleUser]
                 ? userDisplayNames[item.responsibleUser]
@@ -95,15 +111,15 @@ export default function ItemCard({
               <>
                 <DialogHeader>
                   <DialogTitle>{selectedItem.title}</DialogTitle>
-                  <DialogDescription>{selectedItem.category}</DialogDescription>
+                  <DialogDescription>{selectedItem.type}</DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <ImageDisplay
-                    image={selectedItem.logo}
-                    className="w-full h-48 object-cover rounded-lg"
+                    image={item.logo ?? undefined} // Converte null para undefined
+                    className="w-full h-48 object-cover rounded-lg mb-4"
                   />
                   <ScrollArea className="h-[200px] w-full rounded-md border p-4">
-                    <p>{selectedItem.detailedDescription}</p>
+                    <p>{selectedItem.description}</p>
                   </ScrollArea>
                   <div className="flex flex-wrap gap-2">
                     {selectedItem.tags.map((tag, tagIndex) => (
@@ -113,12 +129,8 @@ export default function ItemCard({
                     ))}
                   </div>
                   <Separator />
-                  <div className="space-y-2">
-                    <h4 className="font-semibold">Informações de Contato</h4>
-                    {/* Add contact information here */}
-                    <p>{item.email}</p>
-                  </div>
-                  {selectedItem.responsibleUser === currentUser && (
+                  {renderDetails(selectedItem)}
+                  {selectedItem.creatorId === currentUser && (
                     <div className="flex justify-between mt-4">
                       <Button variant="outline" onClick={handleEdit}>
                         Editar

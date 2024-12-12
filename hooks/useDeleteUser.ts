@@ -21,7 +21,11 @@ const useDeleteUser = () => {
 
       return true // User deleted successfully
     } catch (err) {
-      setError(err.message)
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Erro desconhecido') // Handle non-Error objects
+      }
       return false // Deletion failed
     } finally {
       setLoading(false)

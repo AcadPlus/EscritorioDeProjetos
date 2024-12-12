@@ -1,10 +1,11 @@
 import { useState } from 'react'
+import { IUserProfile } from '@/types/user'
 
 const useUpdateUser = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const updateUser = async (uid: string, userData: Partial<IUser>) => {
+  const updateUser = async (uid: string, userData: Partial<IUserProfile>) => {
     setLoading(true)
     setError(null)
     try {
@@ -24,8 +25,12 @@ const useUpdateUser = () => {
       const updatedUser = await response.json()
       return updatedUser // Retorna os dados do usuário atualizado
     } catch (err) {
-      setError(err.message)
-      return null // Atualização falhou
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('Erro desconhecido') // Handle non-Error objects
+      }
+      return false // Deletion failed
     } finally {
       setLoading(false)
     }
