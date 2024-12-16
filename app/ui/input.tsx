@@ -1,9 +1,11 @@
 import React from 'react'
+import { Book } from 'lucide-react'
 
 import {
   ButtonProps,
   InputButtonProps,
   TextAreaProps,
+  RadioButtomProps,
 } from '../lib/definitions'
 import Link from 'next/link'
 import { twMerge } from 'tailwind-merge'
@@ -24,7 +26,7 @@ export function Input({ name, className, ...rest }: InputButtonProps) {
 
 export function TextArea({ name, ...rest }: TextAreaProps) {
   return (
-    <div className="flex flex-col space-y-2 w-full">
+    <div className="flex flex-col space-y-2 w-full ">
       <label className="text-sm" htmlFor="">
         {name}
       </label>
@@ -44,5 +46,17 @@ export function Button({ name }: ButtonProps) {
     >
       {name}
     </Link>
+  )
+}
+
+export function RadioButton({ tittle, content }: RadioButtomProps) {
+  return (
+    <div className="rounded-md border-2 border-primary text-secondary flex items-center space-x-2 p-3 max-w-96 transition duration-500 ease-in-out hover:scale-110 hover:bg-primary hover:text-black">
+      <Book className="rounded-full bg-secondary p-1" size={30} color="white" />
+      <div>
+        <p className="text-sm font-medium">{tittle}</p>
+        <p className="text-xs">{content}</p>
+      </div>
+    </div>
   )
 }

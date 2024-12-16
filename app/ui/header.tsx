@@ -1,137 +1,138 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Menu, X } from 'lucide-react'
-import { usePathname } from 'next/navigation'
-
-const links = [
-  { name: 'Home', href: '/' },
-  { name: 'Sobre', href: '/' },
-  { name: 'Vitrines', href: '/' },
-  { name: 'Link@', href: '/' },
-  { name: 'Fluxos', href: '/' },
-]
+import Link from 'next/link'
+import { Menu, X, ChevronDown } from 'lucide-react'
+import { links } from '../lib/arrays'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
-
-  const pathname = usePathname()
-
-  console.log(pathname)
-
-  const myRef = useRef<HTMLElement>(null)
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY
-      if (
-        (scrollPosition > 400 && window.innerWidth > 768) ||
-        pathname !== '/'
-      ) {
-        myRef.current?.classList.remove('lg:w-auto')
-        console.log(myRef)
-        myRef.current?.children[0].classList.remove('lg:w-[48vw]')
-        myRef.current?.children[0].classList.add('w-full')
-        myRef.current?.children[1].classList.add('hidden')
-        const a = document.getElementById('hidden')
-        a?.classList.remove('md:hidden')
-        myRef.current?.classList.add('shadow-md')
-      }
-
-      if (pathname === '/') {
-        if (scrollPosition === 0 && window.innerWidth > 768) {
-          myRef.current?.classList.add('lg:w-auto')
-          myRef.current?.children[0].classList.add('lg:w-[48vw]')
-          myRef.current?.children[1].classList.remove('hidden')
-          const a = document.getElementById('hidden')
-          a?.classList.add('md:hidden')
-          myRef.current?.classList.remove('shadow-md')
-        }
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll)
-
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [pathname])
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('overflow-hidden')
-    } else {
-      document.body.classList.remove('overflow-hidden')
+    document.body.style.overflow = isOpen ? 'hidden' : 'unset'
+    return () => {
+      document.body.style.overflow = 'unset'
     }
   }, [isOpen])
 
+  const handleLinkClick = () => {
+    setIsOpen(false)
+  }
+
+  const handleSubItemClick = () => {
+    setExpandedIndex(null)
+    setIsOpen(false)
+  }
+
   return (
-    <header
-      ref={myRef}
-      className="bg-primary flex flex-row fixed top-0 w-full lg:w-auto transition duration-500 items-center"
-    >
-      <nav className="flex items-center justify-between p-4 lg:w-[48vw] md:w-full px-7 w-full xl:pl-28">
-        <div className="flex items-center space-x-4">
+    <header className="bg-primary fixed top-0 w-full z-50 shadow-md">
+      <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <Link href="/" className="flex items-center space-x-4">
           <Image
-            src="/logo.svg"
+            src="/projetos_pp.svg"
+            priority
             alt="Logo"
-            className="h-12 w-12"
-            width={48}
-            height={48}
+            width={140}
+            height={65}
           />
-          <div>
-            <h1 className="text-sm max-w-20 text-left hidden">
-              Escritório de projetos da UFC
-            </h1>
-          </div>
-        </div>
-        <div className="md:hidden">
-          <button
-            type="button"
-            className="rounded-md bg-primary p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 
-            focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            <span className="sr-only">Open main menu</span>
-            {isOpen ? (
-              <X className="block h-6 w-6" aria-hidden="true" />
-            ) : (
-              <Menu className="block h-6 w-6" aria-hidden="true" />
-            )}
-          </button>
-        </div>
-        <div
-          data-isopen={isOpen}
-          className="data-[isopen=true]:block hidden absolute top-16 left-0 z-10 w-full bg-primary px-4 py-2 md:static
-          md:block md:w-auto md:px-0 md:py-0"
+        </Link>
+        <button
+          type="button"
+          className="md:hidden p-2 text-[#213102] focus:outline-none"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label="Toggle menu"
         >
-          <ul className="space-y-2 md:flex md:space-x-4 md:space-y-0 text-center">
-            {links.map((item) => (
-              <li
-                key={item.name}
-                className="hover:underline hover:ease-in duration-300 transition-all"
-              >
-                <a href="#" className="text-sm font-medium">
-                  {item.name}
-                </a>
-              </li>
-            ))}
-            <li
-              id="hidden"
-              className="hover:underline hover:ease-in duration-300 transition-all md:hidden"
+          {isOpen ? (
+            <X className="h-6 w-6" aria-hidden="true" />
+          ) : (
+            <Menu className="h-6 w-6" aria-hidden="true" />
+          )}
+        </button>
+
+        <AnimatePresence>
+          {(isOpen || !isMobile()) && (
+            <motion.ul
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className={`${
+                isOpen
+                  ? 'absolute top-full left-0 right-0 bg-primary shadow-lg'
+                  : 'hidden md:flex md:space-x-8'
+              } flex flex-col md:flex-row items-center py-4 md:py-0`}
             >
-              <a href="/contact" className="text-sm font-medium">
-                Contato
-              </a>
-            </li>
-          </ul>
-        </div>
+              {links.map((item, index) => (
+                <li
+                  key={item.name}
+                  className="relative group"
+                  onClick={() => {
+                    if (isMobile()) {
+                      setExpandedIndex(expandedIndex === index ? null : index)
+                    } else {
+                      handleLinkClick()
+                    }
+                  }}
+                  onPointerEnter={() => {
+                    if (!isMobile() && item.expand) {
+                      setExpandedIndex(index)
+                    }
+                  }}
+                  onPointerLeave={() => {
+                    if (!isMobile() && item.expand) {
+                      setExpandedIndex(null)
+                    }
+                  }}
+                >
+                  <Link
+                    href={item.expand ? '#' : item.href}
+                    className={`text-lg font-regular transition-colors duration-300 flex items-center ${
+                      item.special
+                        ? 'bg-[#213102] pt-2 pb-2 pl-4 pr-4 rounded text-white'
+                        : 'text-[#213102] hover:text-[#82AF01]'
+                    }`}
+                  >
+                    {item.name}
+                    {item.expand && (
+                      <ChevronDown className="ml-1 h-4 w-4 text-[#82AF01] transition-transform duration-300 group-hover:rotate-180" />
+                    )}
+                  </Link>
+                  <AnimatePresence>
+                    {expandedIndex === index && item.expand && (
+                      <motion.ul
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute left-0 w-full mt-2 bg-white rounded-md shadow-lg py-2 z-10"
+                      >
+                        {item.expand.map((subItem, subIndex) => (
+                          <li key={subIndex}>
+                            <Link
+                              href={subItem.href}
+                              onClick={handleSubItemClick}
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#82AF01] transition-colors duration-200"
+                            >
+                              {subItem.name}
+                            </Link>
+                          </li>
+                        ))}
+                      </motion.ul>
+                    )}
+                  </AnimatePresence>
+                </li>
+              ))}
+            </motion.ul>
+          )}
+        </AnimatePresence>
       </nav>
-      <div className="w-[50vw] absolute left-[1200px] right-0">
-        <a href="/contact" className=" bg-primary p-2 text-sm font-medium">
-          Contato
-        </a>
-      </div>
     </header>
   )
+}
+
+function isMobile() {
+  return typeof window !== 'undefined' && window.innerWidth < 768
 }

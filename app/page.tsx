@@ -1,239 +1,180 @@
+'use client'
 import React from 'react'
 import Image from 'next/image'
 import Badge from './ui/badge-group'
-import CardShowcase from './ui/card-showcase'
-import CardStage from './ui/card-stage'
+import Link from 'next/link'
 
-import { CardProps } from './lib/definitions'
-import Header from './ui/header'
-
-const showcases: CardProps[] = [
-  {
-    id: 1,
-    title: 'Vitrine de Startups',
-    description:
-      'Descubra startups inovadoras, parceiras da UFC, que estão moldando o futuro com soluções disruptivas e transformando ideias em realidade.',
-    items: [
-      'Acesso a ideias inovadoras e tecnologias emergentes',
-      'Oportunidades de networking com empreendedores visionários',
-      'Parcerias estratégicas para desenvolvimento e crescimento',
-    ],
-  },
-  {
-    id: 2,
-    title: 'Vitrine de Competências',
-    description:
-      'Explore uma ampla gama de habilidades e talentos, desenvolvidos em parceria com a UFC, destacando competências essenciais para impulsionar carreiras e negócios.',
-    items: [
-      'Encontre professores com vasta experiência em TCC, teses e doutorados',
-      'Conecte-se com pesquisadores que lideram projetos inovadores',
-      'Aproveite o conhecimento de acadêmicos renomados da UFC',
-    ],
-  },
-  {
-    id: 3,
-    title: 'Vitrine de Laboratórios',
-    description:
-      'Conheça laboratórios de ponta, parceiros da UFC, onde ciência e tecnologia se encontram para criar avanços revolucionários e promover a inovação.',
-    items: [
-      'Acesso a equipamentos e tecnologias de última geração',
-      'Ambiente colaborativo para pesquisa e desenvolvimento',
-      'Suporte técnico especializado de profissionais da UFC',
-    ],
-  },
-]
+import { Escritorio } from '@/components/escritorio'
+import { Vitrines } from '@/components/vitrines'
+import { InteractivePartnershipSection } from '@/components/interactive-partnership-section'
+import { UniformizationProcess } from '@/components/uniformization-process'
 
 export default function page() {
   return (
     <main className="">
-      <div className="w-full md:flex">
+      <div className="w-full md:h-[80vh] mt-20 md:flex">
         <Image
-          src="/image-home.svg"
+          src="/cei_3.jpg"
           alt="Imagem de pessoas conversando"
-          width={40}
-          height={40}
+          width={0}
+          height={0}
+          sizes="100vw"
           priority
-          className="w-full md:w-2/4 md:order-1 sm:h-2/4 md:h-auto"
+          className="w-full md:w-[45%] md:order-1 sm:h-2/4 md:h-auto transform transition duration-700 ease-in-out scale-100 hover:scale-105 opacity-0 animate-fadeIn"
         />
-        <section className="bg-primary w-full flex flex-col gap-3 md:w-2/4 md:justify-center">
-          <Header />
-          <div className="flex flex-col p-5 space-y-2 sm:space-y-4 xl:pl-28">
-            <p className="text-secondary md:text-xl">Bem vindo!</p>
-            <h1 className="text-secondary max-w-64 text-left font-bold text-xl w-full sm:text-2xl md:max-w-lg lg:text-2xl text xl:text-4xl">
-              Conecte-se com Empresas e Parceiros da Comunidade UFC
+
+        <section className="bg-primary w-100 h-[600px] md:w-[1112px] md:h-auto flex flex-col gap-3 md:justify-center">
+          <div className="flex flex-col p-5 space-y-3 sm:space-y-4 xl:pl-28 animate-slideIn">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#4E690B] leading-tight ">
+              Conecte-se com
+              <br />
+              Empresas e Parceiros da Comunidade UFC
             </h1>
-            <p className="md:max-w-96 text-secondary text-xs sm:text-sm md:text-base">
-              Promovemos a conexão entre você, iniciativas da UFC e empresas
-              parceiras externas!
+            <p className="text-lg md:text-lg lg:text-xl max-w-[690px] bold text-[#618506] opacity-0 animate-fadeIn delay-200">
+              Promovemos a conexão entre você, iniciativas da UFC e parceiros
+              externos!
             </p>
-            <div className="flex flex-row items-center text-secondary">
-              <form className="flex flex-row gap-2 items-center w-full">
-                <p className="text-xs">Busco por..</p>
-                <select
-                  defaultValue=""
-                  className="w-full max-w-60 bg-white px-1 rounded-full text-xs py-1 border-gray-200 border-2"
+            <div className="flex flex-col items-center text-secondary opacity-0 animate-fadeIn delay-400">
+              <form className="flex flex-col gap-2 items-start w-full">
+                <p className="font-regular text-base text-[#41580F]">
+                  Está procurando uma Startup, Profissional ou Laboratório?
+                </p>
+                <div className="flex flex-col md:flex-row gap-2 w-full md:items-center sm:items-left">
+                  {/* <Select>
+                    <SelectTrigger className="bg-white w-full md:w-1/3 text-black">
+                      <SelectValue placeholder="Software" />
+                    </SelectTrigger>
+                    <SelectContent className="select-content bg-white">
+                      <SelectItem
+                        className="hover:text-[#41580F]"
+                        value="software"
+                      >
+                        Solução em Software
+                      </SelectItem>
+                      <SelectItem
+                        className="hover:text-[#41580F]"
+                        value="hardware"
+                      >
+                        Solução em Hardware
+                      </SelectItem>
+                      <SelectItem
+                        className="text-[#0e100b]"
+                        value="extension_projeto"
+                      >
+                        Projeto de Extensão
+                      </SelectItem>
+                      <SelectItem
+                        className="hover:text-[#41580F]"
+                        value="entrepreneur_project"
+                      >
+                        Projeto Empreendedor
+                      </SelectItem>
+                      <SelectItem
+                        className="hover:text-[#41580F]"
+                        value="docente"
+                      >
+                        Pesquisador(a)
+                      </SelectItem>
+                      <SelectItem
+                        className="hover:text-[#41580F]"
+                        value="research_group"
+                      >
+                        Grupo de Pesquisa
+                      </SelectItem>
+                    </SelectContent>
+                  </Select> */}
+                  {/* <p className="font-regular text-sm text-[#41580F]">em...</p> */}
+                  {/* <Select>
+                    <SelectTrigger className="bg-white w-full md:w-1/3 text-black">
+                      <SelectValue placeholder="Startups" />
+                    </SelectTrigger>
+                    <SelectContent className="select-content bg-white">
+                      <SelectItem
+                        className="hover:text-[#41580F]"
+                        value="startups"
+                      >
+                        Startups
+                      </SelectItem>
+                      <SelectItem
+                        className="hover:text-[#41580F]"
+                        value="laboratorios"
+                      >
+                        Laboratórios
+                      </SelectItem>
+                      <SelectItem
+                        className="hover:text-[#41580F]"
+                        value="competencias"
+                      >
+                        Competências (pesquisa, tcc e etc.)
+                      </SelectItem>
+                    </SelectContent>
+                  </Select> */}
+                </div>
+                <Link
+                  href={'linka'}
+                  className="flex items-center text-sm w-36 h-8 md:h-9 bg-[#41580F] text-white rounded px-3 py-1 mt-2 transform transition duration-200 ease-in-out hover:scale-105"
                 >
-                  <option className="text-xs" value="">
-                    Ex: IA, Software, Saúde
-                  </option>
-                  <option value="US">United States</option>
-                </select>
-                <p className="text-xs">Em..</p>
-                <select
-                  defaultValue=""
-                  className="w-full max-w-40 bg-white px-1 rounded-full text-xs py-1 border-gray-200 border-2"
-                >
-                  <option value="">Ex: IA, Software, Saúde</option>
-                  <option value="US">United States</option>
-                </select>
+                  Ir para o LINK@
+                </Link>
               </form>
             </div>
           </div>
         </section>
       </div>
-      <section className="w-full flex items-center flex-col my-5 px-3">
+
+      <section
+        className="w-full flex items-center flex-col my-2 px-3"
+        id="sobre-escritorio"
+      >
         <Badge
           content="Entenda do que se trata o escritório!"
           title="O Escritório"
           className="text-secondary"
+          posTexto="O que é o Escritório de Projetos e Parcerias?"
         />
-        <h2 className="text-xl  max-w-80 text-center text-secondary font-semibold">
-          O que é o Escritório de Projetos e Parcerias?
-        </h2>
-        <div className="flex flex-row mt-5 w-full max-w-80 md:max-w-4xl justify-center md:gap-10 gap-7">
-          <div className="self-start justify-center items-center flex flex-col">
-            <Image
-              src="/logo.svg"
-              alt="Logo escritório de projetos"
-              width={80}
-              height={80}
-            />
-            <p className="text-xs max-w-40 text-center">
-              Escritório de projetos da UFC
-            </p>
-          </div>
-          <div className="">
-            <p className="text-xs text-left leading-5 text-slate-700">
-              O Escritório de Projetos e Parcerias da Universidade Federal do
-              Ceará (UFC) é uma entidade dedicada a fornecer suporte e
-              assistência em todas as etapas do processo de desenvolvimento de
-              projetos de Pesquisa, Desenvolvimento e Inovação (PD&I). Sua
-              missão é facilitar a formatação, negociação e implementação de
-              parcerias institucionais, garantindo a conformidade com as
-              diretrizes da UFC e promovendo a valorização das atividades
-              institucionais.
-            </p>
-          </div>
-        </div>
+        <Escritorio />
       </section>
-      <section className="w-full mt-2 p-1 flex flex-col justify-center">
+      <section
+        className="w-full mt-2 p-1 flex flex-col justify-center items-center"
+        id="vitrines"
+      >
         <Badge
           color="tertiary"
           title="Nossas Vitrines"
           content="Acesse por categorias!"
           className="text-blueText"
+          posTexto="Exposição de vitrines"
+          classTexto="text-[#1A2C32]"
+          textoFinal="Conheça as vitrines disponíveis na nossa plataforma LINK@, conecte-se e faça parte dessa rede!"
         />
-        <h2 className="text-xl sm:text-2xl md:text-3xl italic text-center  font-semibold">
-          Exposição de vitrines
-        </h2>
-        <div className="flex flex-row gap-5 overflow-y-hidden p-6 container mx-auto">
-          {showcases.map((item) => (
-            <CardShowcase
-              description={item.description}
-              title={item.title}
-              items={item.items}
-              key={item.id}
-            />
-          ))}
-        </div>
+        <Vitrines />
       </section>
-      {/* <section>
+
+      <section className="w-full mt-2 p-1 flex flex-col justify-center items-center">
         <Badge
           content="Faça parte da comunidade!"
           title="Link@!"
           className="text-secondary"
+          posTexto="Quero ser parceiro"
+          textoFinal="Participe da comunidade de pesquisa, startups, projetos e parceiras da
+          UFC através de cadastro na plataforma, integre seus dados e conecte-se!"
         />
-        <h2>Quero ser parceiro!</h2>
-        <p>
-          Participe da comunidade de pesquisa, startups, projetos e parceiras da
-          UFC através do preenchimento de um formulário de acordo com o seu
-          cenário atual!
-        </p>
-        <form action="">
-          <label htmlFor=""></label>
-          <input type="radio" name="" id="" />
-          <label htmlFor=""></label>
-          <input type="radio" name="" id="" />
-        </form>
-      </section> */}
-      <section className="p-3 flex flex-col gap-3 mt-14">
+        <InteractivePartnershipSection />
+      </section>
+
+      <section id="comite" className="p-3 flex flex-col gap-3">
         <Badge
           color="tertiary"
           title="Processos Internos"
           content="Nossos processos internos"
           className="text-blueText"
+          posTexto="Comitê de Uniformização"
+          classTexto="text-[#1A2C32]"
+          textoFinal="Descubra as etapas envolvidas por trás do processo de uniformização
+            de setores implantando na Universidade Federal do Ceará"
         />
-        <div className="flex items-center flex-col">
-          <h2 className="text-xl sm:text-2xl md:text-3xl text-center italic font-semibold mb-4">
-            Fluxo de Uniformização
-          </h2>
-          <p className="text-xs text-center italic md:max-w-96">
-            Descubra as etapas envolvidas por trás do processo de uniformização
-            de setores implantando na Universidade Federal do Ceará
-          </p>
-          <div className="flex flex-col md:flex-row mt-6">
-            <div className="mt-3 flex flex-col gap-3 px-6 md:w-[50vw]">
-              <p className="text-sm">
-                A Universidade reconhece a importância de uma comunicação clara
-                e eficiente entre seus setores. Para isso, estamos empenhados em
-                uniformizar os fluxos e processos relacionados à definição de
-                temas, começando pelo processo de extensão.
-              </p>
-              <p className="text-sm">
-                Este guia detalhado descreve os passos que serão seguidos para
-                alcançar a uniformização desejada.
-              </p>
-              <p className="text-sm">
-                Acreditamos que a uniformização dos fluxos e processos de
-                definição de temas trará diversos benefícios para a
-                Universidade, como:
-              </p>
-              <ul className="list-disc ml-6">
-                <li>
-                  <p className="text-sm">
-                    Maior clareza e eficiência na comunicação entre os setores.
-                  </p>
-                </li>
-                <li>
-                  <p className="text-sm">Redução de tempo e burocracia.</p>
-                </li>
-                <li>
-                  <p className="text-sm">
-                    Melhor aproveitamento dos recursos humanos e materiais.
-                  </p>
-                </li>
-                <li>
-                  <p className="text-sm">
-                    Maior qualidade dos projetos de extensão.
-                  </p>
-                </li>
-                <li>
-                  <p className="text-sm">
-                    Maior clareza e eficiência na comunicação entre os setores.
-                  </p>
-                </li>
-              </ul>
-              <p className="text-sm">
-                Agradecemos a participação de todos os setores neste processo.
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 md:w-2/4 mt-5">
-              <CardStage />
-              <CardStage />
-              <CardStage />
-              <CardStage />
-            </div>
-          </div>
+        <div className="flex items-center flex-col mb-10">
+          <UniformizationProcess />
         </div>
       </section>
     </main>
