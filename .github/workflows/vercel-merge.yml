@@ -1,39 +1,35 @@
 name: Deploy para Vercel
 
 on:
-  push:
-    branches:
-      - develop
-      - release
   pull_request:
     branches:
-      - develop
-      - release
+      - master
+      - main
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    if: ${{github.ref == 'refs/heads/develop' || github.base_ref == 'develop'}}
-    permissions:
-      contents: write
-      pull-requests: write
-      repository-projects: write
-    steps:
-      - uses: actions/checkout@v2
-      - uses: amondnet/vercel-action@v20
-        id: vercel-deploy
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          vercel-org-id: ${{ secrets.ORG_ID}}
-          vercel-project-id: ${{ secrets.PROJECT_ID}}
-      - name: preview-url
-        run: |
-          echo ${{ steps.vercel-deploy.outputs.preview-url }}
+  # test:
+  #   runs-on: ubuntu-latest
+  #   if: ${{github.ref == 'refs/heads/develop' || github.base_ref == 'develop'}}
+  #   permissions:
+  #     contents: write
+  #     pull-requests: write
+  #     repository-projects: write
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: amondnet/vercel-action@v20
+  #       id: vercel-deploy
+  #       with:
+  #         vercel-token: ${{ secrets.VERCEL_TOKEN }}
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  #         vercel-org-id: ${{ secrets.ORG_ID}}
+  #         vercel-project-id: ${{ secrets.PROJECT_ID}}
+  #     - name: preview-url
+  #       run: |
+  #         echo ${{ steps.vercel-deploy.outputs.preview-url }}
 
   build_and_deploy:
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/release' || github.base_ref == 'release' }}
+    if: ${{ github.ref == 'refs/heads/master' || github.base_ref == 'master' }}
     permissions:
       contents: write
       pull-requests: write
