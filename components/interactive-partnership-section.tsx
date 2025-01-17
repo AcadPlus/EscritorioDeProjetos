@@ -105,7 +105,7 @@ export function InteractivePartnershipSection() {
                         </li>
                       ))}
                     </ul>
-                    <Link href="linka/login">
+                    <Link href="linka/dashboard">
                       <Button className="w-full mt-4 bg-[#618506] hover:bg-[#82AF01] text-white">
                         Saiba mais
                       </Button>

@@ -111,7 +111,7 @@ export default function page() {
                   </Select> */}
                 </div>
                 <Link
-                  href={'linka'}
+                  href={'linka/dashboard'}
                   className="flex items-center text-sm w-36 h-8 md:h-9 bg-[#41580F] text-white rounded px-3 py-1 mt-2 transform transition duration-200 ease-in-out hover:scale-105"
                 >
                   Ir para o LINK@

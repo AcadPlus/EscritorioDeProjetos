@@ -49,7 +49,7 @@ const links = [
     ],
   },
   { name: 'Contato', href: '/contact', expand: null },
-  { name: 'LINK@', href: '/linka', expand: null, special: true },
+  { name: 'LINK@', href: '/linka/dashboard', expand: null, special: true },
 ]
 
 export { social, legal, links }
