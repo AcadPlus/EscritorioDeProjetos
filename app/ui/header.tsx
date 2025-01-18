@@ -91,8 +91,8 @@ export default function Header() {
                     href={item.expand ? '#' : item.href}
                     className={`text-lg font-regular transition-colors duration-300 flex items-center ${
                       item.special
-                        ? 'bg-[#213102] pt-2 pb-2 pl-4 pr-4 rounded text-white'
-                        : 'text-[#213102] hover:text-[#82AF01]'
+                        ? 'bg-[#41580F] pt-2 pb-2 pl-4 pr-4 rounded text-white'
+                        : 'text-[#41580F] hover:text-[#82AF01]'
                     }`}
                   >
                     {item.name}
