@@ -1,23 +1,32 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { IUser } from '@/types/network'
+import { useUserApi } from '@/lib/api/users'
 
-export default function allUsers(): IUser[] {
+export function useAllUsers(): {
+  users: IUser[]
+  isLoading: boolean
+  error: Error | null
+} {
   const [users, setUsers] = useState<IUser[]>([])
-
-  const fetchAllUsers = async () => {
-    try {
-      const response = await fetch('/api/users')
-      const data = await response.json()
-      setUsers(data)
-    } catch (error) {
-      console.error('Erro ao buscar usuários:', error)
-    }
-  }
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const { fetchUsers } = useUserApi()
 
   useEffect(() => {
-    fetchAllUsers()
+    async function loadUsers() {
+      try {
+        const fetchedUsers = await fetchUsers()
+        console.log(fetchedUsers)
+        setUsers(fetchedUsers)
+        setIsLoading(false)
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('An error occurred'))
+        setIsLoading(false)
+      }
+    }
+
+    loadUsers()
   }, [])
 
-  return users
+  return { users, isLoading, error }
 }
