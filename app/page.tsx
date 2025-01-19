@@ -37,82 +37,11 @@ export default function page() {
             <div className="flex flex-col items-center text-secondary opacity-0 animate-fadeIn delay-400">
               <form className="flex flex-col gap-2 items-start w-full">
                 <p className="font-regular text-base text-[#41580F]">
-                  Está procurando uma Startup, Profissional ou Laboratório?
+                  Está procurando conexões com Pesquisadores, startups e similares?
                 </p>
-                <div className="flex flex-col md:flex-row gap-2 w-full md:items-center sm:items-left">
-                  {/* <Select>
-                    <SelectTrigger className="bg-white w-full md:w-1/3 text-black">
-                      <SelectValue placeholder="Software" />
-                    </SelectTrigger>
-                    <SelectContent className="select-content bg-white">
-                      <SelectItem
-                        className="hover:text-[#41580F]"
-                        value="software"
-                      >
-                        Solução em Software
-                      </SelectItem>
-                      <SelectItem
-                        className="hover:text-[#41580F]"
-                        value="hardware"
-                      >
-                        Solução em Hardware
-                      </SelectItem>
-                      <SelectItem
-                        className="text-[#0e100b]"
-                        value="extension_projeto"
-                      >
-                        Projeto de Extensão
-                      </SelectItem>
-                      <SelectItem
-                        className="hover:text-[#41580F]"
-                        value="entrepreneur_project"
-                      >
-                        Projeto Empreendedor
-                      </SelectItem>
-                      <SelectItem
-                        className="hover:text-[#41580F]"
-                        value="docente"
-                      >
-                        Pesquisador(a)
-                      </SelectItem>
-                      <SelectItem
-                        className="hover:text-[#41580F]"
-                        value="research_group"
-                      >
-                        Grupo de Pesquisa
-                      </SelectItem>
-                    </SelectContent>
-                  </Select> */}
-                  {/* <p className="font-regular text-sm text-[#41580F]">em...</p> */}
-                  {/* <Select>
-                    <SelectTrigger className="bg-white w-full md:w-1/3 text-black">
-                      <SelectValue placeholder="Startups" />
-                    </SelectTrigger>
-                    <SelectContent className="select-content bg-white">
-                      <SelectItem
-                        className="hover:text-[#41580F]"
-                        value="startups"
-                      >
-                        Startups
-                      </SelectItem>
-                      <SelectItem
-                        className="hover:text-[#41580F]"
-                        value="laboratorios"
-                      >
-                        Laboratórios
-                      </SelectItem>
-                      <SelectItem
-                        className="hover:text-[#41580F]"
-                        value="competencias"
-                      >
-                        Competências (pesquisa, tcc e etc.)
-                      </SelectItem>
-                    </SelectContent>
-                  </Select> */}
-                </div>
                 <Link
-                  href={'linka'}
-                  className="flex items-center text-sm w-36 h-8 md:h-9 bg-[#41580F] text-white rounded px-3 py-1 mt-2 transform transition duration-200 ease-in-out hover:scale-105"
+                  href={'linka/negocios'}
+                  className="flex items-center text-sm h-8 md:h-9 bg-[#41580F] text-white rounded px-3 py-1 mt-2 transform transition duration-200 ease-in-out hover:scale-105"
                 >
                   Ir para o LINK@
                 </Link>
