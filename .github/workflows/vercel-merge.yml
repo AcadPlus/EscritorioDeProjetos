@@ -8,9 +8,9 @@ on:
     branches:
       - main
 
-permissions: # Add explicit permissions
+permissions:
   contents: read
-  pull-requests: write # Required for commenting on PRs
+  pull-requests: write
   deployments: write
   statuses: write
 
@@ -19,8 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v2
-      - uses: amondnet/vercel-action@v20
+      - uses: actions/checkout@v3
+      - uses: amondnet/vercel-action@v25
         id: vercel-deploy-preview
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -28,14 +28,14 @@ jobs:
           vercel-org-id: ${{ secrets.ORG_ID}}
           vercel-project-id: ${{ secrets.PROJECT_ID}}
       - name: Preview URL
-        run: echo ${{ steps.vercel-deploy-preview.outputs.preview-url }}
+        run: echo "PREVIEW_URL=${{ steps.vercel-deploy-preview.outputs.preview-url }}" >> $GITHUB_OUTPUT
 
   deploy_production:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v2
-      - uses: amondnet/vercel-action@v20
+      - uses: actions/checkout@v3
+      - uses: amondnet/vercel-action@v25
         id: vercel-deploy-production
         with:
           vercel-args: --prod
@@ -44,4 +44,4 @@ jobs:
           vercel-org-id: ${{ secrets.ORG_ID }}
           vercel-project-id: ${{ secrets.PROJECT_ID }}
       - name: Production URL
-        run: echo ${{ steps.vercel-deploy-production.outputs.preview-url }}
+        run: echo "PRODUCTION_URL=${{ steps.vercel-deploy-production.outputs.preview-url }}" >> $GITHUB_OUTPUT
