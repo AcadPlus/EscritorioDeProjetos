@@ -54,7 +54,7 @@ export function AsyncNetworkList({
         (roleFilter === 'all' || user.tipo_usuario === roleFilter) &&
         (institutionFilter === 'all' ||
           getInstitution(user) === institutionFilter) &&
-        (!authUserUid || (user as any).uid_admin !== authUserUid)
+        (!authUserUid || (user as any).uid !== authUserUid)
     )
   }, [users, decodedToken, searchQuery, roleFilter, institutionFilter, authUserUid])
 
