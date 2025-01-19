@@ -6,7 +6,6 @@ import axios from 'axios'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
-import SidebarWrapper from '@/lib/wrappers/sidebar_wrapper'
 import {
   Table,
   TableBody,
@@ -213,7 +212,7 @@ const AdminVitrines = () => {
 
   return (
     <>
-      <SidebarWrapper />
+      {/* <SidebarWrapper /> */}
       <div className="container mx-auto p-4 ml-64">
         <h1 className="text-2xl font-bold mb-6">Administração de Vitrines</h1>
         {renderContent()}
