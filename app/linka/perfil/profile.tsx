@@ -10,7 +10,6 @@ import { useState, useEffect } from 'react'
 import { useUserApi } from '@/lib/api/users'
 import { useRouter } from 'next/navigation'
 import { ProfileSkeleton } from '@/components/profile-skeleton'
-import PrivateRoute from '@/components/private_route'
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null)
@@ -80,7 +79,6 @@ export default function ProfilePage() {
   }
 
   return (
-    <PrivateRoute>
       <div className="p-6">
         <div className="max-w-3xl mx-auto space-y-6">
           {/* Informações Principais */}
@@ -195,6 +193,5 @@ export default function ProfilePage() {
           </Card>
         </div>
       </div>
-    </PrivateRoute>
   )
 }
