@@ -9,6 +9,11 @@ export enum UserTypeDomain {
   'pesquisador' = '@ufc.br',
 }
 
+interface RedesSociais {
+  linkedin?: string;
+  twitter?: string;
+}
+
 export interface UserBaseCreate {
   nome: string
   email: string
@@ -16,15 +21,12 @@ export interface UserBaseCreate {
   tipo_usuario: UserType
   telefone: string
   conexoes: string[]
-  negocios: string[]
+  negocios: string[]  
+  redes_sociais?: RedesSociais
 }
 
 export interface PesquisadorCreate extends UserBaseCreate {
   lattes: string
-  redes_sociais?: {
-    linkedin?: string
-    twitter?: string
-  }
   palavras_chave: string[]
   campus: string
 }

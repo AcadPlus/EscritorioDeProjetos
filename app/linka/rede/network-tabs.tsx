@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { NetworkSearch } from './network-search'
 import { NetworkFilter } from './network-filter'
 import { AsyncNetworkList } from './async-network-list'
-import { UserBase } from '@/types/network'
+import { UserBaseCreate } from '@/lib/types/userTypes'
 
 interface NetworkTabsProps {
   searchQuery: string
@@ -11,7 +11,7 @@ interface NetworkTabsProps {
   setRoleFilter: (value: string) => void
   institutionFilter: string
   setInstitutionFilter: (value: string) => void
-  setSelectedUser: (user: UserBase) => void
+  setSelectedUser: (user: UserBaseCreate) => void
 }
 
 export function NetworkTabs({

@@ -1,9 +1,8 @@
 'use client'
 
 import { useAuth } from '@/lib/context/AuthContext'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Toast } from "@/components/ui/toast"
 import { Toaster } from "@/components/ui/toaster"
 import { useToast } from '@/hooks/use-toast'
 
@@ -12,14 +11,12 @@ interface PrivateRouteProps {
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
   const router = useRouter()
   const { toast } = useToast()
-  const [showToast, setShowToast] = useState(false)
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      setShowToast(true)
+    if (!isLoading && !isAuthenticated) {
       toast({
         title: "Não autenticado",
         description: "Você precisa fazer login para acessar esta página.",
@@ -28,7 +25,11 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
       })
       router.push('/linka/negocios')
     }
-  }, [isAuthenticated, router, toast])
+  }, [isAuthenticated, isLoading, router, toast])
+
+  if (isLoading) {
+    return <div>Carregando...</div> // You can replace this with a loading spinner or skeleton
+  }
 
   if (!isAuthenticated) {
     return <Toaster />

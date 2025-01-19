@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { UserType } from '@/lib/types/userTypes'
+import { UserType, UserCreateData, PesquisadorCreate, EstudanteCreate, ExternoCreate } from '@/lib/types/userTypes'
 
 interface AdditionalInfoStepProps {
   userType: UserType
-  formData: any
-  onInputChange: (name: string, value: string) => void
-  onSocialMediaChange?: (network: string, value: string) => void
+  formData: UserCreateData
+  onInputChange: (name: string, value: string | string[]) => void
+  onSocialMediaChange: (network: string, value: string) => void
 }
 
 export function AdditionalInfoStep({
@@ -17,13 +16,14 @@ export function AdditionalInfoStep({
   onSocialMediaChange,
 }: AdditionalInfoStepProps) {
   if (userType === UserType.PESQUISADOR) {
+    const pesquisadorData = formData as PesquisadorCreate;
     return (
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="lattes">Lattes</Label>
           <Input
             id="lattes"
-            value={formData.lattes || ''}
+            value={pesquisadorData.lattes}
             onChange={(e) => onInputChange('lattes', e.target.value)}
             className="h-11"
             required
@@ -35,13 +35,8 @@ export function AdditionalInfoStep({
           </Label>
           <Input
             id="palavras_chave"
-            value={formData.palavras_chave?.join(', ') || ''}
-            onChange={(e) =>
-              onInputChange(
-                'palavras_chave',
-                e.target.value.split(',').map((word) => word.trim()),
-              )
-            }
+            value={pesquisadorData.palavras_chave.join(', ')}
+            onChange={(e) => onInputChange('palavras_chave', e.target.value.split(',').map(word => word.trim()))}
             className="h-11"
             required
           />
@@ -50,7 +45,7 @@ export function AdditionalInfoStep({
           <Label htmlFor="campus">Campus</Label>
           <Input
             id="campus"
-            value={formData.campus || ''}
+            value={pesquisadorData.campus}
             onChange={(e) => onInputChange('campus', e.target.value)}
             className="h-11"
             required
@@ -60,8 +55,8 @@ export function AdditionalInfoStep({
           <Label htmlFor="linkedin">LinkedIn (opcional)</Label>
           <Input
             id="linkedin"
-            value={formData.redes_sociais?.linkedin || ''}
-            onChange={(e) => onSocialMediaChange?.('linkedin', e.target.value)}
+            value={pesquisadorData.redes_sociais?.linkedin || ''}
+            onChange={(e) => onSocialMediaChange('linkedin', e.target.value)}
             className="h-11"
           />
         </div>
@@ -69,8 +64,8 @@ export function AdditionalInfoStep({
           <Label htmlFor="twitter">Twitter (opcional)</Label>
           <Input
             id="twitter"
-            value={formData.redes_sociais?.twitter || ''}
-            onChange={(e) => onSocialMediaChange?.('twitter', e.target.value)}
+            value={pesquisadorData.redes_sociais?.twitter || ''}
+            onChange={(e) => onSocialMediaChange('twitter', e.target.value)}
             className="h-11"
           />
         </div>
@@ -79,13 +74,14 @@ export function AdditionalInfoStep({
   }
 
   if (userType === UserType.ESTUDANTE) {
+    const estudanteData = formData as EstudanteCreate;
     return (
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="curso">Curso</Label>
           <Input
             id="curso"
-            value={formData.curso || ''}
+            value={estudanteData.curso}
             onChange={(e) => onInputChange('curso', e.target.value)}
             className="h-11"
             required
@@ -95,7 +91,7 @@ export function AdditionalInfoStep({
           <Label htmlFor="campus">Campus</Label>
           <Input
             id="campus"
-            value={formData.campus || ''}
+            value={estudanteData.campus}
             onChange={(e) => onInputChange('campus', e.target.value)}
             className="h-11"
             required
@@ -105,13 +101,14 @@ export function AdditionalInfoStep({
     )
   }
 
+  const externoData = formData as ExternoCreate;
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="empresa">Empresa (opcional)</Label>
         <Input
           id="empresa"
-          value={formData.empresa || ''}
+          value={externoData.empresa || ''}
           onChange={(e) => onInputChange('empresa', e.target.value)}
           className="h-11"
         />
@@ -120,7 +117,7 @@ export function AdditionalInfoStep({
         <Label htmlFor="cargo">Cargo (opcional)</Label>
         <Input
           id="cargo"
-          value={formData.cargo || ''}
+          value={externoData.cargo || ''}
           onChange={(e) => onInputChange('cargo', e.target.value)}
           className="h-11"
         />
@@ -128,3 +125,4 @@ export function AdditionalInfoStep({
     </div>
   )
 }
+

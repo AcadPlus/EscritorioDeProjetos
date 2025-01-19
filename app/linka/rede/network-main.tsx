@@ -1,18 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { NetworkSearch } from './network-search'
-import { NetworkFilter } from './network-filter'
-import { NetworkTabs } from './network-tabs'
 import { NetworkModal } from './network-modal'
-import { AsyncNetworkList } from './async-network-list'
-import { UserBase } from '@/types/network'
+import { NetworkTabs } from './network-tabs'
+import { UserBaseCreate } from '@/lib/types/userTypes'
 
 export function Network() {
   const [searchQuery, setSearchQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState('all')
   const [institutionFilter, setInstitutionFilter] = useState('all')
-  const [selectedUser, setSelectedUser] = useState<UserBase | null>(null)
+  const [selectedUser, setSelectedUser] = useState<UserBaseCreate | null>(null)
 
   return (
     <div className="p-6">
@@ -25,13 +22,7 @@ export function Network() {
         setSelectedUser={setSelectedUser}
         institutionFilter={institutionFilter}
         setInstitutionFilter={setInstitutionFilter}
-      >
-        <AsyncNetworkList
-          searchQuery={searchQuery}
-          roleFilter={roleFilter}
-          institutionFilter={institutionFilter}
-          setSelectedUser={setSelectedUser} displayMode={'all'}        />
-      </NetworkTabs>
+      />
       <NetworkModal
         user={selectedUser}
         isOpen={!!selectedUser}
