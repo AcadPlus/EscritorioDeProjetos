@@ -1,49 +1,47 @@
-name: Deploy para Vercel
+name: Deploy to Vercel
 
 on:
   pull_request:
     branches:
-      - master
+      - main
+  push:
+    branches:
       - main
 
-jobs:
-  # test:
-  #   runs-on: ubuntu-latest
-  #   if: ${{github.ref == 'refs/heads/develop' || github.base_ref == 'develop'}}
-  #   permissions:
-  #     contents: write
-  #     pull-requests: write
-  #     repository-projects: write
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: amondnet/vercel-action@v20
-  #       id: vercel-deploy
-  #       with:
-  #         vercel-token: ${{ secrets.VERCEL_TOKEN }}
-  #         github-token: ${{ secrets.GITHUB_TOKEN }}
-  #         vercel-org-id: ${{ secrets.ORG_ID}}
-  #         vercel-project-id: ${{ secrets.PROJECT_ID}}
-  #     - name: preview-url
-  #       run: |
-  #         echo ${{ steps.vercel-deploy.outputs.preview-url }}
+permissions: # Add explicit permissions
+  contents: read
+  pull-requests: write # Required for commenting on PRs
+  deployments: write
+  statuses: write
 
-  build_and_deploy:
+jobs:
+  deploy_preview:
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/master' || github.base_ref == 'master' }}
-    permissions:
-      contents: write
-      pull-requests: write
-      repository-projects: write
+    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v2
       - uses: amondnet/vercel-action@v20
-        id: vercel-deploy
+        id: vercel-deploy-preview
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vercel-org-id: ${{ secrets.ORG_ID}}
+          vercel-project-id: ${{ secrets.PROJECT_ID}}
+      - name: Preview URL
+        run: echo ${{ steps.vercel-deploy-preview.outputs.preview-url }}
+
+  deploy_production:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: amondnet/vercel-action@v20
+        id: vercel-deploy-production
         with:
           vercel-args: --prod
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           vercel-org-id: ${{ secrets.ORG_ID }}
           vercel-project-id: ${{ secrets.PROJECT_ID }}
-      - name: preview-url
-        run: |
-          echo ${{ steps.vercel-deploy.outputs.preview-url }}
+      - name: Production URL
+        run: echo ${{ steps.vercel-deploy-production.outputs.preview-url }}

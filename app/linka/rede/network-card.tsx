@@ -1,18 +1,18 @@
 'use client'
+
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AvatarImage, AvatarFallback, Avatar } from '@/components/ui/avatar'
 import { motion } from 'framer-motion'
-import { UserBase } from '../perfil/mockData'
-import { UserCheck, Loader2, UserPlus, UserMinus } from 'lucide-react'
+import { PesquisadorCreate, EstudanteCreate, ExternoCreate, UserCreateData, UserType } from '@/lib/types/userTypes'
 import { useEffect } from 'react'
 
 interface NetworkCardProps {
-  user: UserBase
+  user: UserCreateData
   showActions?: boolean
-  renderActionButtons: (user: UserBase) => React.ReactNode
-  renderStatusTag: (user: UserBase) => React.ReactNode
-  onViewProfile: (user: UserBase) => void
+  renderActionButtons: (user: UserCreateData) => React.ReactNode
+  renderStatusTag: (user: UserCreateData) => React.ReactNode
+  onViewProfile: (user: UserCreateData) => void
 }
 
 export function NetworkCard({
@@ -27,17 +27,27 @@ export function NetworkCard({
       console.warn('onViewProfile function is not provided to NetworkCard component');
     }
   }, [onViewProfile]);
-  const getUserRole = (user: UserBase) => {
+
+  const getUserRole = (user: UserCreateData) => {
     switch (user.tipo_usuario) {
-      case 'estudante':
+      case UserType.ESTUDANTE:
         return 'Estudante'
-      case 'pesquisador':
+      case UserType.PESQUISADOR:
         return 'Pesquisador'
-      case 'externo':
+      case UserType.EXTERNO:
         return 'Externo'
       default:
         return 'Usuário'
     }
+  }
+
+  const getAffiliation = (user: UserCreateData) => {
+    if (user.tipo_usuario === UserType.ESTUDANTE || user.tipo_usuario === UserType.PESQUISADOR) {
+      return (user as EstudanteCreate | PesquisadorCreate).campus
+    } else if (user.tipo_usuario === UserType.EXTERNO) {
+      return (user as ExternoCreate).empresa || 'N/A'
+    }
+    return 'N/A'
   }
 
   return (
@@ -58,7 +68,7 @@ export function NetworkCard({
               <h3 className="text-lg font-semibold mb-1">{user.nome}</h3>
               <p className="text-sm text-gray-500 mb-1">{getUserRole(user)}</p>
               <p className="text-sm text-gray-500">
-                {user.campus || user.empresa || 'N/A'}
+                {getAffiliation(user)}
               </p>
             </div>
           </div>

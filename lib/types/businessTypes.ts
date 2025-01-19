@@ -42,6 +42,7 @@ export type NegocioUpdate = Partial<
 export interface NegocioResponse extends NegocioBase {
   data_cadastro: string | number | Date
   id: string
+  logo: string
   uid_admin: string
   status: string
   visivel: boolean

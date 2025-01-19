@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
-import { IUser } from '@/types/network'
+import { UserBaseCreate } from '@/lib/types/userTypes'
 import { useUserApi } from '@/lib/api/users'
 
 export function useAllUsers(): {
-  users: IUser[]
+  users: UserBaseCreate[]
   isLoading: boolean
   error: Error | null
 } {
-  const [users, setUsers] = useState<IUser[]>([])
+  const [users, setUsers] = useState<UserBaseCreate[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const { fetchUsers } = useUserApi()

@@ -65,7 +65,7 @@ export function BusinessShowcase() {
         </div>
         <div className="flex flex-col md:flex-row gap-4 md:gap-8">
           <BusinessFilter filter={filter} setFilter={setFilter} />
-          <BusinessStatus activeBusinesses={businesses} />
+          <BusinessStatus activeBusinesses={businesses} pendingBusinesses={businesses} />
           <BusinessCreation onRequestCreate={() => {}} />
         </div>
       </div>

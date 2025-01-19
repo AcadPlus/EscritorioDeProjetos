@@ -1,17 +1,17 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import { NetworkList } from './network-list'
 import { SkeletonCard } from './skeleton-card'
 import { useAllUsers } from '@/hooks/allUsers'
 import { useRequests } from '@/hooks/useRequests'
-import { UserBase } from '@/types/network'
+import { UserCreateData, UserType, PesquisadorCreate, EstudanteCreate, ExternoCreate } from '@/lib/types/userTypes'
 
 interface AsyncNetworkListProps {
   searchQuery: string
   roleFilter: string
   institutionFilter: string
-  setSelectedUser: (user: UserBase) => void
+  setSelectedUser: (user: UserCreateData) => void
   displayMode: 'all' | 'connected' | 'pending'
 }
 
@@ -25,23 +25,43 @@ export function AsyncNetworkList({
   const { users, isLoading, error } = useAllUsers()
   const { requests, handleRequestAction, handleRemoveRequest, decodedToken } =
     useRequests()
+  const [authUserUid, setAuthUserUid] = useState<string | null>(null)
+
+  useEffect(() => {
+    const storedUserUid = localStorage.getItem('userUid')
+    if (storedUserUid) {
+      setAuthUserUid(storedUserUid)
+    }
+  }, [])
+
+  const getInstitution = (user: UserCreateData): string => {
+    switch (user.tipo_usuario) {
+      case UserType.PESQUISADOR:
+      case UserType.ESTUDANTE:
+        return (user as PesquisadorCreate | EstudanteCreate).campus
+      case UserType.EXTERNO:
+        return (user as ExternoCreate).empresa || ''
+      default:
+        return ''
+    }
+  }
 
   const filteredUsers = useMemo(() => {
     return users.filter(
       (user) =>
-        user.uid !== decodedToken &&
+        user.email !== decodedToken &&
         user.nome.toLowerCase().includes(searchQuery.toLowerCase()) &&
         (roleFilter === 'all' || user.tipo_usuario === roleFilter) &&
         (institutionFilter === 'all' ||
-          user.campus === institutionFilter ||
-          user.empresa === institutionFilter),
+          getInstitution(user) === institutionFilter) &&
+        (!authUserUid || (user as any).uid !== authUserUid)
     )
-  }, [users, decodedToken, searchQuery, roleFilter, institutionFilter])
+  }, [users, decodedToken, searchQuery, roleFilter, institutionFilter, authUserUid])
 
   const connectedUsers = useMemo(
     () =>
       filteredUsers.filter(
-        (user) => requests[user.uid] && requests[user.uid][0] === 'accepted',
+        (user) => requests[user.email] && requests[user.email][0] === 'accepted',
       ),
     [filteredUsers, requests],
   )
@@ -49,7 +69,7 @@ export function AsyncNetworkList({
   const pendingUsers = useMemo(
     () =>
       filteredUsers.filter(
-        (user) => requests[user.uid] && requests[user.uid][0] === 'pending',
+        (user) => requests[user.email] && requests[user.email][0] === 'pending',
       ),
     [filteredUsers, requests],
   )
@@ -93,3 +113,4 @@ export function AsyncNetworkList({
     />
   )
 }
+

@@ -3,20 +3,15 @@ import React, { createContext, useContext, useState, useEffect } from 'react'
 import {
   login as apiLogin,
   logout as apiLogout,
-  //   refreshToken,
   getAccessToken,
-  //   getRefreshToken,
 } from '../api/auth'
 import { UserType } from '../types/userTypes'
 
 interface AuthContextType {
   isAuthenticated: boolean
   userType: UserType | null
-  login: (
-    username: string,
-    password: string,
-    userType: UserType,
-  ) => Promise<void>
+  isLoading: boolean
+  login: (username: string, password: string, userType: UserType) => Promise<void>
   logout: () => Promise<void>
   getAccessToken: () => string | null
 }
@@ -28,13 +23,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const [userType, setUserType] = useState<UserType | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   useEffect(() => {
-    const token = getAccessToken()
-    if (token) {
-      setIsAuthenticated(true)
-      setUserType(localStorage.getItem('userType') as UserType)
+    const checkAuth = async () => {
+      const token = getAccessToken()
+      if (token) {
+        setIsAuthenticated(true)
+        setUserType(localStorage.getItem('userType') as UserType)
+      }
+      setIsLoading(false)
     }
+    checkAuth()
   }, [])
 
   const login = async (
@@ -66,6 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const value = {
     isAuthenticated,
     userType,
+    isLoading,
     login,
     logout,
     getAccessToken,

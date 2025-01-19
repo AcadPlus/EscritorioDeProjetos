@@ -34,6 +34,7 @@ export async function login(
   localStorage.setItem('accessToken', data.data.access_token)
   localStorage.setItem('refreshToken', data.data.refresh_token)
   localStorage.setItem('userType', data.data.user_type)
+  localStorage.setItem('userUid', data.data.user_uid)
 
   console.log(localStorage.getItem('userType'))
 
@@ -63,6 +64,8 @@ export async function refreshToken() {
   const data = await response.json()
   localStorage.setItem('accessToken', data.data.access_token)
   localStorage.setItem('refreshToken', data.data.refresh_token)
+  localStorage.setItem('userType', data.data.user_type)
+  localStorage.setItem('userUid', data.data.user_uid)
 
   return data
 }
@@ -88,9 +91,7 @@ export async function logout() {
     throw new Error('Invalid token')
   }
 
-  // Clear stored tokens
-  localStorage.removeItem('accessToken')
-  localStorage.removeItem('refreshToken')
+  localStorage.clear()
 
   return response.json()
 }

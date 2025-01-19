@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -20,6 +19,11 @@ import { UserType, UserTypeDomain } from '@/lib/types/userTypes'
 import { StepByStepRegister } from '@/components/StepByStepRegister'
 import { DynamicEmailInput } from '@/components/dynamic-email-input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+
+// Type guard to check if a UserType has a domain
+function hasUserDomain(userType: UserType): userType is UserType.ESTUDANTE | UserType.PESQUISADOR {
+  return userType === UserType.ESTUDANTE || userType === UserType.PESQUISADOR;
+}
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('')
@@ -61,13 +65,15 @@ export default function LoginScreen() {
   }
 
   const handleUserTypeChange = (value: UserType) => {
-    setUserType(value as UserType)
-    // Adjust email when changing user type
-    if (value === UserType.EXTERNO) {
-      setEmail(email.split('@')[0]) // Remove domain for external users
+    setUserType(value)
+    const username = email.split('@')[0]
+    
+    if (hasUserDomain(value)) {
+      // Only access UserTypeDomain for types that have a domain
+      setEmail(username + UserTypeDomain[value])
     } else {
-      const username = email.split('@')[0]
-      setEmail(username + UserTypeDomain[value as UserType])
+      // For external users, just use the username without domain
+      setEmail(username)
     }
   }
 
@@ -193,3 +199,4 @@ export default function LoginScreen() {
     </main>
   )
 }
+

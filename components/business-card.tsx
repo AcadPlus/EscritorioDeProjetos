@@ -12,7 +12,12 @@ import {
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Facebook, Instagram, Linkedin, LinkIcon } from 'lucide-react'
-import { BusinessCardProps } from '@/lib/types/businessTypes'
+import { NegocioResponse } from '@/lib/types/businessTypes'
+
+// Define a new interface for the component's props
+interface BusinessCardProps {
+  business: NegocioResponse
+}
 
 export function BusinessCard({ business }: BusinessCardProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -30,7 +35,7 @@ export function BusinessCard({ business }: BusinessCardProps) {
     }
   }
 
-  const getBusinessTypeBadge = (type: 'partec' | 'externo') => {
+  const getBusinessTypeBadge = (type: NegocioResponse['tipo_negocio']) => {
     const bgColor = type === 'partec' ? 'bg-blue-500' : 'bg-green-500'
     return (
       <Badge className={`${bgColor} text-white absolute top-4 right-4 z-10`}>
@@ -185,3 +190,4 @@ export function BusinessCard({ business }: BusinessCardProps) {
     </>
   )
 }
+

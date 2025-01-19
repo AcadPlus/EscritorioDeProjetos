@@ -2,19 +2,19 @@
 import { AnimatePresence } from 'framer-motion'
 import { NetworkCard } from './network-card'
 import { Button } from '@/components/ui/button'
-import { UserBase } from '@/types/network'
+import { UserCreateData } from '@/lib/types/userTypes'
 import { UserCheck, Loader2, UserPlus, UserMinus } from 'lucide-react'
 
 interface NetworkListProps {
-  users: UserBase[]
+  users: UserCreateData[]
   requests: Record<string, any>
   decodedToken: string | null
   handleRequestAction: (
     action: 'send' | 'accept' | 'reject',
-    uid: string,
+    email: string,
   ) => void
-  handleRemoveRequest: (uid: string) => void
-  setSelectedUser: (user: UserBase) => void
+  handleRemoveRequest: (email: string) => void
+  setSelectedUser: (user: UserCreateData) => void
 }
 
 export function NetworkList({
@@ -29,8 +29,8 @@ export function NetworkList({
     return <div className="text-center mt-8">Nenhum usuário encontrado.</div>
   }
 
-  const renderStatusTag = (user: UserBase) => {
-    const status = requests[user.uid] ? requests[user.uid][0] : null
+  const renderStatusTag = (user: UserCreateData) => {
+    const status = requests[user.email] ? requests[user.email][0] : null
     let className =
       'px-2 py-1 rounded-full text-xs font-semibold flex items-center'
     let label = ''
@@ -62,14 +62,14 @@ export function NetworkList({
     )
   }
 
-  const renderActionButtons = (user: UserBase) => {
-    const requestStatus = requests[user.uid]
+  const renderActionButtons = (user: UserCreateData) => {
+    const requestStatus = requests[user.email]
 
     if (requestStatus === undefined) {
       return (
         <Button
           size="sm"
-          onClick={() => handleRequestAction('send', user.uid)}
+          onClick={() => handleRequestAction('send', user.email)}
           className="bg-blue-500 hover:bg-blue-600"
         >
           <UserPlus className="w-4 h-4 mr-2" />
@@ -88,7 +88,7 @@ export function NetworkList({
         <Button
           size="sm"
           className="bg-red-500 hover:bg-red-600 text-white"
-          onClick={() => handleRemoveRequest(user.uid)}
+          onClick={() => handleRemoveRequest(user.email)}
         >
           <UserMinus className="w-4 h-4 mr-2" />
           Cancelar
@@ -102,7 +102,7 @@ export function NetworkList({
           <Button
             size="sm"
             className="bg-green-500 hover:bg-green-600"
-            onClick={() => handleRequestAction('accept', user.uid)}
+            onClick={() => handleRequestAction('accept', user.email)}
           >
             <UserCheck className="w-4 h-4 mr-2" />
             Aceitar
@@ -110,7 +110,7 @@ export function NetworkList({
           <Button
             size="sm"
             variant="outline"
-            onClick={() => handleRequestAction('reject', user.uid)}
+            onClick={() => handleRequestAction('reject', user.email)}
           >
             <UserMinus className="w-4 h-4 mr-2" />
             Recusar
@@ -124,7 +124,7 @@ export function NetworkList({
         <Button
           size="sm"
           variant="outline"
-          onClick={() => handleRemoveRequest(user.uid)}
+          onClick={() => handleRemoveRequest(user.email)}
         >
           <UserMinus className="w-4 h-4 mr-2" />
           Remover Conexão
@@ -138,7 +138,7 @@ export function NetworkList({
       <AnimatePresence>
         {users.map((user) => (
           <NetworkCard
-            key={user.uid}
+            key={user.email}
             user={user}
             renderActionButtons={renderActionButtons}
             renderStatusTag={renderStatusTag}
@@ -149,3 +149,4 @@ export function NetworkList({
     </div>
   )
 }
+
