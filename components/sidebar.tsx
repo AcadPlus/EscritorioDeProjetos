@@ -31,27 +31,30 @@ import {
   SidebarNav,
   SidebarNavItem,
 } from '@/components/ui/sidebar'
+import { useAuth } from '@/lib/context/AuthContext'
 
 interface MainSidebarProps
   extends React.ComponentPropsWithoutRef<typeof Sidebar> {}
 
 export function MainSidebar({ className }: MainSidebarProps) {
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false)
   const [isAdmin, setIsAdmin] = React.useState(false)
   const router = useRouter()
 
+  const { isAuthenticated, logout } = useAuth()
+
+  const handleLogout = async () => {
+    try {
+      router.push('/linka/login')
+      await logout()
+    } catch (error) {
+      console.error('Logout failed:', error)
+    }
+  }
+
   React.useEffect(() => {
-    const token = localStorage.getItem('access_token')
-    setIsLoggedIn(!!token)
     const admin = localStorage.getItem('admin')
     setIsAdmin(!!admin)
   }, [])
-
-  const handleLogout = () => {
-    localStorage.clear()
-    setIsLoggedIn(false)
-    router.push('/linka/login')
-  }
 
   const vitrinesItems = [
     { name: 'Negócios', icon: Briefcase, href: '/linka/negocios' },
@@ -74,9 +77,7 @@ export function MainSidebar({ className }: MainSidebarProps) {
       href: '',
     },
   ]
-  const comunidadeItems = [
-    { name: 'Rede', icon: Network, href: '/linka/rede' },
-  ]
+  const comunidadeItems = [{ name: 'Rede', icon: Network, href: '/linka/rede' }]
   const adminItems = [
     {
       name: 'Painel de Controle',
@@ -85,7 +86,7 @@ export function MainSidebar({ className }: MainSidebarProps) {
     },
   ]
   const personalItems = [
-    { name: 'Meus Negócios', icon: Building2, href: '/linka/perfil' },
+    { name: 'Meus Negócios', icon: Building2, href: '/linka/meus-negocios' },
     { name: 'Iniciativas', icon: HandshakeIcon, href: '/linka/perfil' },
     { name: 'Perfil do Usuário', icon: UserCircle, href: '/linka/perfil' },
   ]
@@ -114,7 +115,7 @@ export function MainSidebar({ className }: MainSidebarProps) {
         </SidebarNav>
       </SidebarContent>
       <SidebarFooter className="border-t p-4">
-        {isLoggedIn ? (
+        {isAuthenticated ? (
           <Button
             variant="outline"
             className="w-full justify-start"

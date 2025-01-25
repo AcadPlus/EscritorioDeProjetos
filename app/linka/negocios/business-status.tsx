@@ -6,14 +6,12 @@ interface BusinessStatusProps {
   pendingBusinesses: NegocioResponse[]
 }
 
-export function BusinessStatus({
-  activeBusinesses,
-}: BusinessStatusProps) {
+export function BusinessStatus({ activeBusinesses }: BusinessStatusProps) {
   const businessPartec = activeBusinesses.filter(
-    (item) => item.tipo_negocio === 'partec'
+    (item) => item.tipo_negocio === 'partec',
   )
   const businessExternal = activeBusinesses.filter(
-    (item) => item.tipo_negocio !== 'partec'
+    (item) => item.tipo_negocio !== 'partec',
   )
 
   return (
@@ -32,4 +30,3 @@ export function BusinessStatus({
     </Card>
   )
 }
-

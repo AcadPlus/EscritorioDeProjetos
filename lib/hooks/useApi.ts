@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { refreshToken, getAccessToken } from '../api/auth'
+import { useAuthApi, getAccessToken } from '../api/auth'
 import { useAuth } from '../context/AuthContext'
 
 interface ApiOptions extends RequestInit {
@@ -10,6 +10,8 @@ export const useApi = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   const { logout } = useAuth()
+  const { useRefreshToken } = useAuthApi()
+  const refreshTokenMutation = useRefreshToken()
 
   const fetchWithToken = useCallback(
     async (url: string, options: ApiOptions = {}) => {
@@ -35,7 +37,7 @@ export const useApi = () => {
         if (response.status === 401 && requireAuth) {
           // Token might be expired, try to refresh
           try {
-            await refreshToken()
+            await refreshTokenMutation.mutateAsync()
             accessToken = getAccessToken()
             if (!accessToken) {
               throw new Error('Failed to refresh token')
@@ -67,7 +69,7 @@ export const useApi = () => {
         setIsLoading(false)
       }
     },
-    [logout],
+    [logout, refreshTokenMutation],
   )
 
   return { fetchWithToken, isLoading, error }

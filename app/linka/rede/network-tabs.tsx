@@ -2,15 +2,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { NetworkSearch } from './network-search'
 import { NetworkFilter } from './network-filter'
 import { AsyncNetworkList } from './async-network-list'
-import { UserBaseCreate } from '@/lib/types/userTypes'
+import type { UserBaseCreate } from '@/lib/types/userTypes'
 
 interface NetworkTabsProps {
   searchQuery: string
   setSearchQuery: (value: string) => void
   roleFilter: string
   setRoleFilter: (value: string) => void
-  institutionFilter: string
-  setInstitutionFilter: (value: string) => void
   setSelectedUser: (user: UserBaseCreate) => void
 }
 
@@ -19,8 +17,6 @@ export function NetworkTabs({
   setSearchQuery,
   roleFilter,
   setRoleFilter,
-  institutionFilter,
-  setInstitutionFilter,
   setSelectedUser,
 }: NetworkTabsProps) {
   return (
@@ -38,20 +34,17 @@ export function NetworkTabs({
       </TabsList>
 
       <div className="flex flex-wrap gap-4 mb-6 mt-6">
-        <NetworkSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-        <NetworkFilter
-          roleFilter={roleFilter}
-          setRoleFilter={setRoleFilter}
-          institutionFilter={institutionFilter}
-          setInstitutionFilter={setInstitutionFilter}
+        <NetworkSearch
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
         />
+        <NetworkFilter roleFilter={roleFilter} setRoleFilter={setRoleFilter} />
       </div>
 
       <TabsContent value="all">
         <AsyncNetworkList
           searchQuery={searchQuery}
           roleFilter={roleFilter}
-          institutionFilter={institutionFilter}
           setSelectedUser={setSelectedUser}
           displayMode="all"
         />
@@ -61,7 +54,6 @@ export function NetworkTabs({
         <AsyncNetworkList
           searchQuery={searchQuery}
           roleFilter={roleFilter}
-          institutionFilter={institutionFilter}
           setSelectedUser={setSelectedUser}
           displayMode="connected"
         />
@@ -71,7 +63,6 @@ export function NetworkTabs({
         <AsyncNetworkList
           searchQuery={searchQuery}
           roleFilter={roleFilter}
-          institutionFilter={institutionFilter}
           setSelectedUser={setSelectedUser}
           displayMode="pending"
         />

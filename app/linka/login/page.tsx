@@ -1,10 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Card,
   CardContent,
@@ -14,41 +13,34 @@ import {
 } from '@/components/ui/card'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { login } from '@/lib/api/auth'
-import { UserType, UserTypeDomain } from '@/lib/types/userTypes'
+import { useAuth } from '@/lib/context/AuthContext'
+import type { UserType } from '@/lib/types/userTypes'
 import { StepByStepRegister } from '@/components/StepByStepRegister'
-import { DynamicEmailInput } from '@/components/dynamic-email-input'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-
-// Type guard to check if a UserType has a domain
-function hasUserDomain(userType: UserType): userType is UserType.ESTUDANTE | UserType.PESQUISADOR {
-  return userType === UserType.ESTUDANTE || userType === UserType.PESQUISADOR;
-}
+import { LoginForm } from './components/LoginForm'
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState('')
   const [isRegistering, setIsRegistering] = useState(false)
-  const [userType, setUserType] = useState<UserType>(UserType.ESTUDANTE)
+  const [error, setError] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
   const router = useRouter()
+  const { login, isAuthenticated } = useAuth()
 
   useEffect(() => {
-    const token = localStorage.getItem('acessToken')
-    if (token !== null) {
-      router.push('linka/negocios')
+    if (isAuthenticated) {
+      router.push('/linka/negocios')
     }
-  }, [router])
+  }, [isAuthenticated, router])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleLogin = async (
+    email: string,
+    password: string,
+    userType: UserType,
+  ) => {
     setError('')
+    setSuccessMessage('')
 
     try {
-      const response = await login(email, password, userType)
-      localStorage.setItem('access_token', response.access_token)
-      localStorage.setItem('refresh_token', response.refresh_token)
+      await login(email, password, userType)
       router.push('/linka/negocios')
     } catch (error: any) {
       if (error.response && error.response.data) {
@@ -61,20 +53,7 @@ export default function LoginScreen() {
 
   const handleRegisterSuccess = () => {
     setIsRegistering(false)
-    setError('Cadastro realizado com sucesso. Por favor, faça login.')
-  }
-
-  const handleUserTypeChange = (value: UserType) => {
-    setUserType(value)
-    const username = email.split('@')[0]
-    
-    if (hasUserDomain(value)) {
-      // Only access UserTypeDomain for types that have a domain
-      setEmail(username + UserTypeDomain[value])
-    } else {
-      // For external users, just use the username without domain
-      setEmail(username)
-    }
+    setSuccessMessage('Cadastro realizado com sucesso. Por favor, faça login.')
   }
 
   return (
@@ -93,80 +72,14 @@ export default function LoginScreen() {
           {isRegistering ? (
             <StepByStepRegister onRegisterSuccess={handleRegisterSuccess} />
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <RadioGroup
-                value={userType}
-                onValueChange={handleUserTypeChange}
-                className="flex flex-col sm:flex-row gap-4 mb-4"
-              >
-                {Object.values(UserType).map((type) => (
-                  <div
-                    key={type}
-                    className={`flex-1 flex items-center space-x-2 rounded-lg border p-2 cursor-pointer hover:border-black ${
-                      userType === type ? 'bg-gray-100 border-black' : ''
-                    }`}
-                  >
-                    <RadioGroupItem
-                      value={type}
-                      id={type}
-                      className="sr-only"
-                    />
-                    <div
-                      className={`w-4 h-4 rounded-full border ${userType === type ? 'bg-black border-black' : 'border-gray-300'}`}
-                    />
-                    <Label htmlFor={type} className="cursor-pointer flex-grow">
-                      {type.charAt(0).toUpperCase() + type.slice(1)}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-
-              <DynamicEmailInput
-                email={email}
-                userType={userType}
-                onEmailChange={setEmail}
-                label="Email"
-                required
-              />
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pr-10"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-[#808080]" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-[#808080]" />
-                    )}
-                  </button>
-                </div>
-              </div>
-            </form>
+            <LoginForm
+              onSubmit={handleLogin}
+              error={error}
+              successMessage={successMessage}
+            />
           )}
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          {error && <p className="text-[#FF0000]">{error}</p>}
-          {!isRegistering && (
-            <Button
-              className="w-full text-white"
-              onClick={handleSubmit}
-              style={{ backgroundColor: '#000' }}
-            >
-              Entrar
-            </Button>
-          )}
           <div className="text-sm text-[#808080]">
             {isRegistering ? (
               <>
@@ -174,7 +87,11 @@ export default function LoginScreen() {
                 <Button
                   variant="link"
                   className="p-0"
-                  onClick={() => setIsRegistering(false)}
+                  onClick={() => {
+                    setIsRegistering(false)
+                    setError('')
+                    setSuccessMessage('')
+                  }}
                   style={{ color: '#000' }}
                 >
                   Faça login
@@ -186,7 +103,11 @@ export default function LoginScreen() {
                 <Button
                   variant="link"
                   className="p-0"
-                  onClick={() => setIsRegistering(true)}
+                  onClick={() => {
+                    setIsRegistering(true)
+                    setError('')
+                    setSuccessMessage('')
+                  }}
                   style={{ color: '#000' }}
                 >
                   Cadastre-se
@@ -199,4 +120,3 @@ export default function LoginScreen() {
     </main>
   )
 }
-

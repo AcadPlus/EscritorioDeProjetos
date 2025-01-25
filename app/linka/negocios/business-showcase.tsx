@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useBusinessApi } from '@/lib/api/business'
 import { BusinessSearch } from './business-search'
 import { BusinessFilter } from './business-filter'
@@ -9,34 +9,40 @@ import { BusinessCreation } from './business-create'
 import { BusinessStatus } from './business-status'
 import { BusinessList } from './business-list'
 import { BusinessRefresh } from './business-refresh'
-import { NegocioResponse, NegocioType } from '@/lib/types/businessTypes'
+import type { NegocioType } from '@/lib/types/businessTypes'
+import { NegocioResponse } from '@/lib/types/businessTypes'
+import { useRouter } from 'next/navigation'
 
 export function BusinessShowcase() {
-  const { listBusinesses } = useBusinessApi()
+  const { useListBusinesses } = useBusinessApi()
+  const router = useRouter()
 
-  const [businesses, setBusinesses] = useState<NegocioResponse[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState<NegocioType | 'all'>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'alphabetical'>('recent')
+  const [visibleBusinesses, setVisibleBusinesses] = useState<NegocioResponse[]>(
+    [],
+  )
+  const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'alphabetical'>(
+    'recent',
+  )
   const itemsPerPage = 9
 
-  const fetchBusinesses = async () => {
-    try {
-      const data = await listBusinesses()
-      setBusinesses(data)
-    } catch (err) {
-      setError('Failed to load businesses. Please try again later.')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const {
+    data: businesses,
+    isLoading,
+    error,
+    refetch,
+  } = useListBusinesses('aprovado')
 
   useEffect(() => {
-    fetchBusinesses()
-  }, [])
+    if (businesses) {
+      const filtered = businesses.filter(
+        (business: NegocioResponse) => business.visivel === true,
+      )
+      setVisibleBusinesses(filtered)
+    }
+  }, [businesses])
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -60,27 +66,37 @@ export function BusinessShowcase() {
               handleSearch={handleSearch}
             />
             <BusinessSort handleSortChange={handleSortChange} />
-            <BusinessRefresh handleRefreshButtonClick={fetchBusinesses} />
+            <BusinessRefresh handleRefreshButtonClick={() => refetch()} />
           </div>
         </div>
         <div className="flex flex-col md:flex-row gap-4 md:gap-8">
           <BusinessFilter filter={filter} setFilter={setFilter} />
-          <BusinessStatus activeBusinesses={businesses} pendingBusinesses={businesses} />
-          <BusinessCreation onRequestCreate={() => {}} />
+          <BusinessStatus
+            activeBusinesses={visibleBusinesses}
+            pendingBusinesses={
+              businesses?.filter((b: NegocioResponse) => !b.visivel) || []
+            }
+          />
+          <BusinessCreation
+            onRequestCreate={() => {
+              router.push('/linka/meus-negocios')
+            }}
+          />
         </div>
       </div>
       <div className="mt-8">
         <BusinessList
-          businesses={businesses}
+          businesses={visibleBusinesses}
           filter={filter}
           searchTerm={searchTerm}
           sortBy={sortBy}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
           itemsPerPage={itemsPerPage}
-          loading={loading}
+          loading={isLoading}
         />
       </div>
+      {error && <div className="text-red-500 mt-4">Error: {error.message}</div>}
     </div>
   )
 }

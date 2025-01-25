@@ -21,7 +21,10 @@ export function NetworkModal({ user, isOpen, onClose }: NetworkModalProps) {
   const getUserDetails = (user: UserBaseCreate) => {
     const details = [
       { icon: Mail, value: user.email },
-      { icon: MapPin, value: (user as any).campus || (user as any).empresa || 'N/A' },
+      {
+        icon: MapPin,
+        value: (user as any).campus || (user as any).empresa || 'N/A',
+      },
     ]
 
     if (user.tipo_usuario === 'estudante') {
@@ -73,4 +76,3 @@ export function NetworkModal({ user, isOpen, onClose }: NetworkModalProps) {
     </Dialog>
   )
 }
-

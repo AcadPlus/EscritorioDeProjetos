@@ -17,7 +17,7 @@ export function BusinessCreation({ onRequestCreate }: BusinessCreationProps) {
           onClick={onRequestCreate}
           className="bg-slate-700 w-full hover:bg-black text-white"
         >
-          <Plus className="mr-2 h-4 w-4 text-white" /> Em breve!
+          <Plus className="mr-2 h-4 w-4 text-white" /> Clique aqui!
         </Button>
       </CardContent>
     </Card>
