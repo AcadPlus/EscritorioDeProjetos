@@ -1,10 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from 'react'
+'use client'
+
+import type React from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { UserType, UserCreateData } from '@/lib/types/userTypes'
+import { UserType, type UserCreateData } from '@/lib/types/userTypes'
 import { useUserApi } from '@/lib/api/users'
-import { sendVerificationCode, verifyCode } from '@/lib/api/verification'
+import { useVerificationApi } from '@/lib/api/verification'
 import { UserTypeStep } from './registration/UserTypeStep'
 import { BasicInfoStep } from './registration/BasicInfoStep'
 import { EmailVerificationStep } from './registration/EmailVerificationStep'
@@ -44,7 +46,12 @@ export function StepByStepRegister({
 }: {
   onRegisterSuccess: () => void
 }) {
-  const { createUser } = useUserApi()
+  const { useCreateUser } = useUserApi()
+  const { useSendVerificationCode, useVerifyCode } = useVerificationApi()
+  const createUserMutation = useCreateUser()
+  const sendCodeMutation = useSendVerificationCode()
+  const verifyCodeMutation = useVerifyCode()
+
   const [currentStep, setCurrentStep] = useState(0)
   const [formData, setFormData] = useState<UserCreateData>({
     tipo_usuario: UserType.ESTUDANTE,
@@ -53,15 +60,22 @@ export function StepByStepRegister({
     senha: '',
     telefone: '',
   } as UserCreateData)
+
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [verificationCode, setVerificationCode] = useState('')
   const [isEmailVerified, setIsEmailVerified] = useState(false)
-  const [isVerifying, setIsVerifying] = useState(false)
-  const [isSendingCode, setIsSendingCode] = useState(false)
-  const [emailError, setEmailError] = useState('')
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [showCodeInput, setShowCodeInput] = useState(false)
   const [generalError, setGeneralError] = useState<string>('')
+
+  useEffect(() => {
+    if (currentStep === 2) {
+      setIsEmailVerified(false)
+      setShowCodeInput(false)
+      setVerificationCode('')
+      setErrors((prev) => ({ ...prev, email_verification: '' }))
+    }
+  }, [currentStep])
 
   const handleInputChange = (name: string, value: any) => {
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -69,7 +83,6 @@ export function StepByStepRegister({
   }
 
   const handleUserTypeChange = (value: UserType) => {
-    // Update user type and adjust email domain
     const currentUsername = formData.email.split('@')[0]
     const domain =
       value === UserType.ESTUDANTE
@@ -105,86 +118,52 @@ export function StepByStepRegister({
         if (!/\S+@\S+\.\S+/.test(value)) error = 'Email inválido'
         break
       case 'senha':
-        if (value.length < 8) error = 'Senha deve ter pelo menos 8 caracteres'
-        if (!/\d/.test(value) || !/[a-zA-Z]/.test(value))
-          error = 'Senha deve conter letras e números'
+        error = utilValidatePassword(value) || ''
         break
       case 'telefone':
         if (value.replace(/\D/g, '').length !== 13)
           error = 'Telefone deve ter 13 dígitos'
         break
-      // Add more validations as needed
     }
     setErrors((prev) => ({ ...prev, [name]: error }))
     return !error
   }
 
-  const handleInputChangeOld = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-    validateField(name, value)
-  }
-
-  const handleTermsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAcceptedTerms(e.target.checked)
-  }
-
   const handleSendVerificationCode = async () => {
-    setIsSendingCode(true)
-    setEmailError('')
     try {
-      await sendVerificationCode(formData.email)
-      setShowCodeInput(true) // Show code input after successfully sending code
+      await sendCodeMutation.mutateAsync(formData.email)
+      setShowCodeInput(true)
     } catch (error) {
-      setEmailError('Erro ao enviar código de verificação. Tente novamente.')
+      setErrors((prev) => ({
+        ...prev,
+        email_verification:
+          'Erro ao enviar código de verificação. Tente novamente.',
+      }))
       setGeneralError('Algo deu errado... Verifique os passos anteriores!')
-    } finally {
-      setIsSendingCode(false)
     }
   }
 
   const handleVerifyCode = async () => {
     if (!verificationCode) {
-      setEmailError('Por favor, digite o código de verificação.')
+      setErrors((prev) => ({
+        ...prev,
+        email_verification: 'Por favor, digite o código de verificação.',
+      }))
       return
     }
 
-    setIsVerifying(true)
-    setEmailError('')
-
     try {
-      await verifyCode(formData.email, verificationCode)
+      await verifyCodeMutation.mutateAsync({
+        email: formData.email,
+        code: verificationCode,
+      })
       setIsEmailVerified(true)
-      setEmailError('')
+      setErrors((prev) => ({ ...prev, email_verification: '' }))
     } catch (error) {
-      setEmailError('Código de verificação inválido. Tente novamente.')
-    } finally {
-      setIsVerifying(false)
-    }
-  }
-
-  const validatePassword = (password: string) => {
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
-    const hasNumber = /\d/.test(password)
-    const hasUpperCase = /[A-Z]/.test(password)
-    const hasLowerCase = /[a-z]/.test(password)
-    const isLongEnough = password.length >= 8
-
-    if (
-      hasSpecialChar &&
-      hasNumber &&
-      hasUpperCase &&
-      hasLowerCase &&
-      isLongEnough
-    ) {
-      setErrors((prev) => ({ ...prev, senha: '' }))
-      return true
-    } else {
       setErrors((prev) => ({
         ...prev,
-        senha: 'A senha não atende aos requisitos de segurança.',
+        email_verification: 'Código de verificação inválido. Tente novamente.',
       }))
-      return false
     }
   }
 
@@ -195,45 +174,38 @@ export function StepByStepRegister({
     }
 
     try {
-      await createUser(formData)
+      await createUserMutation.mutateAsync(formData)
       onRegisterSuccess()
     } catch (error: any) {
-      if (error.status === 400) {
-        if (error.detail === 'Email already registered') {
+      if (error.response?.status === 400) {
+        if (error.response.data.detail === 'Email already registered') {
           setErrors((prev) => ({
             ...prev,
             email: 'Este email já está registrado.',
           }))
-          setGeneralError('Email em uso! Altere seu email ou faça login!')
-        } else if (error.detail.includes('Password validation failed')) {
+          setGeneralError(
+            'Email já cadastrado. Por favor, use outro email ou faça login.',
+          )
+          setCurrentStep(1)
+        } else if (
+          error.response.data.detail.includes('Password validation failed')
+        ) {
           setErrors((prev) => ({
             ...prev,
             senha: 'A senha não atende aos requisitos de segurança.',
           }))
         } else {
           setGeneralError(
-            error.detail || 'Erro ao criar usuário. Tente novamente.',
+            error.response.data.detail ||
+              'Erro ao criar usuário. Tente novamente.',
           )
         }
       } else {
-        setGeneralError('Erro ao criar usuário. Tente novamente.')
+        setGeneralError(
+          'Email já cadastrado. Por favor, use outro email ou faça login.',
+        )
       }
     }
-  }
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const username = e.target.value.split('@')[0] // Get only the username part
-    const domain =
-      formData.tipo_usuario === UserType.ESTUDANTE
-        ? '@alu.ufc.br'
-        : formData.tipo_usuario === UserType.PESQUISADOR
-          ? '@ufc.br'
-          : ''
-
-    setFormData((prev) => ({
-      ...prev,
-      email: username + domain,
-    }))
   }
 
   const renderStep = () => {
@@ -263,11 +235,11 @@ export function StepByStepRegister({
           <EmailVerificationStep
             email={formData.email}
             verificationCode={verificationCode}
-            isVerifying={isVerifying}
+            isVerifying={verifyCodeMutation.isLoading}
             isEmailVerified={isEmailVerified}
-            isSendingCode={isSendingCode}
+            isSendingCode={sendCodeMutation.isLoading}
             showCodeInput={showCodeInput}
-            emailError={emailError}
+            emailError={errors.email_verification}
             onSendCode={handleSendVerificationCode}
             onVerifyCode={handleVerifyCode}
             onCodeChange={setVerificationCode}
@@ -302,16 +274,23 @@ export function StepByStepRegister({
     switch (currentStep) {
       case 0:
         return allFieldsValid && acceptedTerms
+      case 1:
+        return (
+          allFieldsValid && formData.nome && formData.email && formData.telefone
+        )
       case 2:
         return allFieldsValid && isEmailVerified
-      default:
+      case 3:
+        return allFieldsValid && utilValidatePassword(formData.senha) === null
+      case 4:
         return allFieldsValid
+      default:
+        return false
     }
   }
 
   const handleNext = async () => {
     if (currentStep === steps.length - 1) {
-      // If we're on the last step, submit the form instead of incrementing step
       await handleSubmit()
     } else {
       setCurrentStep((prev) => prev + 1)
@@ -368,4 +347,32 @@ export function StepByStepRegister({
       </div>
     </div>
   )
+}
+
+function utilValidatePassword(password: string): string | null {
+  if (password.length < 8) {
+    return 'A senha deve ter pelo menos 8 caracteres'
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    return 'A senha deve conter pelo menos uma letra maiúscula'
+  }
+
+  if (!/[a-z]/.test(password)) {
+    return 'A senha deve conter pelo menos uma letra minúscula'
+  }
+
+  if (!/[0-9]/.test(password)) {
+    return 'A senha deve conter pelo menos um número'
+  }
+
+  if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
+    return 'A senha deve conter pelo menos um caractere especial'
+  }
+
+  return null // Password is valid
+}
+
+function validatePassword(password: string): boolean {
+  return utilValidatePassword(password) === null
 }
