@@ -1,199 +1,174 @@
-import {
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useApi } from '../hooks/useApi'
+import type {
   IniciativaCreateAndUpdate,
   IniciativaResponse,
   InitiativeStatus,
-} from '@/lib/types/initiativeTypes'
+} from '../types/initiativeTypes'
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1'
 
-function getAccessToken(): string | null {
-  return localStorage.getItem('accessToken')
-}
+export const useApiIniciativas = () => {
+  const { fetchWithToken } = useApi()
+  const queryClient = useQueryClient()
 
-export async function createInitiative(
-  initiativeData: IniciativaCreateAndUpdate,
-): Promise<IniciativaResponse> {
-  const token = getAccessToken()
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/initiatives/`, {
+  const createIniciativa = async (
+    iniciativaData: IniciativaCreateAndUpdate,
+  ): Promise<IniciativaResponse> => {
+    const response = await fetchWithToken(`${API_BASE_URL}/iniciativas/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(initiativeData),
+      body: JSON.stringify(iniciativaData),
     })
-
-    if (!response.ok) {
-      throw new Error('Failed to create initiative')
-    }
-
     return await response.json()
-  } catch (error) {
-    console.error('Error creating initiative:', error)
-    throw error
   }
-}
 
-export async function getInitiativeById(
-  initiativeId: string,
-): Promise<IniciativaResponse> {
-  const token = getAccessToken()
-
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/initiatives/${initiativeId}`,
+  const getIniciativaById = async (
+    iniciativaId: string,
+  ): Promise<IniciativaResponse> => {
+    const response = await fetchWithToken(
+      `${API_BASE_URL}/iniciativas/${iniciativaId}`,
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        requireAuth: false,
       },
     )
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch initiative')
-    }
-
     return await response.json()
-  } catch (error) {
-    console.error('Error fetching initiative:', error)
-    throw error
   }
-}
 
-export async function listInitiatives(
-  businessId?: string,
-  status: InitiativeStatus = 'aprovado',
-): Promise<IniciativaResponse[]> {
-  const token = getAccessToken()
-
-  try {
-    const url = new URL(`${API_BASE_URL}/initiatives/`)
-    if (businessId) url.searchParams.append('negocio_id', businessId)
-    url.searchParams.append('status', status)
-
-    const response = await fetch(url.toString(), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  const listIniciativas = async (
+    negocioId?: string,
+    status: InitiativeStatus = 'aprovado',
+  ): Promise<IniciativaResponse[]> => {
+    let url = `${API_BASE_URL}/iniciativas/?status=${status}`
+    if (negocioId) {
+      url += `&negocio_id=${negocioId}`
+    }
+    const response = await fetchWithToken(url, {
+      requireAuth: false,
     })
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch initiatives')
-    }
-
-    return await response.json()
-  } catch (error) {
-    console.error('Error fetching initiatives:', error)
-    throw error
+    const data = await response.json()
+    return data.data
   }
-}
 
-export async function updateInitiative(
-  initiativeId: string,
-  updateData: IniciativaCreateAndUpdate,
-): Promise<IniciativaResponse> {
-  const token = getAccessToken()
-
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/initiatives/${initiativeId}`,
+  const updateIniciativa = async ({
+    iniciativaId,
+    updateData,
+  }: {
+    iniciativaId: string
+    updateData: IniciativaCreateAndUpdate
+  }): Promise<IniciativaResponse> => {
+    const response = await fetchWithToken(
+      `${API_BASE_URL}/iniciativas/${iniciativaId}`,
       {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(updateData),
       },
     )
-
-    if (!response.ok) {
-      throw new Error('Failed to update initiative')
-    }
-
-    return await response.json()
-  } catch (error) {
-    console.error('Error updating initiative:', error)
-    throw error
+    const data = await response.json()
+    return data.data
   }
-}
 
-export async function deleteInitiative(initiativeId: string): Promise<void> {
-  const token = getAccessToken()
-
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/initiatives/${initiativeId}`,
-      {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    )
-
-    if (!response.ok) {
-      throw new Error('Failed to delete initiative')
-    }
-  } catch (error) {
-    console.error('Error deleting initiative:', error)
-    throw error
+  const deleteIniciativa = async (iniciativaId: string): Promise<void> => {
+    await fetchWithToken(`${API_BASE_URL}/iniciativas/${iniciativaId}`, {
+      method: 'DELETE',
+    })
   }
-}
 
-export async function approveInitiative(
-  initiativeId: string,
-): Promise<IniciativaResponse> {
-  const token = getAccessToken()
-
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/initiatives/${initiativeId}/approve`,
+  const approveIniciativa = async (
+    iniciativaId: string,
+  ): Promise<IniciativaResponse> => {
+    const response = await fetchWithToken(
+      `${API_BASE_URL}/iniciativas/${iniciativaId}/approve`,
       {
         method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       },
     )
-
-    if (!response.ok) {
-      throw new Error('Failed to approve initiative')
-    }
-
     return await response.json()
-  } catch (error) {
-    console.error('Error approving initiative:', error)
-    throw error
   }
-}
 
-export async function rejectInitiative(
-  initiativeId: string,
-): Promise<IniciativaResponse> {
-  const token = getAccessToken()
-
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/initiatives/${initiativeId}/reject`,
+  const rejectIniciativa = async (
+    iniciativaId: string,
+  ): Promise<IniciativaResponse> => {
+    const response = await fetchWithToken(
+      `${API_BASE_URL}/iniciativas/${iniciativaId}/reject`,
       {
         method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       },
     )
-
-    if (!response.ok) {
-      throw new Error('Failed to reject initiative')
-    }
-
     return await response.json()
-  } catch (error) {
-    console.error('Error rejecting initiative:', error)
-    throw error
+  }
+
+  const useCreateIniciativa = () =>
+    useMutation({
+      mutationFn: createIniciativa,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['iniciativas'] })
+      },
+    })
+
+  const useGetIniciativaById = (iniciativaId: string) =>
+    useQuery({
+      queryKey: ['iniciativa', iniciativaId],
+      queryFn: () => getIniciativaById(iniciativaId),
+    })
+
+  const useListIniciativas = (
+    negocioId?: string,
+    status: InitiativeStatus = 'aprovado',
+  ) =>
+    useQuery({
+      queryKey: ['iniciativas', negocioId, status],
+      queryFn: () => listIniciativas(negocioId, status),
+    })
+
+  const useUpdateIniciativa = () =>
+    useMutation({
+      mutationFn: updateIniciativa,
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({ queryKey: ['iniciativa', data.id] })
+        queryClient.invalidateQueries({ queryKey: ['iniciativas'] })
+      },
+    })
+
+  const useDeleteIniciativa = () =>
+    useMutation({
+      mutationFn: deleteIniciativa,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['iniciativas'] })
+      },
+    })
+
+  const useApproveIniciativa = () =>
+    useMutation({
+      mutationFn: approveIniciativa,
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({ queryKey: ['iniciativa', data.id] })
+        queryClient.invalidateQueries({ queryKey: ['iniciativas'] })
+      },
+    })
+
+  const useRejectIniciativa = () =>
+    useMutation({
+      mutationFn: rejectIniciativa,
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({ queryKey: ['iniciativa', data.id] })
+        queryClient.invalidateQueries({ queryKey: ['iniciativas'] })
+      },
+    })
+
+  return {
+    useCreateIniciativa,
+    useGetIniciativaById,
+    useListIniciativas,
+    useUpdateIniciativa,
+    useDeleteIniciativa,
+    useApproveIniciativa,
+    useRejectIniciativa,
   }
 }
