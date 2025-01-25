@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export enum UserType {
   ESTUDANTE = 'estudante',
   PESQUISADOR = 'pesquisador',
@@ -10,19 +11,19 @@ export enum UserTypeDomain {
 }
 
 interface RedesSociais {
-  linkedin?: string;
-  twitter?: string;
+  linkedin?: string
+  twitter?: string
 }
 
 export interface UserBaseCreate {
   nome: string
   email: string
   senha: string
-  tipo_usuario: UserType
   telefone: string
   conexoes: string[]
-  negocios: string[]  
+  negocios: string[]
   redes_sociais?: RedesSociais
+  tipo_usuario: UserType
 }
 
 export interface PesquisadorCreate extends UserBaseCreate {
@@ -42,3 +43,20 @@ export interface ExternoCreate extends UserBaseCreate {
 }
 
 export type UserCreateData = PesquisadorCreate | EstudanteCreate | ExternoCreate
+
+export interface UserWithType {
+  tipo_usuario: UserType
+  [key: string]: any // This allows for any additional properties
+}
+
+export function isEstudante(user: UserWithType): user is EstudanteCreate {
+  return user.tipo_usuario === UserType.ESTUDANTE
+}
+
+export function isPesquisador(user: UserWithType): user is PesquisadorCreate {
+  return user.tipo_usuario === UserType.PESQUISADOR
+}
+
+export function isExterno(user: UserWithType): user is ExternoCreate {
+  return user.tipo_usuario === UserType.EXTERNO
+}
