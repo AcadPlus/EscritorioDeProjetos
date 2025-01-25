@@ -26,7 +26,7 @@ export function BusinessList({
   loading,
 }: BusinessListProps) {
   const filteredAndSortedBusinesses = useMemo(() => {
-    let result = businesses.filter((business) => {
+    const result = businesses.filter((business) => {
       const matchesFilter = filter === 'all' || business.tipo_negocio === filter
       const matchesSearch =
         business.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -38,13 +38,21 @@ export function BusinessList({
 
     switch (sortBy) {
       case 'oldest':
-        result.sort((a, b) => new Date(a.data_cadastro).getTime() - new Date(b.data_cadastro).getTime())
+        result.sort(
+          (a, b) =>
+            new Date(a.data_cadastro).getTime() -
+            new Date(b.data_cadastro).getTime(),
+        )
         break
       case 'alphabetical':
         result.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
         break
       default: // 'recent'
-        result.sort((a, b) => new Date(b.data_cadastro).getTime() - new Date(a.data_cadastro).getTime())
+        result.sort(
+          (a, b) =>
+            new Date(b.data_cadastro).getTime() -
+            new Date(a.data_cadastro).getTime(),
+        )
     }
 
     return result
