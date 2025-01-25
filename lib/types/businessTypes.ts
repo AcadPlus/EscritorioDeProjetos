@@ -56,4 +56,11 @@ export interface NegocioResponse extends NegocioBase {
   demanda?: string
 }
 
+export type BusinessesByAdminResponse = {
+  all: NegocioResponse[]
+  aprovados: NegocioResponse[]
+  recusados: NegocioResponse[]
+  pendentes: NegocioResponse[]
+}
+
 export type BusinessStatus = 'aprovado' | 'pendente' | 'recusado'

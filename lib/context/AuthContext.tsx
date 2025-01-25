@@ -1,17 +1,26 @@
 'use client'
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import type React from 'react'
 import {
-  login as apiLogin,
-  logout as apiLogout,
-  getAccessToken,
-} from '../api/auth'
-import { UserType } from '../types/userTypes'
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react'
+import { useAuthApi, getAccessToken } from '../api/auth'
+import type { UserType } from '../types/userTypes'
+import { useQueryClient } from '@tanstack/react-query'
 
 interface AuthContextType {
   isAuthenticated: boolean
   userType: UserType | null
+  userId: string | null
   isLoading: boolean
-  login: (username: string, password: string, userType: UserType) => Promise<void>
+  login: (
+    username: string,
+    password: string,
+    userType: UserType,
+  ) => Promise<void>
   logout: () => Promise<void>
   getAccessToken: () => string | null
 }
@@ -23,19 +32,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const [userType, setUserType] = useState<UserType | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const { useLogin, useLogout } = useAuthApi()
+  const loginMutation = useLogin()
+  const logoutMutation = useLogout()
+  const queryClient = useQueryClient()
+
+  const checkAuth = useCallback(() => {
+    const token = getAccessToken()
+    const storedUserType = localStorage.getItem('userType') as UserType | null
+    const storedUserId = localStorage.getItem('userId')
+    if (token && storedUserType) {
+      setIsAuthenticated(true)
+      setUserType(storedUserType)
+      setUserId(storedUserId)
+    } else {
+      setIsAuthenticated(false)
+      setUserType(null)
+      setUserId(null)
+    }
+    setIsLoading(false)
+  }, [])
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = getAccessToken()
-      if (token) {
-        setIsAuthenticated(true)
-        setUserType(localStorage.getItem('userType') as UserType)
-      }
-      setIsLoading(false)
-    }
     checkAuth()
-  }, [])
+  }, [checkAuth])
 
   const login = async (
     username: string,
@@ -43,9 +65,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     userType: UserType,
   ) => {
     try {
-      await apiLogin(username, password, userType)
+      const response = await loginMutation.mutateAsync({
+        username,
+        password,
+        userType,
+      })
       setIsAuthenticated(true)
       setUserType(userType)
+      setUserId(response.user_uid)
+      localStorage.setItem('userType', userType)
+      localStorage.setItem('userId', response.user_uid)
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] })
     } catch (error) {
       console.error('Login failed:', error)
       throw error
@@ -54,9 +84,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = async () => {
     try {
-      await apiLogout()
+      await logoutMutation.mutateAsync()
       setIsAuthenticated(false)
       setUserType(null)
+      setUserId(null)
+      localStorage.clear()
+      queryClient.clear()
     } catch (error) {
       console.error('Logout failed:', error)
       throw error
@@ -66,6 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const value = {
     isAuthenticated,
     userType,
+    userId,
     isLoading,
     login,
     logout,

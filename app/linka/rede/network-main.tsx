@@ -3,12 +3,11 @@
 import { useState } from 'react'
 import { NetworkModal } from './network-modal'
 import { NetworkTabs } from './network-tabs'
-import { UserBaseCreate } from '@/lib/types/userTypes'
+import type { UserBaseCreate } from '@/lib/types/userTypes'
 
 export function Network() {
   const [searchQuery, setSearchQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState('all')
-  const [institutionFilter, setInstitutionFilter] = useState('all')
   const [selectedUser, setSelectedUser] = useState<UserBaseCreate | null>(null)
 
   return (
@@ -20,8 +19,6 @@ export function Network() {
         roleFilter={roleFilter}
         setRoleFilter={setRoleFilter}
         setSelectedUser={setSelectedUser}
-        institutionFilter={institutionFilter}
-        setInstitutionFilter={setInstitutionFilter}
       />
       <NetworkModal
         user={selectedUser}
@@ -31,4 +28,3 @@ export function Network() {
     </div>
   )
 }
-
