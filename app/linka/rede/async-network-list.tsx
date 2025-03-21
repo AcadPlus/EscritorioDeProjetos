@@ -1,16 +1,17 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
-import { useMemo, useEffect, useState } from 'react'
+import { useMemo, useEffect, useState, useCallback } from 'react'
 import { NetworkList } from './network-list'
 import { SkeletonCard } from './skeleton-card'
 import { useAllUsers } from '@/hooks/allUsers'
-import { useRequests } from '@/hooks/useRequests'
-import { UserCreateData, UserType, PesquisadorCreate, EstudanteCreate, ExternoCreate } from '@/lib/types/userTypes'
+import { useConnectionRequests } from '@/lib/api/connections'
+import { type UserCreateData, UserType } from '@/lib/types/userTypes'
+import { ConnectionStatus, RequestType } from '@/lib/types/connectionTypes'
 
 interface AsyncNetworkListProps {
   searchQuery: string
   roleFilter: string
-  institutionFilter: string
   setSelectedUser: (user: UserCreateData) => void
   displayMode: 'all' | 'connected' | 'pending'
 }
@@ -18,72 +19,200 @@ interface AsyncNetworkListProps {
 export function AsyncNetworkList({
   searchQuery,
   roleFilter,
-  institutionFilter,
   setSelectedUser,
   displayMode,
 }: AsyncNetworkListProps) {
-  const { users, isLoading, error } = useAllUsers()
-  const { requests, handleRequestAction, handleRemoveRequest, decodedToken } =
-    useRequests()
-  const [authUserUid, setAuthUserUid] = useState<string | null>(null)
+  const {
+    data: users,
+    isLoading: isLoadingUsers,
+    error: usersError,
+  } = useAllUsers()
+  const {
+    useGetRequests,
+    useCreateRequest,
+    useUpdateRequest,
+    useCancelRequest,
+    useRemoveConnection,
+    useGetUserConnections,
+  } = useConnectionRequests()
+
+  const { data: sentRequests, isLoading: isLoadingSent } = useGetRequests(
+    RequestType.SENT,
+  )
+  const { data: receivedRequests, isLoading: isLoadingReceived } =
+    useGetRequests(RequestType.RECEIVED)
+  const { data: userConnections, isLoading: isLoadingConnections } =
+    useGetUserConnections()
+
+  const createRequestMutation = useCreateRequest()
+  const updateRequestMutation = useUpdateRequest()
+  const cancelRequestMutation = useCancelRequest()
+  const removeConnectionMutation = useRemoveConnection()
+
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [loadingActions, setLoadingActions] = useState<Record<string, boolean>>(
+    {},
+  )
 
   useEffect(() => {
     const storedUserUid = localStorage.getItem('userUid')
     if (storedUserUid) {
-      setAuthUserUid(storedUserUid)
+      setCurrentUserId(storedUserUid)
     }
   }, [])
 
-  const getInstitution = (user: UserCreateData): string => {
-    switch (user.tipo_usuario) {
-      case UserType.PESQUISADOR:
-      case UserType.ESTUDANTE:
-        return (user as PesquisadorCreate | EstudanteCreate).campus
-      case UserType.EXTERNO:
-        return (user as ExternoCreate).empresa || ''
-      default:
-        return ''
-    }
-  }
+  const isLoading =
+    isLoadingUsers || isLoadingSent || isLoadingReceived || isLoadingConnections
+
+  const connections = useMemo(() => {
+    if (!sentRequests || !receivedRequests || !userConnections) return []
+
+    const connectionMap = new Map()
+
+    // Primeiro, mapear as conexões aceitas (maior prioridade)
+    userConnections.forEach((id) => {
+      connectionMap.set(id, {
+        id,
+        status: ConnectionStatus.ACCEPTED,
+        isSentByMe: false,
+      })
+    })
+
+    // Depois, adicionar solicitações pendentes apenas se não houver conexão aceita
+    sentRequests
+      .filter((req) => req.status === ConnectionStatus.PENDING)
+      .forEach((req) => {
+        if (!connectionMap.has(req.target_id)) {
+          connectionMap.set(req.target_id, {
+            id: req.target_id,
+            status: ConnectionStatus.PENDING,
+            isSentByMe: true,
+          })
+        }
+      })
+
+    receivedRequests
+      .filter((req) => req.status === ConnectionStatus.PENDING)
+      .forEach((req) => {
+        if (!connectionMap.has(req.requester_id)) {
+          connectionMap.set(req.requester_id, {
+            id: req.requester_id,
+            status: ConnectionStatus.PENDING,
+            isSentByMe: false,
+          })
+        }
+      })
+
+    return Array.from(connectionMap.values())
+  }, [sentRequests, receivedRequests, userConnections])
 
   const filteredUsers = useMemo(() => {
-    return users.filter(
-      (user) =>
-        user.email !== decodedToken &&
-        user.nome.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        (roleFilter === 'all' || user.tipo_usuario === roleFilter) &&
-        (institutionFilter === 'all' ||
-          getInstitution(user) === institutionFilter) &&
-        (!authUserUid || (user as any).uid !== authUserUid)
-    )
-  }, [users, decodedToken, searchQuery, roleFilter, institutionFilter, authUserUid])
+    return users
+      ? users.filter(
+          (user: {
+            uid: string | null
+            nome: string
+            tipo_usuario: string
+          }) => {
+            const isNotCurrentUser = user.uid !== currentUserId
+            const matchesSearch = user.nome
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())
+            const matchesRole =
+              roleFilter === 'all' || user.tipo_usuario === roleFilter
+            return matchesSearch && matchesRole && isNotCurrentUser
+          },
+        )
+      : []
+  }, [users, searchQuery, roleFilter, currentUserId])
 
-  const connectedUsers = useMemo(
-    () =>
-      filteredUsers.filter(
-        (user) => requests[user.email] && requests[user.email][0] === 'accepted',
-      ),
-    [filteredUsers, requests],
-  )
+  const categorizedUsers = useMemo(() => {
+    const connected: UserCreateData[] = []
+    const pending: UserCreateData[] = []
+    const all: UserCreateData[] = []
 
-  const pendingUsers = useMemo(
-    () =>
-      filteredUsers.filter(
-        (user) => requests[user.email] && requests[user.email][0] === 'pending',
-      ),
-    [filteredUsers, requests],
-  )
+    filteredUsers.forEach((user: UserCreateData) => {
+      const connection = connections.find((conn) => conn.id === user.uid)
+      if (connection) {
+        if (connection.status === ConnectionStatus.ACCEPTED) {
+          connected.push(user)
+        } else if (connection.status === ConnectionStatus.PENDING) {
+          pending.push(user)
+        }
+      }
+      all.push(user)
+    })
+
+    return { connected, pending, all }
+  }, [filteredUsers, connections])
 
   const displayUsers = useMemo(() => {
     switch (displayMode) {
       case 'connected':
-        return connectedUsers
+        return categorizedUsers.connected
       case 'pending':
-        return pendingUsers
+        return categorizedUsers.pending
       default:
-        return filteredUsers
+        return categorizedUsers.all
     }
-  }, [displayMode, connectedUsers, pendingUsers, filteredUsers])
+  }, [displayMode, categorizedUsers])
+
+  const handleRequestAction = useCallback(
+    async (
+      action: 'send' | 'accept' | 'reject' | 'cancel' | 'remove',
+      targetId: string,
+      user: UserCreateData,
+    ) => {
+      setLoadingActions((prev) => ({ ...prev, [targetId]: true }))
+      try {
+        if (action === 'send') {
+          const existingConnection = connections.find(conn => conn.id === targetId)
+          if (existingConnection) {
+            console.error('Já existe uma conexão ou solicitação pendente com este usuário')
+            return
+          }
+        }
+
+        switch (action) {
+          case 'send':
+            await createRequestMutation.mutateAsync(targetId)
+            break
+          case 'accept':
+          case 'reject':
+            await updateRequestMutation.mutateAsync({
+              userId: targetId,
+              status:
+                action === 'accept'
+                  ? ConnectionStatus.ACCEPTED
+                  : ConnectionStatus.REJECTED,
+            })
+            break
+          case 'cancel':
+            await cancelRequestMutation.mutateAsync(targetId)
+            break
+          case 'remove':
+            await removeConnectionMutation.mutateAsync({
+              userId: targetId,
+              userType: user.tipo_usuario,
+            })
+            break
+          default:
+            console.error('Invalid action:', action)
+        }
+      } catch (error) {
+        console.error(`Error performing ${action} action:`, error)
+      } finally {
+        setLoadingActions((prev) => ({ ...prev, [targetId]: false }))
+      }
+    },
+    [
+      createRequestMutation,
+      updateRequestMutation,
+      cancelRequestMutation,
+      removeConnectionMutation,
+      connections
+    ],
+  )
 
   if (isLoading) {
     return (
@@ -95,22 +224,22 @@ export function AsyncNetworkList({
     )
   }
 
-  if (error)
+  if (usersError)
     return (
       <div className="text-center mt-8 text-red-500">
-        Erro ao carregar usuários: {error.message}
+        Erro ao carregar dados: {usersError.message}
       </div>
     )
 
   return (
     <NetworkList
       users={displayUsers}
-      requests={requests}
-      decodedToken={decodedToken}
+      connections={connections}
+      currentUserId={currentUserId || ''}
       handleRequestAction={handleRequestAction}
-      handleRemoveRequest={handleRemoveRequest}
       setSelectedUser={setSelectedUser}
+      viewOption={displayMode}
+      loadingActions={loadingActions}
     />
   )
 }
-

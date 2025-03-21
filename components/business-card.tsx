@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import Image from 'next/image'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -13,6 +12,8 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Facebook, Instagram, Linkedin, LinkIcon } from 'lucide-react'
 import { NegocioResponse } from '@/lib/types/businessTypes'
+import Link from 'next/link'
+import Image from 'next/image'
 
 // Define a new interface for the component's props
 interface BusinessCardProps {
@@ -46,44 +47,65 @@ export function BusinessCard({ business }: BusinessCardProps) {
 
   return (
     <>
-      <Card className="w-full sm:w-[300px] overflow-hidden hover:shadow-lg transition-shadow duration-200">
-        <CardHeader className="p-0 relative">
-          {getBusinessTypeBadge(business.tipo_negocio)}
-          <div className="bg-gray-100 h-[200px] relative flex items-center justify-center">
-            {business.logo ? (
-              <Image
-                src={business.logo || '/placeholder.svg'}
-                alt={`${business.nome} logo`}
-                fill
-                className="object-contain p-6"
-              />
-            ) : (
-              <Avatar className="h-24 w-24">
-                <AvatarFallback className="text-4xl bg-white">
-                  {business.nome.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-            )}
+      <Card className="group relative overflow-hidden hover:shadow-lg transition-all duration-300 bg-gradient-to-b from-white to-gray-50">
+        <Link
+          href={`/linka/inspecionar-negocio/${business.id}`}
+          className="block"
+        >
+          <div className="relative p-6 flex flex-col items-center">
+            {getBusinessTypeBadge(business.tipo_negocio)}
+            
+            <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-gray-100 shadow-sm relative">
+              {business.foto_perfil ? (
+                <Image
+                  src={business.foto_perfil}
+                  alt={`Logo de ${business.nome}`}
+                  fill
+                  sizes="(max-width: 96px) 100vw, 96px"
+                  className="object-cover"
+                />
+              ) : (
+                <Avatar className="w-full h-full">
+                  <AvatarFallback className="text-3xl bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                    {business.nome.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+            </div>
+
+            <h3 className="text-lg font-semibold text-gray-900 mb-2 text-center">
+              {business.nome}
+            </h3>
+
+            <div className="flex flex-wrap justify-center gap-2 mb-4">
+              {business.palavras_chave.slice(0, 3).map((keyword, index) => (
+                <Badge 
+                  key={index} 
+                  variant="secondary" 
+                  className="text-xs bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                >
+                  {keyword}
+                </Badge>
+              ))}
+              {business.palavras_chave.length > 3 && (
+                <Badge 
+                  variant="secondary" 
+                  className="text-xs bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                >
+                  +{business.palavras_chave.length - 3}
+                </Badge>
+              )}
+            </div>
+
+            <p className="text-sm text-gray-600 text-center line-clamp-2">
+              {business.tipo_negocio === 'partec'
+                ? business.descricao_problema
+                : business.demanda}
+            </p>
+
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
-        </CardHeader>
-        <CardContent className="p-6">
-          <CardTitle className="mb-4 text-xl line-clamp-1">
-            {business.nome}
-          </CardTitle>
-          <p className="text-sm text-muted-foreground mb-6 line-clamp-3 min-h-[4.5rem]">
-            {business.tipo_negocio === 'partec'
-              ? business.descricao_problema
-              : business.demanda}
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsOpen(true)}
-            className="w-full"
-          >
-            Detalhes
-          </Button>
-        </CardContent>
+        </Link>
       </Card>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -138,7 +160,9 @@ export function BusinessCard({ business }: BusinessCardProps) {
                 {business.tipo_negocio === 'partec' ? (
                   <div className="grid gap-4">
                     <div>
-                      <h3 className="font-semibold mb-2">Descrição do Problema</h3>
+                      <h3 className="font-semibold mb-2">
+                        Descrição do Problema
+                      </h3>
                       <p className="text-sm">{business.descricao_problema}</p>
                     </div>
                     <div className="grid gap-2 text-sm">
@@ -190,4 +214,3 @@ export function BusinessCard({ business }: BusinessCardProps) {
     </>
   )
 }
-

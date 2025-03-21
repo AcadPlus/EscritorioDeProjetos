@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { refreshToken, getAccessToken } from '../api/auth'
+import { useAuthApi, getAccessToken } from '../api/auth'
 import { useAuth } from '../context/AuthContext'
 
 interface ApiOptions extends RequestInit {
@@ -10,6 +10,8 @@ export const useApi = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   const { logout } = useAuth()
+  const { useRefreshToken } = useAuthApi()
+  const refreshTokenMutation = useRefreshToken()
 
   const fetchWithToken = useCallback(
     async (url: string, options: ApiOptions = {}) => {
@@ -26,16 +28,14 @@ export const useApi = () => {
         }
 
         const headers = new Headers(fetchOptions.headers)
-        if (requireAuth) {
-          headers.set('Authorization', `Bearer ${accessToken}`)
-        }
+        headers.set('Authorization', `Bearer ${accessToken}`)
 
         const response = await fetch(url, { ...fetchOptions, headers })
 
         if (response.status === 401 && requireAuth) {
           // Token might be expired, try to refresh
           try {
-            await refreshToken()
+            await refreshTokenMutation.mutateAsync()
             accessToken = getAccessToken()
             if (!accessToken) {
               throw new Error('Failed to refresh token')
@@ -47,13 +47,14 @@ export const useApi = () => {
             }
             return newResponse
           } catch (refreshError) {
-            // If refresh fails, log out the user
+            alert('Sessão expirada. Por favor, faça login novamente.')
             await logout()
             throw new Error('Session expired. Please log in again.')
           }
         }
 
         if (!response.ok) {
+          console.log(response)
           throw new Error('API request failed')
         }
 
@@ -67,7 +68,7 @@ export const useApi = () => {
         setIsLoading(false)
       }
     },
-    [logout],
+    [logout, refreshTokenMutation],
   )
 
   return { fetchWithToken, isLoading, error }

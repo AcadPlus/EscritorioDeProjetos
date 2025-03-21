@@ -1,9 +1,23 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { UserType, UserCreateData, PesquisadorCreate, EstudanteCreate, ExternoCreate } from '@/lib/types/userTypes'
+import {
+  PublicUserType,
+  UserCreateData,
+  PesquisadorCreate,
+  EstudanteCreate,
+  ExternoCreate,
+  campusOptions,
+} from '@/lib/types/userTypes'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface AdditionalInfoStepProps {
-  userType: UserType
+  userType: PublicUserType
   formData: UserCreateData
   onInputChange: (name: string, value: string | string[]) => void
   onSocialMediaChange: (network: string, value: string) => void
@@ -15,8 +29,8 @@ export function AdditionalInfoStep({
   onInputChange,
   onSocialMediaChange,
 }: AdditionalInfoStepProps) {
-  if (userType === UserType.PESQUISADOR) {
-    const pesquisadorData = formData as PesquisadorCreate;
+  if (userType === PublicUserType.PESQUISADOR) {
+    const pesquisadorData = formData as PesquisadorCreate
     return (
       <div className="space-y-4">
         <div className="space-y-2">
@@ -30,26 +44,49 @@ export function AdditionalInfoStep({
           />
         </div>
         <div className="space-y-2">
+          <Label htmlFor="siape">SIAPE</Label>
+          <Input
+            id="siape"
+            value={pesquisadorData.siape}
+            onChange={(e) => onInputChange('siape', e.target.value)}
+            className="h-11"
+            required
+          />
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="palavras_chave">
             Palavras-chave (separadas por vírgula)
           </Label>
           <Input
             id="palavras_chave"
             value={pesquisadorData.palavras_chave.join(', ')}
-            onChange={(e) => onInputChange('palavras_chave', e.target.value.split(',').map(word => word.trim()))}
+            onChange={(e) =>
+              onInputChange(
+                'palavras_chave',
+                e.target.value.split(',').map((word) => word.trim()),
+              )
+            }
             className="h-11"
             required
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="campus">Campus</Label>
-          <Input
-            id="campus"
+          <Select
             value={pesquisadorData.campus}
-            onChange={(e) => onInputChange('campus', e.target.value)}
-            className="h-11"
-            required
-          />
+            onValueChange={(value) => onInputChange('campus', value)}
+          >
+            <SelectTrigger className="h-11">
+              <SelectValue placeholder="Selecione o campus" />
+            </SelectTrigger>
+            <SelectContent>
+              {campusOptions.map((campus) => (
+                <SelectItem key={campus} value={campus}>
+                  {campus}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-2">
           <Label htmlFor="linkedin">LinkedIn (opcional)</Label>
@@ -73,8 +110,8 @@ export function AdditionalInfoStep({
     )
   }
 
-  if (userType === UserType.ESTUDANTE) {
-    const estudanteData = formData as EstudanteCreate;
+  if (userType === PublicUserType.ESTUDANTE) {
+    const estudanteData = formData as EstudanteCreate
     return (
       <div className="space-y-4">
         <div className="space-y-2">
@@ -88,20 +125,38 @@ export function AdditionalInfoStep({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="campus">Campus</Label>
+          <Label htmlFor="matricula">Matrícula</Label>
           <Input
-            id="campus"
-            value={estudanteData.campus}
-            onChange={(e) => onInputChange('campus', e.target.value)}
+            id="matricula"
+            value={estudanteData.matricula}
+            onChange={(e) => onInputChange('matricula', e.target.value)}
             className="h-11"
             required
           />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="campus">Campus</Label>
+          <Select
+            value={estudanteData.campus}
+            onValueChange={(value) => onInputChange('campus', value)}
+          >
+            <SelectTrigger className="h-11">
+              <SelectValue placeholder="Selecione o campus" />
+            </SelectTrigger>
+            <SelectContent>
+              {campusOptions.map((campus) => (
+                <SelectItem key={campus} value={campus}>
+                  {campus}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
     )
   }
 
-  const externoData = formData as ExternoCreate;
+  const externoData = formData as ExternoCreate
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -125,4 +180,3 @@ export function AdditionalInfoStep({
     </div>
   )
 }
-

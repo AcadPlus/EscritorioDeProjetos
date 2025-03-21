@@ -65,8 +65,8 @@ export default function GenericForm({
   const onSubmit = async (data: any) => {
     if (!uid) {
       toast({
-        title: 'Erro',
-        description: 'Usuário não autenticado',
+        title: 'Erro de autenticação',
+        description: 'Você precisa estar autenticado para criar um novo item. Por favor, faça login para continuar.',
         variant: 'destructive',
       })
       return
@@ -108,17 +108,16 @@ export default function GenericForm({
         onItemCreated(response.data.newItem)
         reset()
         toast({
-          title: 'Sucesso',
-          description: 'Item criado com sucesso!',
+          title: 'Item criado',
+          description: 'O novo item foi criado e salvo com sucesso no sistema.',
           variant: 'success',
         })
       }
     } catch (error) {
       console.error('Erro ao criar item:', error)
       toast({
-        title: 'Erro',
-        description:
-          'Não foi possível criar o item. Por favor, tente novamente.',
+        title: 'Erro ao criar item',
+        description: 'Ocorreu um erro ao tentar criar o item. Por favor, verifique os dados e tente novamente.',
         variant: 'destructive',
       })
     } finally {

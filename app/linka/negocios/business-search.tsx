@@ -12,10 +12,7 @@ export function BusinessSearch({
   handleSearch,
 }: BusinessSearchProps) {
   return (
-    <form
-      onSubmit={handleSearch}
-      className="flex items-center gap-2 w-full"
-    >
+    <form onSubmit={handleSearch} className="flex items-center gap-2 w-full">
       <Input
         className="w-full bg-white"
         placeholder="Digite aqui!"
@@ -25,4 +22,3 @@ export function BusinessSearch({
     </form>
   )
 }
-

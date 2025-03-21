@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { NegocioResponse } from '@/lib/types/businessTypes'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { NegocioResponse, NegocioType } from '@/lib/types/businessTypes'
 
 interface BusinessStatusProps {
   activeBusinesses: NegocioResponse[]
@@ -8,28 +8,31 @@ interface BusinessStatusProps {
 
 export function BusinessStatus({
   activeBusinesses,
+  pendingBusinesses,
 }: BusinessStatusProps) {
-  const businessPartec = activeBusinesses.filter(
-    (item) => item.tipo_negocio === 'partec'
-  )
-  const businessExternal = activeBusinesses.filter(
-    (item) => item.tipo_negocio !== 'partec'
-  )
+  const incubadosCount = activeBusinesses.filter(
+    (b) => b.tipo_negocio === NegocioType.INCUBADO,
+  ).length
+  const parceirosCount = activeBusinesses.filter(
+    (b) => b.tipo_negocio === NegocioType.PARCEIRO,
+  ).length
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-lg font-medium">
-          Status dos Negócios
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col sm:flex-row justify-between space-y-2 sm:space-y-0 sm:space-x-4">
-          <div>Ativos (Partec): {businessPartec.length}</div>
-          <div>Ativos (Externos): {businessExternal.length}</div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="flex items-center gap-6">
+      <div className="flex items-center gap-2">
+        <div className="text-sm text-gray-600">Incubados:</div>
+        <div className="font-medium text-gray-900">{incubadosCount}</div>
+      </div>
+      <div className="w-px h-4 bg-gray-200" />
+      <div className="flex items-center gap-2">
+        <div className="text-sm text-gray-600">Parceiros:</div>
+        <div className="font-medium text-gray-900">{parceirosCount}</div>
+      </div>
+      <div className="w-px h-4 bg-gray-200" />
+      <div className="flex items-center gap-2">
+        <div className="text-sm text-gray-600">Total:</div>
+        <div className="font-medium text-gray-900">{activeBusinesses.length}</div>
+      </div>
+    </div>
   )
 }
-

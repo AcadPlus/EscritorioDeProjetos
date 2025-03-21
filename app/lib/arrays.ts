@@ -14,11 +14,11 @@ const legal = [
 ]
 const links = [
   { name: 'Home', href: '/', expand: null },
-  { name: 'Sobre', href: '#sobre-escritorio', expand: null },
-  { name: 'Vitrines', href: '#vitrines', expand: null },
+  { name: 'Sobre', href: '/#sobre-escritorio', expand: null },
+  { name: 'Vitrines', href: '/#vitrines', expand: null },
   {
     name: 'Comitê de Uniformização',
-    href: '#comite',
+    href: '/#comite',
     // expand: [
     //   { name: 'Sobre', href: '/sobre' },
     //   { name: 'Conferir', href: '/conferir' },
@@ -48,7 +48,7 @@ const links = [
       { name: 'Fluxos visuais', href: '/fluxos_e_checklists/fluxos_visuais' },
     ],
   },
-  { name: 'Contato', href: '/contact', expand: null },
+  { name: 'Contato', href: '/contato', expand: null },
   { name: 'LINK@', href: '/linka/negocios', expand: null, special: true },
 ]
 

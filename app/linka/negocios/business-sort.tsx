@@ -21,13 +21,22 @@ export function BusinessSort({ handleSortChange }: BusinessSortProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-white">
-        <DropdownMenuItem onSelect={() => handleSortChange('recent')}>
+        <DropdownMenuItem
+          className="hover:bg-gray-200"
+          onSelect={() => handleSortChange('recent')}
+        >
           Mais Recentes
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => handleSortChange('oldest')}>
+        <DropdownMenuItem
+          className="hover:bg-gray-200"
+          onSelect={() => handleSortChange('oldest')}
+        >
           Mais Antigos
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => handleSortChange('alphabetical')}>
+        <DropdownMenuItem
+          className="hover:bg-gray-200"
+          onSelect={() => handleSortChange('alphabetical')}
+        >
           Ordem Alfabética
         </DropdownMenuItem>
       </DropdownMenuContent>
