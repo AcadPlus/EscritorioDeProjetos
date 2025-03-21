@@ -14,7 +14,7 @@ interface NetworkListProps {
   handleRequestAction: (
     action: 'send' | 'accept' | 'reject' | 'cancel' | 'remove',
     targetId: string,
-    user: UserCreateData
+    user: UserCreateData,
   ) => void
   setSelectedUser: (user: UserCreateData) => void
   viewOption: 'all' | 'pending' | 'connected'
@@ -53,7 +53,9 @@ export function NetworkList({
               key={user.uid}
               user={user}
               connectionStatus={status}
-              handleRequestAction={(action, targetId) => handleRequestAction(action, targetId, user)}
+              handleRequestAction={(action, targetId) =>
+                handleRequestAction(action, targetId, user)
+              }
               onViewProfile={setSelectedUser}
               isLoading={loadingActions[user.uid]}
               isSentByMe={isSentByMe}
@@ -64,4 +66,3 @@ export function NetworkList({
     </div>
   )
 }
-

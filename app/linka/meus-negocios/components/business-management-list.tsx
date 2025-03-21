@@ -1,21 +1,16 @@
 'use client'
 
-import type {
-  NegocioResponse,
-  BusinessStatus,
-  BusinessesByAdminResponse,
-} from '@/lib/types/businessTypes'
+import type { NegocioResponse, NegocioUpdate } from '@/lib/types/businessTypes'
 import { useBusinessApi } from '@/lib/api/business'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
-import { Edit2, Trash2, Mail, Phone } from 'lucide-react'
+import { Trash2, Mail, Phone } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -28,48 +23,36 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { BusinessEditModal } from './business-edit-modal'
+import Link from 'next/link'
+import { motion } from 'framer-motion'
 
 interface BusinessManagementListProps {
-  businessesData: BusinessesByAdminResponse | undefined
-  statusFilter: BusinessStatus | 'all'
+  businesses: NegocioResponse[] | undefined
   searchTerm: string
   sortBy: 'recent' | 'oldest' | 'alphabetical'
   currentPage: number
   setCurrentPage: (page: number) => void
   itemsPerPage: number
   loading: boolean
+  onRefresh: () => void
 }
 
 export function BusinessManagementList({
-  businessesData,
-  statusFilter,
+  businesses,
   searchTerm,
   sortBy,
   currentPage,
   setCurrentPage,
   itemsPerPage,
   loading,
+  onRefresh,
 }: BusinessManagementListProps) {
   const { useUpdateBusiness, useDeleteBusiness } = useBusinessApi()
   const updateBusinessMutation = useUpdateBusiness()
   const deleteBusinessMutation = useDeleteBusiness()
   const [deleteBusinessId, setDeleteBusinessId] = useState<string | null>(null)
-  const [editBusiness, setEditBusiness] = useState<NegocioResponse | null>(null)
 
-  const filteredBusinesses = (() => {
-    if (!businessesData) return []
-    switch (statusFilter) {
-      case 'aprovado':
-        return businessesData.aprovados
-      case 'pendente':
-        return businessesData.pendentes
-      case 'recusado':
-        return businessesData.recusados
-      default:
-        return businessesData.all
-    }
-  })().filter(
+  const filteredBusinesses = (businesses || []).filter(
     (business) =>
       business.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
       business.email.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -102,8 +85,9 @@ export function BusinessManagementList({
     try {
       await updateBusinessMutation.mutateAsync({
         businessId: business.id,
-        updateData: { visivel: !business.visivel },
+        updateData: { visivel: !business.visivel } as NegocioUpdate,
       })
+      onRefresh()
     } catch (error) {
       console.error('Error updating business visibility:', error)
     }
@@ -113,13 +97,10 @@ export function BusinessManagementList({
     try {
       await deleteBusinessMutation.mutateAsync(businessId)
       setDeleteBusinessId(null)
+      onRefresh()
     } catch (error) {
       console.error('Error deleting business:', error)
     }
-  }
-
-  const handleEdit = (business: NegocioResponse) => {
-    setEditBusiness(business)
   }
 
   const getStatusColor = (status: string) => {
@@ -146,134 +127,135 @@ export function BusinessManagementList({
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {paginatedBusinesses.map((business) => (
-          <Card
+        {paginatedBusinesses.map((business, index) => (
+          <motion.div
             key={business.id}
-            className="backdrop-blur-sm bg-white/50 border shadow-lg  flex flex-col"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
           >
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <CardTitle className="text-xl font-bold">
-                  {business.nome}
-                </CardTitle>
-                <Badge
-                  className={cn('font-medium', getStatusColor(business.status))}
-                >
-                  {business.status}
-                </Badge>
-                {business.status === 'aprovado' && !business.visivel && (
-                  <Badge variant="outline" className="ml-2">
-                    Não visível
-                  </Badge>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4 flex-1 flex flex-col">
-              <div className="space-y-1 flex-1">
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                  <Mail className="h-4 w-4" />
-                  <span>{business.email}</span>
+            <Card className="backdrop-blur-sm bg-white border shadow-lg flex flex-col hover:shadow-xl transition-all duration-200 group">
+              <Link
+                href={`/linka/inspecionar-negocio/${business.id}`}
+                className="block"
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-xl font-bold group-hover:text-blue-600 transition-colors">
+                      {business.nome}
+                    </CardTitle>
+                    <Badge
+                      className={cn(
+                        'font-medium',
+                        getStatusColor(business.status),
+                      )}
+                    >
+                      {business.status}
+                    </Badge>
+                    {business.status === 'aprovado' && !business.visivel && (
+                      <Badge variant="outline" className="ml-2">
+                        Não visível
+                      </Badge>
+                    )}
+                  </div>
+                </CardHeader>
+              </Link>
+              <CardContent className="space-y-4 flex-1 flex flex-col">
+                <div className="space-y-1 flex-1">
+                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                    <Mail className="h-4 w-4" />
+                    <span>{business.email}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                    <Phone className="h-4 w-4" />
+                    <span>{business.telefone}</span>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                  <Phone className="h-4 w-4" />
-                  <span>{business.telefone}</span>
-                </div>
-              </div>
 
-              <div className="flex items-center justify-between pt-2 mt-auto">
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-muted-foreground">Visível</span>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div>
-                          <Switch
-                            checked={business.visivel}
-                            onCheckedChange={() =>
-                              handleVisibilityChange(business)
-                            }
-                            disabled={business.status !== 'aprovado'}
-                          />
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {business.status === 'aprovado'
-                          ? 'Alterar visibilidade do negócio'
-                          : 'Apenas negócios aprovados podem alterar a visibilidade'}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                    onClick={() => handleEdit(business)}
-                  >
-                    <Edit2 className="h-4 w-4" />
-                    <span className="sr-only">Editar</span>
-                  </Button>
-                  <Dialog
-                    open={deleteBusinessId === business.id}
-                    onOpenChange={(open) => !open && setDeleteBusinessId(null)}
-                  >
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => setDeleteBusinessId(business.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Excluir</span>
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Confirmar exclusão</DialogTitle>
-                        <DialogDescription className="space-y-3 pt-3">
-                          <p>
+                <div className="flex items-center justify-between pt-2 mt-auto">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-muted-foreground">Visível</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div>
+                            <Switch
+                              checked={business.visivel}
+                              onCheckedChange={() =>
+                                handleVisibilityChange(business)
+                              }
+                              disabled={business.status !== 'aprovado'}
+                            />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {business.status === 'aprovado'
+                            ? 'Alterar visibilidade do negócio'
+                            : 'Apenas negócios aprovados podem alterar a visibilidade'}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Dialog
+                      open={deleteBusinessId === business.id}
+                      onOpenChange={(open) => !open && setDeleteBusinessId(null)}
+                    >
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => setDeleteBusinessId(business.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Excluir</span>
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Confirmar exclusão</DialogTitle>
+                        </DialogHeader>
+                        <div className="py-4">
+                          <div className="text-sm text-muted-foreground">
                             Você tem certeza que deseja excluir este negócio?
                             Esta ação não pode ser desfeita.
-                          </p>
-                          <div className="rounded-lg bg-amber-50 border border-amber-200 p-3">
-                            <p className="text-amber-700 text-sm">
+                          </div>
+                          <div className="mt-4 rounded-lg bg-amber-50 border border-amber-200 p-3">
+                            <div className="text-amber-700 text-sm">
                               Atenção: Se você excluir este negócio, precisará
                               passar por todo o processo de submissão novamente
                               caso queira readicioná-lo à plataforma.
-                            </p>
+                            </div>
                           </div>
-                        </DialogDescription>
-                      </DialogHeader>
-                      <DialogFooter className="gap-2 sm:gap-0">
-                        <Button
-                          variant="outline"
-                          className="bg-black text-white"
-                          onClick={() => setDeleteBusinessId(null)}
-                        >
-                          Cancelar
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          onClick={() =>
-                            deleteBusinessId && handleDelete(deleteBusinessId)
-                          }
-                        >
-                          Sim, excluir negócio
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
+                        </div>
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={() => setDeleteBusinessId(null)}
+                          >
+                            Cancelar
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            onClick={() => handleDelete(business.id)}
+                          >
+                            Excluir
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </motion.div>
         ))}
       </div>
 
+      {/* Paginação */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center space-x-4 mt-6">
+        <div className="flex justify-center space-x-2 mt-6">
           <Button
             variant="outline"
             onClick={() => setCurrentPage(currentPage - 1)}
@@ -281,9 +263,6 @@ export function BusinessManagementList({
           >
             Anterior
           </Button>
-          <span className="text-sm text-muted-foreground">
-            Página {currentPage} de {totalPages}
-          </span>
           <Button
             variant="outline"
             onClick={() => setCurrentPage(currentPage + 1)}
@@ -292,14 +271,6 @@ export function BusinessManagementList({
             Próxima
           </Button>
         </div>
-      )}
-
-{editBusiness && (
-        <BusinessEditModal
-          isOpen={!!editBusiness}
-          onClose={() => setEditBusiness(null)}
-          business={editBusiness}
-        />
       )}
     </div>
   )

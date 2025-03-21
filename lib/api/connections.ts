@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useApi } from '../hooks/useApi'
-import type {
+import {
   ConnectionRequest,
   RequestType,
   ConnectionStatus,
@@ -88,6 +88,60 @@ export function useConnectionRequests() {
     })
   }
 
+  // Nova função para verificar o status de conexão entre o usuário atual e outro usuário
+  const getConnectionStatus = async (userId: string): Promise<ConnectionStatus | 'none'> => {
+    try {
+      // Primeiro verificar se já estão conectados
+      const connectionsResponse = await fetchWithToken(
+        `${API_BASE_URL}/connections/connections`,
+      )
+      const connectionsData = await connectionsResponse.json()
+      const connections = connectionsData.data.connections || []
+
+      // Verificar se o usuário está na lista de conexões
+      if (connections.includes(userId)) {
+        return ConnectionStatus.ACCEPTED
+      }
+
+      // Buscar solicitações enviadas pendentes
+      const sentResponse = await fetchWithToken(
+        `${API_BASE_URL}/connections/requests/${RequestType.SENT}?status=${ConnectionStatus.PENDING}`,
+      )
+      const sentData = await sentResponse.json()
+      const sentRequests = sentData.data || []
+
+      // Verificar se existe uma solicitação enviada pendente
+      const sentPending = sentRequests.find(
+        (req: ConnectionRequest) => req.target_id === userId,
+      )
+      
+      if (sentPending) {
+        return ConnectionStatus.PENDING
+      }
+
+      // Buscar solicitações recebidas pendentes
+      const receivedResponse = await fetchWithToken(
+        `${API_BASE_URL}/connections/requests/${RequestType.RECEIVED}?status=${ConnectionStatus.PENDING}`,
+      )
+      const receivedData = await receivedResponse.json()
+      const receivedRequests = receivedData.data || []
+
+      // Verificar se existe uma solicitação recebida pendente
+      const receivedPending = receivedRequests.find(
+        (req: ConnectionRequest) => req.requester_id === userId,
+      )
+      
+      if (receivedPending) {
+        return ConnectionStatus.PENDING
+      }
+
+      return 'none'
+    } catch (error) {
+      console.error('Error checking connection status:', error)
+      return 'none'
+    }
+  }
+
   const useGetRequests = (
     requestType: RequestType,
     status?: ConnectionStatus,
@@ -102,6 +156,8 @@ export function useConnectionRequests() {
       mutationFn: createRequest,
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['connectionRequests'] })
+        queryClient.invalidateQueries({ queryKey: ['connectionStatus'] })
+        queryClient.invalidateQueries({ queryKey: ['userConnections'] })
       },
     })
 
@@ -110,6 +166,8 @@ export function useConnectionRequests() {
       mutationFn: updateRequest,
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['connectionRequests'] })
+        queryClient.invalidateQueries({ queryKey: ['userConnections'] })
+        queryClient.invalidateQueries({ queryKey: ['connectionStatus'] })
       },
     })
 
@@ -118,6 +176,8 @@ export function useConnectionRequests() {
       mutationFn: cancelRequest,
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['connectionRequests'] })
+        queryClient.invalidateQueries({ queryKey: ['connectionStatus'] })
+        queryClient.invalidateQueries({ queryKey: ['userConnections'] })
       },
     })
 
@@ -131,8 +191,18 @@ export function useConnectionRequests() {
     useMutation({
       mutationFn: removeConnection,
       onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['userConnections'] })
+        queryClient.invalidateQueries({ queryKey: ['connectionStatus'] })
         queryClient.invalidateQueries({ queryKey: ['connectionRequests'] })
       },
+    })
+
+  // Hook para verificar o status de conexão
+  const useGetConnectionStatus = (userId: string, options = {}) =>
+    useQuery({
+      queryKey: ['connectionStatus', userId],
+      queryFn: () => getConnectionStatus(userId),
+      ...options,
     })
 
   return {
@@ -142,5 +212,11 @@ export function useConnectionRequests() {
     useCancelRequest,
     useGetUserConnections,
     useRemoveConnection,
+    useGetConnectionStatus,
   }
+}
+
+// Exportar uma função para uso direto em componentes
+export function useConnectionApi() {
+  return useConnectionRequests()
 }

@@ -20,8 +20,8 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       toast({
-        title: 'Não autenticado',
-        description: 'Você precisa fazer login para acessar esta página.',
+        title: 'Acesso restrito',
+        description: 'Você precisa estar autenticado para acessar esta página. Por favor, faça login para continuar.',
         duration: 5000,
         variant: 'destructive',
       })

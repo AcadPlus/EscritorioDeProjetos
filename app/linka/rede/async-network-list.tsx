@@ -67,36 +67,62 @@ export function AsyncNetworkList({
   const connections = useMemo(() => {
     if (!sentRequests || !receivedRequests || !userConnections) return []
 
-    return [
-      ...sentRequests.map((req) => ({
-        id: req.target_id,
-        status: req.status,
-        isSentByMe: true,
-      })),
-      ...receivedRequests.map((req) => ({
-        id: req.requester_id,
-        status: req.status,
-        isSentByMe: false,
-      })),
-      ...userConnections.map((id) => ({
+    const connectionMap = new Map()
+
+    // Primeiro, mapear as conexões aceitas (maior prioridade)
+    userConnections.forEach((id) => {
+      connectionMap.set(id, {
         id,
         status: ConnectionStatus.ACCEPTED,
         isSentByMe: false,
-      })),
-    ]
+      })
+    })
+
+    // Depois, adicionar solicitações pendentes apenas se não houver conexão aceita
+    sentRequests
+      .filter((req) => req.status === ConnectionStatus.PENDING)
+      .forEach((req) => {
+        if (!connectionMap.has(req.target_id)) {
+          connectionMap.set(req.target_id, {
+            id: req.target_id,
+            status: ConnectionStatus.PENDING,
+            isSentByMe: true,
+          })
+        }
+      })
+
+    receivedRequests
+      .filter((req) => req.status === ConnectionStatus.PENDING)
+      .forEach((req) => {
+        if (!connectionMap.has(req.requester_id)) {
+          connectionMap.set(req.requester_id, {
+            id: req.requester_id,
+            status: ConnectionStatus.PENDING,
+            isSentByMe: false,
+          })
+        }
+      })
+
+    return Array.from(connectionMap.values())
   }, [sentRequests, receivedRequests, userConnections])
 
   const filteredUsers = useMemo(() => {
     return users
-      ? users.filter((user) => {
-          const isNotCurrentUser = user.uid !== currentUserId
-          const matchesSearch = user.nome
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())
-          const matchesRole =
-            roleFilter === 'all' || user.tipo_usuario === roleFilter
-          return matchesSearch && matchesRole && isNotCurrentUser
-        })
+      ? users.filter(
+          (user: {
+            uid: string | null
+            nome: string
+            tipo_usuario: string
+          }) => {
+            const isNotCurrentUser = user.uid !== currentUserId
+            const matchesSearch = user.nome
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())
+            const matchesRole =
+              roleFilter === 'all' || user.tipo_usuario === roleFilter
+            return matchesSearch && matchesRole && isNotCurrentUser
+          },
+        )
       : []
   }, [users, searchQuery, roleFilter, currentUserId])
 
@@ -105,7 +131,7 @@ export function AsyncNetworkList({
     const pending: UserCreateData[] = []
     const all: UserCreateData[] = []
 
-    filteredUsers.forEach((user) => {
+    filteredUsers.forEach((user: UserCreateData) => {
       const connection = connections.find((conn) => conn.id === user.uid)
       if (connection) {
         if (connection.status === ConnectionStatus.ACCEPTED) {
@@ -139,6 +165,14 @@ export function AsyncNetworkList({
     ) => {
       setLoadingActions((prev) => ({ ...prev, [targetId]: true }))
       try {
+        if (action === 'send') {
+          const existingConnection = connections.find(conn => conn.id === targetId)
+          if (existingConnection) {
+            console.error('Já existe uma conexão ou solicitação pendente com este usuário')
+            return
+          }
+        }
+
         switch (action) {
           case 'send':
             await createRequestMutation.mutateAsync(targetId)
@@ -176,6 +210,7 @@ export function AsyncNetworkList({
       updateRequestMutation,
       cancelRequestMutation,
       removeConnectionMutation,
+      connections
     ],
   )
 

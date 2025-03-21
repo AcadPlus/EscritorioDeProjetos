@@ -1,70 +1,33 @@
 'use client'
 import React from 'react'
-import Image from 'next/image'
 import Badge from './ui/badge-group'
-import Link from 'next/link'
 
+import Hero from '@/components/hero'
 import { Escritorio } from '@/components/escritorio'
 import { Vitrines } from '@/components/vitrines'
 import { InteractivePartnershipSection } from '@/components/interactive-partnership-section'
 import { UniformizationProcess } from '@/components/uniformization-process'
 
-export default function page() {
+export default function Page() {
   return (
-    <main className="">
-      <div className="w-full md:h-[80vh] mt-20 md:flex">
-        <Image
-          src="/cei_3.jpg"
-          alt="Imagem de pessoas conversando"
-          width={0}
-          height={0}
-          sizes="100vw"
-          priority
-          className="w-full md:w-[45%] md:order-1 sm:h-2/4 md:h-auto transform transition duration-700 ease-in-out scale-100 hover:scale-105 opacity-0 animate-fadeIn"
-        />
-
-        <section className="bg-primary w-100 h-[600px] md:w-[1112px] md:h-auto flex flex-col gap-3 md:justify-center">
-          <div className="flex flex-col p-5 space-y-3 sm:space-y-4 xl:pl-28 animate-slideIn">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#4E690B] leading-tight ">
-              Conecte-se com
-              <br />
-              Empresas e Parceiros da Comunidade UFC
-            </h1>
-            <p className="text-lg md:text-lg lg:text-xl max-w-[690px] bold text-[#618506] opacity-0 animate-fadeIn delay-200">
-              Promovemos a conexão entre você, iniciativas da UFC e parceiros
-              externos!
-            </p>
-            <div className="flex flex-col items-center text-secondary opacity-0 animate-fadeIn delay-400">
-              <form className="flex flex-col gap-2 items-start w-full">
-                <p className="font-regular text-base text-[#41580F]">
-                  Está procurando conexões com Pesquisadores, startups e similares?
-                </p>
-                <Link
-                  href={'linka/negocios'}
-                  className="flex items-center text-sm h-8 md:h-9 bg-[#41580F] text-white rounded px-3 py-1 mt-2 transform transition duration-200 ease-in-out hover:scale-105"
-                >
-                  Ir para o LINK@
-                </Link>
-              </form>
-            </div>
-          </div>
-        </section>
-      </div>
+    <main className="min-h-screen">
+      <Hero />
 
       <section
-        className="w-full flex items-center flex-col my-2 px-3"
+        className="w-full flex items-center flex-col my-8 px-4 md:px-6 lg:px-8"
         id="sobre-escritorio"
       >
         <Badge
           content="Entenda do que se trata o escritório!"
           title="O Escritório"
           className="text-secondary"
-          posTexto="O que é o Escritório de Projetos e Parcerias?"
+          posTexto="Sobre o Escritório"
         />
         <Escritorio />
       </section>
+
       <section
-        className="w-full mt-2 p-1 flex flex-col justify-center items-center"
+        className="w-full mt-8 p-4 md:p-6 lg:p-8 flex flex-col justify-center items-center"
         id="vitrines"
       >
         <Badge
@@ -79,7 +42,7 @@ export default function page() {
         <Vitrines />
       </section>
 
-      <section className="w-full mt-2 p-1 flex flex-col justify-center items-center">
+      <section className="w-full mt-8 p-4 md:p-6 lg:p-8 flex flex-col justify-center items-center">
         <Badge
           content="Faça parte da comunidade!"
           title="Link@!"
@@ -91,7 +54,7 @@ export default function page() {
         <InteractivePartnershipSection />
       </section>
 
-      <section id="comite" className="p-3 flex flex-col gap-3">
+      <section id="comite" className="p-4 md:p-6 lg:p-8 flex flex-col gap-6">
         <Badge
           color="tertiary"
           title="Processos Internos"

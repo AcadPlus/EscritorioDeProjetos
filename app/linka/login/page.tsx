@@ -14,7 +14,7 @@ import {
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/context/AuthContext'
-import type { UserType } from '@/lib/types/userTypes'
+import type { SelectableUserType } from '@/lib/types/userTypes'
 import { StepByStepRegister } from '@/components/StepByStepRegister'
 import { LoginForm } from './components/LoginForm'
 
@@ -34,7 +34,7 @@ export default function LoginScreen() {
   const handleLogin = async (
     email: string,
     password: string,
-    userType: UserType,
+    userType: SelectableUserType,
   ) => {
     setError('')
     setSuccessMessage('')
@@ -45,8 +45,6 @@ export default function LoginScreen() {
     } catch (error: any) {
       if (error.response && error.response.data) {
         setError(error.response.data.detail || 'Erro ao fazer login')
-      } else {
-        setError('Erro ao fazer login. Tente novamente.')
       }
     }
   }

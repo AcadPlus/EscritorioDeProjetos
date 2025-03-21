@@ -28,9 +28,7 @@ export const useApi = () => {
         }
 
         const headers = new Headers(fetchOptions.headers)
-        if (requireAuth) {
-          headers.set('Authorization', `Bearer ${accessToken}`)
-        }
+        headers.set('Authorization', `Bearer ${accessToken}`)
 
         const response = await fetch(url, { ...fetchOptions, headers })
 
@@ -49,13 +47,14 @@ export const useApi = () => {
             }
             return newResponse
           } catch (refreshError) {
-            // If refresh fails, log out the user
+            alert('Sessão expirada. Por favor, faça login novamente.')
             await logout()
             throw new Error('Session expired. Please log in again.')
           }
         }
 
         if (!response.ok) {
+          console.log(response)
           throw new Error('API request failed')
         }
 

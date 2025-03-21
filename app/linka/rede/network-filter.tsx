@@ -29,10 +29,18 @@ export function NetworkFilter({
           <SelectValue placeholder="Função" />
         </SelectTrigger>
         <SelectContent className="bg-white">
-          <SelectItem value="all">Todos</SelectItem>
-          <SelectItem value="estudante">Estudante</SelectItem>
-          <SelectItem value="pesquisador">Pesquisador</SelectItem>
-          <SelectItem value="externo">Externo</SelectItem>
+          <SelectItem className="hover:bg-gray-200" value="all">
+            Todos
+          </SelectItem>
+          <SelectItem className="hover:bg-gray-200" value="estudante">
+            Estudante
+          </SelectItem>
+          <SelectItem className="hover:bg-gray-200" value="pesquisador">
+            Pesquisador
+          </SelectItem>
+          <SelectItem className="hover:bg-gray-200" value="externo">
+            Externo
+          </SelectItem>
         </SelectContent>
       </Select>
       <Select value={institutionFilter} onValueChange={setInstitutionFilter}>
@@ -40,9 +48,11 @@ export function NetworkFilter({
           <SelectValue placeholder="Instituição" />
         </SelectTrigger>
         <SelectContent className="bg-white">
-          <SelectItem value="all">Todos</SelectItem>
+          <SelectItem className="bg-gray-200" value="all">
+            Todos
+          </SelectItem>
           {campusOptions.map((campusName, index) => (
-            <SelectItem key={index} value={campusName}>
+            <SelectItem className="bg-gray-200" key={index} value={campusName}>
               {campusName}
             </SelectItem>
           ))}

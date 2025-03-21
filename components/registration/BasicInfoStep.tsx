@@ -1,13 +1,13 @@
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { PhoneInput } from '../phone-input'
-import { UserType, UserTypeDomain } from '@/lib/types/userTypes'
+import { PublicUserType, UserTypeDomain } from '@/lib/types/userTypes'
 
 interface BasicInfoStepProps {
   nome: string
   email: string
   telefone: string
-  userType: UserType
+  userType: PublicUserType
   errors: { [key: string]: string }
   onInputChange: (name: string, value: string) => void
 }
@@ -21,7 +21,7 @@ export function BasicInfoStep({
   onInputChange,
 }: BasicInfoStepProps) {
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (userType === UserType.EXTERNO) {
+    if (userType === PublicUserType.EXTERNO) {
       // For external users, allow full email input
       onInputChange('email', e.target.value)
     } else {
@@ -52,17 +52,19 @@ export function BasicInfoStep({
           <Input
             id="email"
             type="email"
-            value={userType === UserType.EXTERNO ? email : email.split('@')[0]}
+            value={
+              userType === PublicUserType.EXTERNO ? email : email.split('@')[0]
+            }
             onChange={handleEmailChange}
-            className={`h-11 ${userType !== UserType.EXTERNO ? 'pr-24' : ''}`}
+            className={`h-11 ${userType !== PublicUserType.EXTERNO ? 'pr-24' : ''}`}
             required
             placeholder={
-              userType === UserType.EXTERNO
+              userType === PublicUserType.EXTERNO
                 ? 'seu.email@exemplo.com'
                 : 'seu.email'
             }
           />
-          {userType !== UserType.EXTERNO && (
+          {userType !== PublicUserType.EXTERNO && (
             <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500 bg-gray-100 border-l">
               {UserTypeDomain[userType]}
             </div>

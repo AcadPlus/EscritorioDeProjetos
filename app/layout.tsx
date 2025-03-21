@@ -6,6 +6,7 @@ import FooterWrapper from '@/lib/wrappers/footer_wrapper'
 import { Toaster } from '@/components/ui/toaster'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { Toaster as SonnerToaster } from 'sonner'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -32,6 +33,7 @@ export default function RootLayout({
         <main className="flex flex-1">
           <div className={'flex-1 p-6`'}>{children}</div>
           <Toaster />
+          <SonnerToaster />
         </main>
         <FooterWrapper />
       </body>

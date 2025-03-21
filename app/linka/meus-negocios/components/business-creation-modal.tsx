@@ -3,7 +3,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useBusinessApi } from '@/lib/api/business'
@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { NegocioType, type NegocioCreate } from '@/lib/types/businessTypes'
+import { NegocioType, AreaAtuacao, EstagioNegocio, type NegocioCreate } from '@/lib/types/businessTypes'
 import { Progress } from '@/components/ui/progress'
 import {
   Tooltip,
@@ -35,77 +35,85 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { Info, Building, Briefcase, CheckCircle } from 'lucide-react'
+import { Info, Building, Briefcase, CheckCircle, FileText } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { PhoneInput } from '@/components/phone-input'
+import { Badge } from '@/components/ui/badge'
 
-const businessSchema = z
-  .object({
-    nome: z
-      .string()
-      .min(2, 'Nome deve ter pelo menos 2 caracteres')
-      .max(100, 'Nome deve ter no máximo 100 caracteres'),
-    email: z.string().email('Email inválido'),
-    telefone: z
-      .string()
-      .min(14, 'Telefone deve ter pelo menos 14 caracteres (incluindo +55)'),
-    tipo_negocio: z.nativeEnum(NegocioType),
-    palavras_chave: z
-      .array(z.string())
-      .min(1, 'Pelo menos uma palavra-chave é obrigatória'),
-    midias_sociais: z.record(z.string().url('URL inválida')).optional(),
-    id_iniciativas: z.array(z.string()).optional(),
-    descricao_problema: z
-      .string()
-      .min(1, 'Descrição do problema é obrigatória')
-      .optional(),
-    area_estrategica: z
-      .string()
-      .min(1, 'Área estratégica é obrigatória')
-      .optional(),
-    campus: z.string().min(1, 'Campus é obrigatório').optional(),
-    cnae: z
-      .string()
-      .length(7, 'CNAE deve ter exatamente 7 caracteres')
-      .optional(),
-    area_de_atuacao: z
-      .string()
-      .min(1, 'Área de atuação é obrigatória')
-      .optional(),
-    demanda: z.string().min(1, 'Demanda é obrigatória').optional(),
-  })
-  .refine(
-    (data) => {
-      if (data.tipo_negocio === NegocioType.INCUBADO) {
-        return (
-          !!data.descricao_problema && !!data.area_estrategica && !!data.campus
-        )
-      }
-      if (data.tipo_negocio === NegocioType.EXTERNO) {
-        return !!data.cnae && !!data.area_de_atuacao && !!data.demanda
-      }
-      return true
-    },
-    {
-      message:
-        'Campos obrigatórios não fornecidos para o tipo de negócio selecionado',
-      path: ['tipo_negocio'],
-    },
-  )
+const Campus = {
+  PICI: 'PICI',
+  RUSSAS: 'RUSSAS',
+  CRATEUS: 'CRATEÚS',
+  QUIXADA: 'QUIXADÁ',
+  BENFICA: 'BENFICA',
+  PORANGABUCU: 'PORANGABUÇU',
+  SOBRAL: 'SOBRAL',
+  ITAPAJE: 'ITAPAJÉ',
+} as const
+
+const businessSchema = z.object({
+  nome: z
+    .string()
+    .min(2, 'Nome deve ter pelo menos 2 caracteres')
+    .max(100, 'Nome deve ter no máximo 100 caracteres'),
+  email: z.string().email('Email inválido'),
+  telefone: z
+    .string()
+    .min(14, 'Telefone deve ter pelo menos 14 caracteres (incluindo +55)'),
+  area_atuacao: z.nativeEnum(AreaAtuacao),
+  estagio: z.nativeEnum(EstagioNegocio),
+  palavras_chave: z
+    .array(z.string())
+    .min(1, 'Pelo menos uma palavra-chave é obrigatória'),
+  descricao_problema: z
+    .string()
+    .min(10, 'A descrição do problema deve ter pelo menos 10 caracteres'),
+  solucao_proposta: z
+    .string()
+    .min(10, 'A descrição da solução proposta deve ter pelo menos 10 caracteres'),
+  midias_sociais: z
+    .object({
+      website: z.string().optional().nullable(),
+      linkedin: z.string().optional().nullable(),
+      instagram: z.string().optional().nullable(),
+      facebook: z.string().optional().nullable(),
+    })
+    .optional()
+    .nullable(),
+  cnpj: z
+    .string()
+    .regex(/^\d{14}$/, 'CNPJ deve ter 14 dígitos')
+    .optional(),
+  cnae: z
+    .string()
+    .regex(/^\d{7}$/, 'CNAE deve ter 7 dígitos')
+    .optional(),
+  razao_social: z.string().optional(),
+  area_de_atuacao: z.string().optional(),
+  demanda: z.string().optional(),
+})
 
 type BusinessFormData = z.infer<typeof businessSchema>
 
 export function BusinessCreationModal({
   isOpen,
   onClose,
+  onSuccess,
 }: {
   isOpen: boolean
   onClose: () => void
+  onSuccess?: () => void
 }) {
   const [step, setStep] = useState(0)
   const { useCreateBusiness } = useBusinessApi()
   const createBusinessMutation = useCreateBusiness()
-  const [businessType, setBusinessType] = useState<NegocioType>(
-    NegocioType.EXTERNO,
-  )
+  const [newTag, setNewTag] = useState('')
 
   const form = useForm<BusinessFormData>({
     resolver: zodResolver(businessSchema),
@@ -114,34 +122,45 @@ export function BusinessCreationModal({
       nome: '',
       email: '',
       telefone: '+55',
-      tipo_negocio: businessType,
+      area_atuacao: AreaAtuacao.TECNOLOGIA,
+      estagio: EstagioNegocio.IDEACAO,
       palavras_chave: [],
-      midias_sociais: {},
+      descricao_problema: '',
+      solucao_proposta: '',
+      midias_sociais: {
+        website: '',
+        linkedin: '',
+        instagram: '',
+        facebook: '',
+      },
     },
   })
 
-  useEffect(() => {
-    const userType = localStorage.getItem('userType')
-    if (userType === 'estudante' || userType === 'pesquisador') {
-      setBusinessType(NegocioType.INCUBADO)
-    } else {
-      setBusinessType(NegocioType.EXTERNO)
-    }
-  }, [])
-
-  useEffect(() => {
-    form.setValue('tipo_negocio', businessType)
-  }, [businessType, form])
-
   const onSubmit = async (data: BusinessFormData) => {
     try {
-      await createBusinessMutation.mutateAsync(data as NegocioCreate)
+      const businessData = {
+        nome: data.nome,
+        email: data.email,
+        telefone: data.telefone,
+        area_atuacao: data.area_atuacao,
+        estagio: data.estagio,
+        descricao_problema: data.descricao_problema,
+        solucao_proposta: data.solucao_proposta,
+        palavras_chave: data.palavras_chave,
+        
+        cnpj: data.cnpj,
+        cnae: data.cnae,
+        razao_social: data.razao_social,
+        midias_sociais: data.midias_sociais,
+      }
+      
+      await createBusinessMutation.mutateAsync(businessData as any)
       onClose()
       form.reset()
       setStep(0)
+      if (onSuccess) onSuccess()
     } catch (error) {
-      console.error('Error creating business:', error)
-      // Adicione aqui a lógica para mostrar uma mensagem de erro ao usuário
+      console.error('Erro ao criar negócio:', error)
     }
   }
 
@@ -152,7 +171,7 @@ export function BusinessCreationModal({
     )
 
     if (isStepValid) {
-      setStep((prev) => Math.min(prev + 1, 3))
+      setStep((prev) => Math.min(prev + 1, 4))
     } else {
       // Trigger validation for the current step fields
       form.trigger(currentStepFields as any)
@@ -165,27 +184,78 @@ export function BusinessCreationModal({
 
   const getFieldsForStep = (stepNumber: number): (keyof BusinessFormData)[] => {
     switch (stepNumber) {
+      case 0:
+        return ['nome', 'email', 'telefone']
       case 1:
-        return ['nome', 'email', 'telefone', 'palavras_chave']
+        return ['area_atuacao', 'estagio']
       case 2:
-        return businessType === NegocioType.INCUBADO
-          ? ['descricao_problema', 'area_estrategica', 'campus']
-          : ['cnae', 'area_de_atuacao', 'demanda']
+        return ['descricao_problema', 'solucao_proposta', 'palavras_chave']
+      case 3:
+        return ['cnpj', 'cnae', 'razao_social']
+      case 4:
+        return ['midias_sociais']
       default:
         return []
     }
   }
 
   const steps = [
-    { title: 'Introdução', icon: <Info className="w-5 h-5" /> },
-    { title: 'Informações Básicas', icon: <Building className="w-5 h-5" /> },
-    { title: 'Detalhes Específicos', icon: <Briefcase className="w-5 h-5" /> },
-    { title: 'Revisão', icon: <CheckCircle className="w-5 h-5" /> },
+    { title: 'Informações Básicas', icon: <Info className="w-5 h-5" /> },
+    { title: 'Categorização', icon: <Building className="w-5 h-5" /> },
+    { title: 'Descrição', icon: <FileText className="w-5 h-5" /> },
+    { title: 'Documentação', icon: <Briefcase className="w-5 h-5" /> },
+    { title: 'Redes Sociais', icon: <CheckCircle className="w-5 h-5" /> },
   ]
+
+  const getAreaAtuacaoLabel = (value: AreaAtuacao): string => {
+    const labels = {
+      [AreaAtuacao.TECNOLOGIA]: 'Tecnologia',
+      [AreaAtuacao.SAUDE]: 'Saúde',
+      [AreaAtuacao.EDUCACAO]: 'Educação',
+      [AreaAtuacao.SUSTENTABILIDADE]: 'Sustentabilidade',
+      [AreaAtuacao.INDUSTRIA]: 'Indústria',
+      [AreaAtuacao.SERVICOS]: 'Serviços',
+      [AreaAtuacao.VAREJO]: 'Varejo',
+      [AreaAtuacao.FINANCAS]: 'Finanças',
+      [AreaAtuacao.OUTRO]: 'Outro',
+    }
+    return labels[value] || value
+  }
+
+  const getEstagioLabel = (value: EstagioNegocio): string => {
+    const labels = {
+      [EstagioNegocio.IDEACAO]: 'Ideação',
+      [EstagioNegocio.VALIDACAO]: 'Validação',
+      [EstagioNegocio.MVP]: 'MVP',
+      [EstagioNegocio.OPERACAO]: 'Operação',
+      [EstagioNegocio.CRESCIMENTO]: 'Crescimento',
+      [EstagioNegocio.ESCALA]: 'Escala',
+    }
+    return labels[value] || value
+  }
+
+  const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && newTag.trim()) {
+      e.preventDefault()
+      const currentTags = form.getValues('palavras_chave')
+      if (!currentTags.includes(newTag.trim())) {
+        form.setValue('palavras_chave', [...currentTags, newTag.trim()])
+      }
+      setNewTag('')
+    }
+  }
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    const currentTags = form.getValues('palavras_chave')
+    form.setValue(
+      'palavras_chave',
+      currentTags.filter((tag) => tag !== tagToRemove)
+    )
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Criar Novo Negócio</DialogTitle>
           <DialogDescription>
@@ -196,16 +266,20 @@ export function BusinessCreationModal({
           value={(step / (steps.length - 1)) * 100}
           className="w-full"
         />
-        <div className="flex justify-between mb-4">
+        <div className="flex justify-between mb-4 overflow-x-auto py-2 px-1">
           {steps.map((s, index) => (
             <TooltipProvider key={index}>
               <Tooltip>
                 <TooltipTrigger>
                   <div
-                    className={`flex flex-col items-center ${index === step ? 'text-black' : 'text-[#aaa]'}`}
+                    className={`flex flex-col items-center ${
+                      index === step ? 'text-black' : 'text-[#aaa]'
+                    }`}
                   >
                     {s.icon}
-                    <span className="text-xs mt-1">{s.title}</span>
+                    <span className="text-xs mt-1 whitespace-nowrap">
+                      {s.title}
+                    </span>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>{s.title}</TooltipContent>
@@ -217,51 +291,14 @@ export function BusinessCreationModal({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {step === 0 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">
-                  Bem-vindo à Criação de Negócio
-                </h3>
-                <p>
-                  Neste processo, você irá cadastrar seu negócio em nossa
-                  plataforma. Com base no seu perfil, seu negócio será
-                  registrado como:
-                </p>
-                <div className="space-y-2">
-                  <h4 className="font-semibold">
-                    {businessType === NegocioType.INCUBADO
-                      ? 'Negócio Incubado'
-                      : 'Negócio Externo'}
-                  </h4>
-                  {businessType === NegocioType.INCUBADO ? (
-                    <p>
-                      Ideal para startups e empresas em estágio inicial que
-                      buscam suporte e mentoria. Você precisará fornecer
-                      informações sobre o problema que seu negócio resolve, a
-                      área estratégica e o campus associado.
-                    </p>
-                  ) : (
-                    <p>
-                      Para empresas já estabelecidas que desejam se conectar com
-                      nossa rede. Você precisará fornecer o CNAE, área de
-                      atuação e demanda específica.
-                    </p>
-                  )}
-                </div>
-                <p>
-                  Vamos começar com algumas informações básicas sobre o seu
-                  negócio.
-                </p>
-              </div>
-            )}
-            {step === 1 && (
-              <>
                 <FormField
                   control={form.control}
                   name="nome"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nome do Negócio</FormLabel>
+                      <FormLabel>Nome do Negócio *</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input placeholder="Digite o nome do seu negócio" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -272,9 +309,9 @@ export function BusinessCreationModal({
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email *</FormLabel>
                       <FormControl>
-                        <Input {...field} type="email" />
+                        <Input type="email" placeholder="contato@seunegocio.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -285,13 +322,113 @@ export function BusinessCreationModal({
                   name="telefone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Telefone</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="+5588999999999" />
+                        <PhoneInput
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={form.formState.errors.telefone?.message}
+                          required
+                        />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+            {step === 1 && (
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="area_atuacao"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Área de Atuação *</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) => field.onChange(value as AreaAtuacao)}
+                          defaultValue={field.value}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione a área de atuação" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.values(AreaAtuacao).map((value) => (
+                              <SelectItem key={value} value={value}>
+                                {getAreaAtuacaoLabel(value as AreaAtuacao)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="estagio"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estágio do Negócio *</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) => field.onChange(value as EstagioNegocio)}
+                          defaultValue={field.value}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o estágio do negócio" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.values(EstagioNegocio).map((value) => (
+                              <SelectItem key={value} value={value}>
+                                {getEstagioLabel(value as EstagioNegocio)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
                       <FormDescription>
-                        Inclua o código do país (+55 para Brasil)
+                        O estágio atual de desenvolvimento do seu negócio
                       </FormDescription>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+            {step === 2 && (
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="descricao_problema"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descrição do Problema *</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Descreva o problema que seu negócio resolve..."
+                          className="min-h-[100px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="solucao_proposta"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Solução Proposta *</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Descreva a solução que seu negócio oferece..."
+                          className="min-h-[100px]"
+                          {...field}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -303,194 +440,185 @@ export function BusinessCreationModal({
                     <FormItem>
                       <FormLabel>Palavras-chave</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          value={field.value?.join(', ') || ''}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value.split(', ').filter(Boolean),
-                            )
-                          }
-                        />
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Input
+                              placeholder="Digite uma palavra-chave e pressione Enter"
+                              value={newTag}
+                              onChange={(e) => setNewTag(e.target.value)}
+                              onKeyDown={handleAddTag}
+                            />
+                            <span className="ml-2 text-sm text-muted-foreground">
+                              {field.value.length}/5
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-2 min-h-[2.5rem] p-2 border rounded-md bg-muted/50">
+                            {field.value.map((tag) => (
+                              <Badge
+                                key={tag}
+                                variant="secondary"
+                                className="cursor-pointer hover:bg-secondary/80 transition-colors"
+                                onClick={() => handleRemoveTag(tag)}
+                              >
+                                {tag} ×
+                              </Badge>
+                            ))}
+                            {field.value.length === 0 && (
+                              <span className="text-sm text-muted-foreground">
+                                Adicione palavras-chave para melhorar a visibilidade do seu negócio
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </FormControl>
                       <FormDescription>
-                        Separe as palavras-chave por vírgula
+                        Adicione até 5 palavras-chave que descrevam seu negócio
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </>
-            )}
-            {step === 2 && (
-              <>
-                {businessType === NegocioType.INCUBADO ? (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name="descricao_problema"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Descrição do Problema</FormLabel>
-                          <FormControl>
-                            <Textarea {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="area_estrategica"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Área Estratégica</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="campus"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Campus</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name="cnae"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>CNAE</FormLabel>
-                          <FormControl>
-                            <Input {...field} maxLength={7} />
-                          </FormControl>
-                          <FormDescription>
-                            Deve ter exatamente 7 caracteres
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="area_de_atuacao"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Área de Atuação</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="demanda"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Demanda</FormLabel>
-                          <FormControl>
-                            <Textarea {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </>
-                )}
-              </>
+              </div>
             )}
             {step === 3 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">
-                  Revisão das Informações
-                </h3>
-                <p>
-                  Por favor, revise todas as informações fornecidas antes de
-                  criar o negócio:
-                </p>
-                <div className="space-y-2">
-                  <p>
-                    <strong>Nome do Negócio:</strong> {form.getValues('nome')}
-                  </p>
-                  <p>
-                    <strong>Email:</strong> {form.getValues('email')}
-                  </p>
-                  <p>
-                    <strong>Telefone:</strong> {form.getValues('telefone')}
-                  </p>
-                  <p>
-                    <strong>Tipo de Negócio:</strong>{' '}
-                    {businessType === NegocioType.INCUBADO
-                      ? 'Incubado'
-                      : 'Externo'}
-                  </p>
-                  <p>
-                    <strong>Palavras-chave:</strong>{' '}
-                    {form.getValues('palavras_chave').join(', ')}
-                  </p>
-                  {businessType === NegocioType.INCUBADO ? (
-                    <>
-                      <p>
-                        <strong>Descrição do Problema:</strong>{' '}
-                        {form.getValues('descricao_problema')}
-                      </p>
-                      <p>
-                        <strong>Área Estratégica:</strong>{' '}
-                        {form.getValues('area_estrategica')}
-                      </p>
-                      <p>
-                        <strong>Campus:</strong> {form.getValues('campus')}
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p>
-                        <strong>CNAE:</strong> {form.getValues('cnae')}
-                      </p>
-                      <p>
-                        <strong>Área de Atuação:</strong>{' '}
-                        {form.getValues('area_de_atuacao')}
-                      </p>
-                      <p>
-                        <strong>Demanda:</strong> {form.getValues('demanda')}
-                      </p>
-                    </>
+                <FormField
+                  control={form.control}
+                  name="cnpj"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CNPJ</FormLabel>
+                      <FormControl>
+                        <Input placeholder="00000000000000" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Se já possuir, digite apenas os números
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </div>
-                <p>
-                  Se todas as informações estiverem corretas, clique em
-                  &quot;Criar Negócio&quot; para finalizar o processo.
-                </p>
+                />
+                <FormField
+                  control={form.control}
+                  name="cnae"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CNAE</FormLabel>
+                      <FormControl>
+                        <Input placeholder="0000000" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Se já possuir, digite apenas os números
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="razao_social"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Razão Social</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Razão social da empresa" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+            {step === 4 && (
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="midias_sociais.website"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Website</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://www.seunegocio.com" 
+                          value={field.value || ''} 
+                          onChange={(e) => field.onChange(e.target.value || null)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="midias_sociais.linkedin"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>LinkedIn</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://www.linkedin.com/company/seunegocio" 
+                          value={field.value || ''} 
+                          onChange={(e) => field.onChange(e.target.value || null)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="midias_sociais.instagram"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Instagram</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://www.instagram.com/seunegocio" 
+                          value={field.value || ''} 
+                          onChange={(e) => field.onChange(e.target.value || null)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="midias_sociais.facebook"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Facebook</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://www.facebook.com/seunegocio" 
+                          value={field.value || ''} 
+                          onChange={(e) => field.onChange(e.target.value || null)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             )}
             <DialogFooter>
               {step > 0 && (
                 <Button type="button" variant="outline" onClick={prevStep}>
-                  Anterior
+                  Voltar
                 </Button>
               )}
-              {step < 3 ? (
+              {step < steps.length - 1 ? (
                 <Button type="button" onClick={nextStep}>
                   Próximo
                 </Button>
               ) : (
-                <Button type="submit" disabled={!form.formState.isValid}>
-                  Criar Negócio
+                <Button
+                  type="submit"
+                  disabled={createBusinessMutation.isPending}
+                >
+                  {createBusinessMutation.isPending
+                    ? 'Criando...'
+                    : 'Criar Negócio'}
                 </Button>
               )}
             </DialogFooter>
