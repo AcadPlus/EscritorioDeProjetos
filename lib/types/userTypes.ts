@@ -3,12 +3,41 @@ export enum UserType {
   ESTUDANTE = 'estudante',
   PESQUISADOR = 'pesquisador',
   EXTERNO = 'externo',
+  ADMIN = 'admin',
+}
+
+export enum PublicUserType {
+  ESTUDANTE = 'estudante',
+  PESQUISADOR = 'pesquisador',
+  EXTERNO = 'externo',
+}
+
+export type SelectableUserType = Exclude<UserType, UserType.ADMIN>
+
+export const userTypeLabels: Record<UserType, string> = {
+  [UserType.ESTUDANTE]: 'Estudante',
+  [UserType.PESQUISADOR]: 'Pesquisador',
+  [UserType.EXTERNO]: 'Externo',
+  [UserType.ADMIN]: 'Administrador',
 }
 
 export enum UserTypeDomain {
   'estudante' = '@alu.ufc.br',
   'pesquisador' = '@ufc.br',
 }
+
+export enum CampusType {
+  RUSSAS = 'Russas',
+  PICI = 'Pici',
+  PORANGABUSSU = 'Porangabussu',
+  CRATEUS = 'Crateús',
+  QUIXADA = 'Quixadá',
+  BENFICA = 'Benfica',
+  ITAPAJE = 'Itapajé',
+  SOBRAL = 'Sobral',
+}
+
+export const campusOptions = Object.values(CampusType)
 
 interface RedesSociais {
   linkedin?: string
@@ -23,18 +52,21 @@ export interface UserBaseCreate {
   conexoes: string[]
   negocios: string[]
   redes_sociais?: RedesSociais
-  tipo_usuario: UserType
+  tipo_usuario: PublicUserType
+  foto_url?: string
 }
 
 export interface PesquisadorCreate extends UserBaseCreate {
   lattes: string
+  siape: string
   palavras_chave: string[]
-  campus: string
+  campus: CampusType
 }
 
 export interface EstudanteCreate extends UserBaseCreate {
   curso: string
-  campus: string
+  campus: CampusType
+  matricula: string
 }
 
 export interface ExternoCreate extends UserBaseCreate {

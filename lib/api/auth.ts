@@ -1,10 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { UserType } from '../types/userTypes'
+import { toast } from '@/hooks/use-toast'
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1'
 
 interface LoginResponse {
+  is_admin: string
   access_token: string
   refresh_token: string
   user_type: UserType
@@ -36,15 +38,18 @@ export const useAuthApi = () => {
       body: new URLSearchParams({
         username,
         password,
-        user_type: userType,
+        scope: userType,
       }),
     })
 
     if (!response.ok) {
       if (response.status === 401) {
-        throw new Error(
-          'Credenciais inválidas. Por favor, verifique seu email, senha e tipo de usuário.',
-        )
+        toast({
+          title: 'Erro',
+          description:
+            'Credenciais inválidas. Por favor, verifique seu email, senha e tipo de usuário.',
+          variant: 'destructive',
+        })
       }
       throw new Error('Login failed')
     }
@@ -55,6 +60,7 @@ export const useAuthApi = () => {
     localStorage.setItem('refreshToken', data.data.refresh_token)
     localStorage.setItem('userType', data.data.user_type)
     localStorage.setItem('userUid', data.data.user_uid)
+    localStorage.setItem('userIsAdmin', data.data.is_admin)
 
     return data.data
   }

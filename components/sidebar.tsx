@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import * as React from 'react'
@@ -15,10 +16,11 @@ import {
   GraduationCap,
   Pickaxe,
   BellIcon,
-  BriefcaseBusinessIcon,
-  Handshake,
   HandshakeIcon,
   Building2,
+  X,
+  CalendarCheck,
+  ChevronDown,
 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -29,18 +31,41 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarNav,
-  SidebarNavItem,
 } from '@/components/ui/sidebar'
 import { useAuth } from '@/lib/context/AuthContext'
+import { useNotifications } from '@/lib/context/NotificationsContext'
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from '@/components/ui/collapsible'
 
 interface MainSidebarProps
-  extends React.ComponentPropsWithoutRef<typeof Sidebar> {}
+  extends React.ComponentPropsWithoutRef<typeof Sidebar> {
+  onClose?: () => void
+}
 
-export function MainSidebar({ className }: MainSidebarProps) {
+interface IconProps {
+  className?: string
+  [key: string]: any
+}
+
+interface SidebarNavItemProps {
+  className?: string
+  title: string
+  items: Array<{
+    name: string
+    icon: React.ComponentType<IconProps>
+    href: string
+  }>
+}
+
+export function MainSidebar({ className, onClose }: MainSidebarProps) {
   const [isAdmin, setIsAdmin] = React.useState(false)
   const router = useRouter()
-
+  const { hasUnread } = useNotifications()
   const { isAuthenticated, logout } = useAuth()
+  const [isMounted, setIsMounted] = React.useState(false)
 
   const handleLogout = async () => {
     try {
@@ -52,56 +77,136 @@ export function MainSidebar({ className }: MainSidebarProps) {
   }
 
   React.useEffect(() => {
-    const admin = localStorage.getItem('admin')
-    setIsAdmin(!!admin)
+    setIsMounted(true)
+    const admin: boolean = localStorage.getItem('userIsAdmin') === 'true'
+    setIsAdmin(admin)
   }, [])
 
   const vitrinesItems = [
     { name: 'Negócios', icon: Briefcase, href: '/linka/negocios' },
+    { name: 'Iniciativas', icon: HandshakeIcon, href: '/linka/iniciativas' },
   ]
 
   const nextUpdateItems = [
-    {
-      name: 'Laboratórios',
-      icon: Pickaxe,
-      href: '',
-    },
-    {
-      name: 'Competências',
-      icon: GraduationCap,
-      href: '',
-    },
-    {
-      name: 'Notificações',
-      icon: BellIcon,
-      href: '',
-    },
+    { name: 'Laboratórios', icon: Pickaxe, href: '' },
+    { name: 'Competências', icon: GraduationCap, href: '' },
   ]
-  const comunidadeItems = [{ name: 'Rede', icon: Network, href: '/linka/rede' }]
+
+  const comunidadeItems = React.useMemo(
+    () => [
+      { name: 'Rede', icon: Network, href: '/linka/rede' },
+      {
+        name: 'Notificações',
+        icon: ({ className, ...props }: IconProps) => (
+          <div className="relative">
+            <BellIcon className={className} {...props} />
+            {hasUnread && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
+            )}
+          </div>
+        ),
+        href: '/linka/notificacoes',
+      },
+      { name: 'Eventos', icon: CalendarCheck, href: '/linka/eventos' },
+    ],
+    [hasUnread],
+  )
+
   const adminItems = [
     {
       name: 'Painel de Controle',
       icon: GitPullRequestArrow,
       href: '/linka/administrativo',
     },
+    {
+      name: 'Administrar Negócios',
+      icon: Building2,
+      href: '/linka/administrativo/negocios',
+    },
+    {
+      name: 'Administrar Iniciativas',
+      icon: HandshakeIcon,
+      href: '/linka/administrativo/iniciativas',
+    },
+    {
+      name: 'Administrar Eventos',
+      icon: CalendarCheck,
+      href: '/linka/administrativo/eventos',
+    },
   ]
+
   const personalItems = [
     { name: 'Meus Negócios', icon: Building2, href: '/linka/meus-negocios' },
-    { name: 'Iniciativas', icon: HandshakeIcon, href: '/linka/perfil' },
+    { name: 'Meus Eventos', icon: CalendarCheck, href: '/linka/meus-eventos' },
+    {
+      name: 'Minhas Iniciativas',
+      icon: HandshakeIcon,
+      href: '/linka/minhas-iniciativas',
+    },
     { name: 'Perfil do Usuário', icon: UserCircle, href: '/linka/perfil' },
   ]
+
+  const SidebarNavItem = React.forwardRef<HTMLDivElement, SidebarNavItemProps>(
+    ({ className, title, items, ...props }, ref) => {
+      const [isOpen, setIsOpen] = React.useState(true)
+
+      return (
+        <div ref={ref} className={cn('', className)} {...props}>
+          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between">
+                {title}
+                <ChevronDown
+                  className={cn('h-4 w-4 transition-transform duration-200', {
+                    '-rotate-180': isOpen,
+                  })}
+                />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-2">
+              {items.map((item) => (
+                <Button
+                  key={item.name}
+                  asChild
+                  variant="ghost"
+                  className="w-full justify-start relative"
+                >
+                  <Link href={item.href}>
+                    <item.icon className="mr-2 h-4 w-4" />
+                    {item.name}
+                  </Link>
+                </Button>
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
+      )
+    },
+  )
+  SidebarNavItem.displayName = 'SidebarNavItem'
 
   return (
     <Sidebar
       className={cn(
-        'border-r h-full flex flex-col w-full max-w-[250px] md:w-64',
+        'border-r h-full flex flex-col w-full md:max-w-[280px]',
         className,
       )}
     >
-      <SidebarHeader className="border-b px-4 py-3">
-        <Link href="" className="flex items-center space-x-2">
+      <SidebarHeader className="border-b px-4 py-3 flex justify-between items-center">
+        <Link href="/linka/negocios" className="flex items-center space-x-2">
           <span className="text-2xl font-bold">LINKA</span>
         </Link>
+        {isMounted && onClose && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="md:hidden"
+          >
+            <X className="h-6 w-6" />
+            <span className="sr-only">Close sidebar</span>
+          </Button>
+        )}
       </SidebarHeader>
       <SidebarContent className="flex-grow overflow-y-auto overflow-x-hidden">
         <SidebarNav className="space-y-2 w-full">

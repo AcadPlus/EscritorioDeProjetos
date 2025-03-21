@@ -5,9 +5,18 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { AvatarImage, AvatarFallback, Avatar } from '@/components/ui/avatar'
+import { AvatarFallback, Avatar } from '@/components/ui/avatar'
 import { UserBaseCreate } from '@/lib/types/userTypes'
-import { Mail, MapPin, Briefcase, GraduationCap, Calendar } from 'lucide-react'
+import {
+  Mail,
+  MapPin,
+  Briefcase,
+  GraduationCap,
+  Calendar,
+  UserCircle,
+} from 'lucide-react'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 interface NetworkModalProps {
   user: UserBaseCreate | null
@@ -16,6 +25,8 @@ interface NetworkModalProps {
 }
 
 export function NetworkModal({ user, isOpen, onClose }: NetworkModalProps) {
+  const router = useRouter()
+
   if (!user) return null
 
   const getUserDetails = (user: UserBaseCreate) => {
@@ -43,6 +54,11 @@ export function NetworkModal({ user, isOpen, onClose }: NetworkModalProps) {
     return details
   }
 
+  const handleViewProfile = () => {
+    router.push(`/linka/perfil?id=${user.uid}&type=${user.tipo_usuario}`)
+    onClose()
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
@@ -51,10 +67,21 @@ export function NetworkModal({ user, isOpen, onClose }: NetworkModalProps) {
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="flex items-center space-x-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={'/default-avatar.jpg'} alt={user.nome} />
-              <AvatarFallback>{user.nome.charAt(0)}</AvatarFallback>
-            </Avatar>
+            <div className="relative h-16 w-16 rounded-full overflow-hidden">
+              {user.foto_url ? (
+                <Image
+                  src={user.foto_url}
+                  alt={`Foto de ${user.nome}`}
+                  fill
+                  sizes="(max-width: 64px) 100vw, 64px"
+                  className="object-cover"
+                />
+              ) : (
+                <Avatar className="h-full w-full">
+                  <AvatarFallback>{user.nome.charAt(0)}</AvatarFallback>
+                </Avatar>
+              )}
+            </div>
             <div>
               <h3 className="text-lg font-semibold">{user.nome}</h3>
               <p className="text-sm text-gray-500">{user.tipo_usuario}</p>
@@ -69,7 +96,15 @@ export function NetworkModal({ user, isOpen, onClose }: NetworkModalProps) {
             ))}
           </div>
         </div>
-        <div className="flex justify-end">
+        <div className="flex justify-between">
+          <Button
+            variant="outline"
+            onClick={handleViewProfile}
+            className="flex items-center gap-2"
+          >
+            <UserCircle className="w-4 h-4" />
+            Ver Perfil Completo
+          </Button>
           <Button onClick={onClose}>Fechar</Button>
         </div>
       </DialogContent>

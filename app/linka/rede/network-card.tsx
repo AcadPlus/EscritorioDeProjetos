@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { AvatarImage, AvatarFallback, Avatar } from '@/components/ui/avatar'
+import { AvatarFallback, Avatar } from '@/components/ui/avatar'
 import { motion } from 'framer-motion'
 import {
   type PesquisadorCreate,
@@ -14,6 +14,8 @@ import {
 } from '@/lib/types/userTypes'
 import { ConnectionStatus } from '@/lib/types/connectionTypes'
 import { UserCheck, Loader2, UserPlus, UserMinus, UserX } from 'lucide-react'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 interface NetworkCardProps {
   user: UserCreateData
@@ -36,6 +38,8 @@ export const NetworkCard = React.memo(function NetworkCard({
   isLoading,
   isSentByMe,
 }: NetworkCardProps) {
+  const router = useRouter()
+
   useEffect(() => {
     if (!onViewProfile) {
       console.warn(
@@ -190,6 +194,10 @@ export const NetworkCard = React.memo(function NetworkCard({
     }
   }
 
+  const handleViewProfile = () => {
+    router.push(`/linka/perfil?id=${user.uid}&type=${user.tipo_usuario}`)
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -200,10 +208,21 @@ export const NetworkCard = React.memo(function NetworkCard({
       <Card className="overflow-hidden">
         <CardContent className="p-6">
           <div className="flex items-center space-x-4 mb-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage alt={user.nome} src={'/default-avatar.jpg'} />
-              <AvatarFallback>{user.nome.charAt(0)}</AvatarFallback>
-            </Avatar>
+            <div className="relative h-16 w-16 rounded-full overflow-hidden">
+              {user.foto_url ? (
+                <Image
+                  src={user.foto_url}
+                  alt={`Foto de ${user.nome}`}
+                  fill
+                  sizes="(max-width: 64px) 100vw, 64px"
+                  className="object-cover"
+                />
+              ) : (
+                <Avatar className="h-full w-full">
+                  <AvatarFallback>{user.nome.charAt(0)}</AvatarFallback>
+                </Avatar>
+              )}
+            </div>
             <div>
               <h3 className="text-lg font-semibold mb-1">{user.nome}</h3>
               <p className="text-sm text-gray-500 mb-1">{getUserRole}</p>
@@ -212,11 +231,7 @@ export const NetworkCard = React.memo(function NetworkCard({
           </div>
           <div className="flex items-center justify-between">
             {renderStatusTag()}
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onViewProfile(user)}
-            >
+            <Button size="sm" variant="outline" onClick={handleViewProfile}>
               Ver Perfil
             </Button>
           </div>

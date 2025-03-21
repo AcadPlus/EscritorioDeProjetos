@@ -14,29 +14,32 @@ export default function Footer() {
   }
 
   return (
-    <footer className="w-full bg-primary text-[#213102]">
+    <footer className="bg-gray-50 text-gray-600">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <motion.div
-            className="flex flex-col items-center md:items-start space-y-4"
-            {...fadeInUp}
-          >
-            <Image
-              src="/logo.svg"
-              alt="Logo do escritório de projetos"
-              width={60}
-              height={60}
-              className="hover:opacity-80 transition-opacity"
-            />
-            <p className=" text-center md:text-left text-sm">
-              Escritório de Projetos e Parcerias da Universidade Federal do
-              Ceará
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <motion.div className="col-span-1 md:col-span-2" {...fadeInUp}>
+            <Link href="/" className="flex items-center space-x-2 mb-4">
+              <Image
+                src="/projetos_pp.svg"
+                alt="Logo do escritório de projetos"
+                width={120}
+                height={120}
+                className="hover:opacity-80 transition-opacity"
+              />
+            </Link>
+            <p className="text-sm mb-4">
+              Promovendo conexões entre a UFC, iniciativas acadêmicas e
+              parceiros externos.
             </p>
             <ul className="flex space-x-4">
               {social.map((item) => (
                 <li key={item.name}>
-                  <Link href={item.href} aria-label={item.name}>
-                    <item.icon className="w-6 h-6 text-gray-600 hover:text-gray-800 transition-colors" />
+                  <Link
+                    href={item.href}
+                    aria-label={item.name}
+                    className="text-gray-400 hover:text-secondary transition-colors"
+                  >
+                    <item.icon className="w-6 h-6" />
                   </Link>
                 </li>
               ))}
@@ -44,13 +47,15 @@ export default function Footer() {
           </motion.div>
 
           <motion.div {...fadeInUp}>
-            <h2 className="text-lg font-semibold mb-4 text-gray-700">Home</h2>
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">
+              Links Rápidos
+            </h2>
             <ul className="space-y-2">
               {links.map((item) => (
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-sm hover:underline transition-all"
+                    className="text-sm hover:text-secondary transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -60,11 +65,16 @@ export default function Footer() {
           </motion.div>
 
           <motion.div {...fadeInUp}>
-            <h2 className="text-lg font-semibold mb-4 text-gray-700">Legal</h2>
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">Legal</h2>
             <ul className="space-y-2">
               {legal.map((item) => (
                 <li key={item.name}>
-                  <div className="text-sm transition-all">{item.name}</div>
+                  <Link
+                    href={item?.href || ''}
+                    className="text-sm hover:text-secondary transition-colors"
+                  >
+                    {item.name}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -78,8 +88,8 @@ export default function Footer() {
           transition={{ delay: 0.5, duration: 0.6 }}
         >
           <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} Escritório de Projetos e Parcerias.
-            Todos os direitos reservados.
+            © {new Date().getFullYear()} Escritório de Projetos e Parcerias da
+            Universidade Federal do Ceará. Todos os direitos reservados.
           </p>
         </motion.div>
       </div>

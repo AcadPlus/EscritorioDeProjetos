@@ -1,11 +1,11 @@
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
-import { UserType } from '@/lib/types/userTypes'
+import { PublicUserType } from '@/lib/types/userTypes'
 
 interface UserTypeStepProps {
-  userType: UserType
-  onUserTypeChange: (type: UserType) => void
+  userType: PublicUserType
+  onUserTypeChange: (type: PublicUserType) => void
   acceptedTerms: boolean
   onTermsChange: (accepted: boolean) => void
 }
@@ -26,7 +26,7 @@ export function UserTypeStep({
           onValueChange={onUserTypeChange}
           className="flex flex-col sm:flex-row gap-4 mb-4"
         >
-          {Object.values(UserType).map((type) => (
+          {Object.values(PublicUserType).map((type) => (
             <div
               key={type}
               className={`flex-1 flex items-center space-x-2 rounded-lg border p-2 cursor-pointer hover:border-black ${

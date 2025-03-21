@@ -3,7 +3,7 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronDown, Menu } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -12,58 +12,19 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-
-const SidebarContext = React.createContext<{
-  isOpen: boolean
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
-}>({
-  isOpen: false,
-  setIsOpen: () => {},
-})
 
 const Sidebar = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, children, ...props }, ref) => {
-  const [isOpen, setIsOpen] = React.useState(false)
-
   return (
-    <SidebarContext.Provider value={{ isOpen, setIsOpen }}>
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetTrigger asChild>
-          <Button
-            variant="outline"
-            size="icon"
-            className="fixed top-5 right-4 z-50 bg-white md:hidden"
-          >
-            <Menu className="h-4 w-4" />
-            <span className="sr-only">Toggle Sidebar</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent
-          side="left"
-          className="w-[300px] sm:w-[400px] p-0 border-r"
-        >
-          <div
-            ref={ref}
-            className={cn('flex flex-col h-full bg-white', className)}
-            {...props}
-          >
-            {children}
-          </div>
-        </SheetContent>
-        <div className="hidden md:block h-full">
-          <div
-            ref={ref}
-            className={cn('flex flex-col h-full bg-white', className)}
-            {...props}
-          >
-            {children}
-          </div>
-        </div>
-      </Sheet>
-    </SidebarContext.Provider>
+    <div
+      ref={ref}
+      className={cn('flex flex-col h-full bg-white', className)}
+      {...props}
+    >
+      {children}
+    </div>
   )
 })
 Sidebar.displayName = 'Sidebar'

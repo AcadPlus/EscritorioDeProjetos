@@ -4,7 +4,11 @@
 import type React from 'react'
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { UserType, type UserCreateData } from '@/lib/types/userTypes'
+import {
+  PublicUserType,
+  type UserCreateData,
+  CampusType,
+} from '@/lib/types/userTypes'
 import { useUserApi } from '@/lib/api/users'
 import { useVerificationApi } from '@/lib/api/verification'
 import { UserTypeStep } from './registration/UserTypeStep'
@@ -54,11 +58,16 @@ export function StepByStepRegister({
 
   const [currentStep, setCurrentStep] = useState(0)
   const [formData, setFormData] = useState<UserCreateData>({
-    tipo_usuario: UserType.ESTUDANTE,
+    tipo_usuario: PublicUserType.ESTUDANTE,
     nome: '',
     email: '',
     senha: '',
     telefone: '',
+    conexoes: [],
+    negocios: [],
+    curso: '',
+    campus: CampusType.PICI,
+    matricula: '',
   } as UserCreateData)
 
   const [acceptedTerms, setAcceptedTerms] = useState(false)
@@ -82,20 +91,60 @@ export function StepByStepRegister({
     validateField(name, value)
   }
 
-  const handleUserTypeChange = (value: UserType) => {
+  const handleUserTypeChange = (value: PublicUserType) => {
     const currentUsername = formData.email.split('@')[0]
     const domain =
-      value === UserType.ESTUDANTE
+      value === PublicUserType.ESTUDANTE
         ? '@alu.ufc.br'
-        : value === UserType.PESQUISADOR
+        : value === PublicUserType.PESQUISADOR
           ? '@ufc.br'
           : ''
 
-    setFormData((prev) => ({
-      ...prev,
+    let newFormData = {
+      ...formData,
       tipo_usuario: value,
       email: currentUsername + domain,
-    }))
+    }
+
+    if (value === PublicUserType.ESTUDANTE) {
+      newFormData = {
+        ...newFormData,
+        curso: '',
+        campus: CampusType.PICI,
+        matricula: '',
+        lattes: undefined,
+        siape: undefined,
+        palavras_chave: undefined,
+        empresa: undefined,
+        cargo: undefined,
+      }
+    } else if (value === PublicUserType.PESQUISADOR) {
+      newFormData = {
+        ...newFormData,
+        lattes: '',
+        siape: '',
+        palavras_chave: [],
+        campus: CampusType.PICI,
+        curso: undefined,
+        matricula: undefined,
+        empresa: undefined,
+        cargo: undefined,
+      }
+    } else if (value === PublicUserType.EXTERNO) {
+      newFormData = {
+        ...newFormData,
+        empresa: '',
+        cargo: '',
+        curso: undefined,
+        campus: undefined,
+        matricula: undefined,
+        lattes: undefined,
+        siape: undefined,
+        palavras_chave: undefined,
+      }
+    }
+
+    setFormData(newFormData as UserCreateData)
   }
 
   const handleSocialMediaChange = (network: string, value: string) => {
