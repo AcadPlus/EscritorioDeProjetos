@@ -8,12 +8,13 @@ export function SidebarWrapper() {
   const pathname = usePathname()
   const [isMounted, setIsMounted] = useState(false)
 
-  // List of routes where the sidebar should not be shown
-  const excludedRoutes = ['/linka/login', '/linka/cadastro']
+  // Lista de rotas onde a sidebar NÃO deve ser mostrada
+  // Atualizado para não usar mais /linka
+  const excludedRoutes = ['/login', '/cadastro'] // Assumindo que /cadastro pode existir
 
-  // Check if the current path starts with '/linka' and is not in the excluded routes
-  const showSidebar =
-    pathname?.startsWith('/linka') && !excludedRoutes.includes(pathname)
+  // A sidebar deve ser mostrada se a rota ATUAL NÃO ESTIVER na lista de excluídas.
+  // Removida a verificação pathname?.startsWith('/linka')
+  const showSidebar = !excludedRoutes.includes(pathname)
 
   useEffect(() => {
     setIsMounted(true)
