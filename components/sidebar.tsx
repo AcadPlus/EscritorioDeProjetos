@@ -69,7 +69,7 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
 
   const handleLogout = async () => {
     try {
-      router.push('/linka/login')
+      router.push('/login')
       await logout()
     } catch (error) {
       console.error('Logout failed:', error)
@@ -83,8 +83,8 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
   }, [])
 
   const vitrinesItems = [
-    { name: 'Negócios', icon: Briefcase, href: '/linka/negocios' },
-    { name: 'Iniciativas', icon: HandshakeIcon, href: '/linka/iniciativas' },
+    { name: 'Negócios', icon: Briefcase, href: '/negocios' },
+    { name: 'Iniciativas', icon: HandshakeIcon, href: '/iniciativas' },
   ]
 
   const nextUpdateItems = [
@@ -94,7 +94,7 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
 
   const comunidadeItems = React.useMemo(
     () => [
-      { name: 'Rede', icon: Network, href: '/linka/rede' },
+      { name: 'Rede', icon: Network, href: '/rede' },
       {
         name: 'Notificações',
         icon: ({ className, ...props }: IconProps) => (
@@ -105,9 +105,9 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
             )}
           </div>
         ),
-        href: '/linka/notificacoes',
+        href: '/notificacoes',
       },
-      { name: 'Eventos', icon: CalendarCheck, href: '/linka/eventos' },
+      { name: 'Eventos', icon: CalendarCheck, href: '/eventos' },
     ],
     [hasUnread],
   )
@@ -116,34 +116,34 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
     {
       name: 'Painel de Controle',
       icon: GitPullRequestArrow,
-      href: '/linka/administrativo',
+      href: '/administrativo',
     },
     {
       name: 'Administrar Negócios',
       icon: Building2,
-      href: '/linka/administrativo/negocios',
+      href: '/administrativo/negocios',
     },
     {
       name: 'Administrar Iniciativas',
       icon: HandshakeIcon,
-      href: '/linka/administrativo/iniciativas',
+      href: '/administrativo/iniciativas',
     },
     {
       name: 'Administrar Eventos',
       icon: CalendarCheck,
-      href: '/linka/administrativo/eventos',
+      href: '/administrativo/eventos',
     },
   ]
 
   const personalItems = [
-    { name: 'Meus Negócios', icon: Building2, href: '/linka/meus-negocios' },
-    { name: 'Meus Eventos', icon: CalendarCheck, href: '/linka/meus-eventos' },
+    { name: 'Meus Negócios', icon: Building2, href: '/meus-negocios' },
+    { name: 'Meus Eventos', icon: CalendarCheck, href: '/meus-eventos' },
     {
       name: 'Minhas Iniciativas',
       icon: HandshakeIcon,
-      href: '/linka/minhas-iniciativas',
+      href: '/minhas-iniciativas',
     },
-    { name: 'Perfil do Usuário', icon: UserCircle, href: '/linka/perfil' },
+    { name: 'Perfil do Usuário', icon: UserCircle, href: '/perfil' },
   ]
 
   const SidebarNavItem = React.forwardRef<HTMLDivElement, SidebarNavItemProps>(
@@ -193,7 +193,7 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
       )}
     >
       <SidebarHeader className="border-b px-4 py-3 flex justify-between items-center">
-        <Link href="/linka/negocios" className="flex items-center space-x-2">
+        <Link href="/negocios" className="flex items-center space-x-2">
           <span className="text-2xl font-bold">LINKA</span>
         </Link>
         {isMounted && onClose && (
@@ -231,7 +231,7 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
           </Button>
         ) : (
           <Button variant="outline" className="w-full justify-start" asChild>
-            <Link href="/linka/login">
+            <Link href="/login">
               <LogIn className="mr-2 h-4 w-4" />
               Login e Cadastro
             </Link>
