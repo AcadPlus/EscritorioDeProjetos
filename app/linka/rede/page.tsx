@@ -1,4 +1,4 @@
-import { Network } from './network-main'
+import { Network } from './components/network-main'
 import PrivateRoute from '@/components/private_route'
 
 export default function NetworkPage() {

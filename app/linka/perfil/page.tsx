@@ -1,5 +1,5 @@
 'use client'
-import ProfilePage from './profile'
+import ProfilePage from './components/profile'
 import PrivateRoute from '@/components/private_route'
 import { useSearchParams } from 'next/navigation'
 
