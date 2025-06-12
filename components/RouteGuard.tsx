@@ -11,8 +11,8 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isLoading && pathname) {
-      if (isAuthenticated && pathname === '/linka/login') {
-        router.push('/linka/negocios')
+      if (isAuthenticated && pathname === '/login') {
+        router.push('/negocios')
       }
     }
   }, [isAuthenticated, isLoading, pathname, router])

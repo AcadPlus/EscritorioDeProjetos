@@ -49,7 +49,7 @@ export function BusinessCard({ business }: BusinessCardProps) {
     <>
       <Card className="group relative overflow-hidden hover:shadow-lg transition-all duration-300 bg-gradient-to-b from-white to-gray-50">
         <Link
-          href={`/linka/inspecionar-negocio/${business.id}`}
+          href={`/inspecionar-negocio/${business.id}`}
           className="block"
         >
           <div className="relative p-6 flex flex-col items-center">
