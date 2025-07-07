@@ -10,6 +10,11 @@ RUN npm install
 # Copia o restante do código da aplicação
 COPY . .
 
+# Argumento que vem do docker-compose.yml
+ARG NEXT_PUBLIC_API_BASE_URL
+# Define a variável de ambiente para o processo de build
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+
 # Define o ambiente para produção
 ENV NODE_ENV=production
 
