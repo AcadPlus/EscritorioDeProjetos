@@ -4,7 +4,13 @@ import { NextRequest, NextResponse } from 'next/server';
 const BACKEND_URL = process.env.INTERNAL_API_URL || 'http://backend:8000';
 
 export async function handler(req: NextRequest) {
-  const url = new URL(req.nextUrl.pathname, BACKEND_URL);
+  // Remove o prefixo /api/v1 do caminho da requisição original
+  const originalPath = req.nextUrl.pathname;
+  const pathWithoutApiPrefix = originalPath.startsWith('/api/v1')
+    ? originalPath.substring('/api/v1'.length)
+    : originalPath;
+
+  const url = new URL(pathWithoutApiPrefix, BACKEND_URL);
 
   // Copia os parâmetros de busca da requisição original
   req.nextUrl.searchParams.forEach((value, key) => {
