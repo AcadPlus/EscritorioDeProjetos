@@ -1,13 +1,10 @@
 # Estágio de build
 FROM node:18-alpine AS builder
 
-# Define o diretório de trabalho
 WORKDIR /app
 
-# Copia os arquivos de manifesto de pacote
+# Copia os arquivos de manifesto de pacote e instala dependências
 COPY package*.json ./
-
-# Instala as dependências
 RUN npm install
 
 # Copia o restante dos arquivos da aplicação
@@ -17,20 +14,25 @@ COPY . .
 RUN npm run build
 
 # Estágio de produção
-FROM nginx:alpine
+FROM node:18-alpine
 
-# Copia os arquivos de build do estágio anterior
-COPY --from=builder /app/.next /usr/share/nginx/html/.next
-COPY --from=builder /app/public /usr/share/nginx/html/public
+WORKDIR /app
 
-# Remove a configuração padrão do Nginx
-RUN rm /etc/nginx/conf.d/default.conf
+# Define o ambiente como produção
+ENV NODE_ENV=production
 
-# Copia a nova configuração do Nginx
-COPY nginx.conf /etc/nginx/conf.d
+# Copia os artefatos de build do estágio anterior
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
 
-# Expõe a porta 80
-EXPOSE 80
+# Cria um usuário de sistema para rodar a aplicação com menos privilégios
+RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
+USER nextjs
 
-# Comando para iniciar o Nginx
-CMD ["nginx", "-g", "daemon off;"] 
+# Expõe a porta que o Next.js usa
+EXPOSE 3000
+
+# Comando para iniciar o servidor Next.js em produção
+CMD ["npm", "start"] 
