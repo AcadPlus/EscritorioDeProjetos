@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useCallback } from 'react'
 import { useAuthApi, getAccessToken } from '../api/auth'
 import { useAuth } from '../context/AuthContext'

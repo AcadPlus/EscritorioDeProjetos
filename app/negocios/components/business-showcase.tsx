@@ -8,17 +8,20 @@ import { BusinessSort } from './business-sort'
 import { BusinessStatus } from './business-status'
 import { BusinessList } from './business-list'
 import { BusinessRefresh } from './business-refresh'
-import type { NegocioType } from '@/lib/types/businessTypes'
-import { NegocioResponse } from '@/lib/types/businessTypes'
+import type { NegocioType, NegocioResponse } from '@/lib/types/businessTypes'
 
-export function BusinessShowcase() {
+interface BusinessShowcaseProps {
+  initialBusinesses?: NegocioResponse[] | null
+}
+
+export function BusinessShowcase({ initialBusinesses }: BusinessShowcaseProps) {
   const { useListBusinesses } = useBusinessApi()
 
   const [filter, setFilter] = useState<NegocioType | 'all'>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [visibleBusinesses, setVisibleBusinesses] = useState<NegocioResponse[]>(
-    [],
+    initialBusinesses?.filter((b) => b.visivel === true) || [],
   )
   const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'alphabetical'>(
     'recent',
@@ -30,7 +33,9 @@ export function BusinessShowcase() {
     isLoading,
     error,
     refetch,
-  } = useListBusinesses('aprovado')
+  } = useListBusinesses('aprovado', {
+    initialData: initialBusinesses,
+  })
 
   useEffect(() => {
     if (businesses) {
@@ -38,8 +43,15 @@ export function BusinessShowcase() {
         (business: NegocioResponse) => business.visivel === true,
       )
       setVisibleBusinesses(filtered)
+    } else if (!businesses && initialBusinesses) {
+      const filtered = initialBusinesses.filter(
+        (business: NegocioResponse) => business.visivel === true,
+      )
+      setVisibleBusinesses(filtered)
+    } else if (!businesses && !initialBusinesses && !isLoading && !error) {
+      setVisibleBusinesses([]);
     }
-  }, [businesses])
+  }, [businesses, initialBusinesses, isLoading, error])
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -49,6 +61,23 @@ export function BusinessShowcase() {
   const handleSortChange = (value: 'recent' | 'oldest' | 'alphabetical') => {
     setSortBy(value)
     setCurrentPage(1)
+  }
+
+  if (initialBusinesses === null && isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <p>Carregando negócios...</p>
+      </div>
+    );
+  }
+
+  if (error && !businesses && !initialBusinesses) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center text-red-500">
+        <p>Erro ao carregar os negócios: {error.message}.</p>
+        <p>Por favor, tente atualizar a página ou contate o suporte.</p>
+      </div>
+    );
   }
 
   return (
@@ -78,7 +107,7 @@ export function BusinessShowcase() {
               </div>
               <div className="flex flex-wrap gap-4 items-center">
                 <BusinessSort handleSortChange={handleSortChange} />
-                <BusinessRefresh handleRefreshButtonClick={() => refetch()} />
+                <BusinessRefresh handleRefreshButtonClick={async () => { await refetch(); }} />
               </div>
             </div>
 
@@ -119,9 +148,26 @@ export function BusinessShowcase() {
             loading={isLoading}
           />
         </div>
-        {error && (
-          <div className="text-red-500 mt-4">Error: {error.message}</div>
+
+        {error && visibleBusinesses.length === 0 && (
+          <div className="text-red-500 mt-4 text-center">
+            Falha ao atualizar os negócios: {error.message}.
+            {initialBusinesses === null && " Os dados iniciais do servidor também não puderam ser carregados."}
+          </div>
         )}
+        
+        {!isLoading && !error && visibleBusinesses.length === 0 && (businesses && businesses.length > 0 || initialBusinesses && initialBusinesses.length > 0) && (
+          <div className="text-center mt-8 text-gray-500">
+            Nenhum negócio encontrado com os filtros atuais.
+          </div>
+        )}
+
+         {!isLoading && !error && (!businesses || businesses.length === 0) && (!initialBusinesses || initialBusinesses.length === 0) && (
+          <div className="text-center mt-8 text-gray-500">
+            Ainda não há negócios cadastrados ou visíveis.
+          </div>
+        )}
+
       </div>
     </div>
   )
