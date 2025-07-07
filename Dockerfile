@@ -1,20 +1,36 @@
-# Usar Node.js 18 como base
-FROM node:18-alpine
+# Estágio de build
+FROM node:18-alpine AS builder
 
-# Definir diretório de trabalho
+# Define o diretório de trabalho
 WORKDIR /app
 
-# Copiar arquivos de dependências
+# Copia os arquivos de manifesto de pacote
 COPY package*.json ./
 
-# Instalar dependências
-RUN npm ci --only=production
+# Instala as dependências
+RUN npm install
 
-# Copiar código da aplicação
+# Copia o restante dos arquivos da aplicação
 COPY . .
 
-# Expor porta
-EXPOSE 3000
+# Constrói a aplicação para produção
+RUN npm run build
 
-# Comando para executar a aplicação
-CMD ["npm", "run", "dev"] 
+# Estágio de produção
+FROM nginx:alpine
+
+# Copia os arquivos de build do estágio anterior
+COPY --from=builder /app/.next /usr/share/nginx/html/.next
+COPY --from=builder /app/public /usr/share/nginx/html/public
+
+# Remove a configuração padrão do Nginx
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Copia a nova configuração do Nginx
+COPY nginx.conf /etc/nginx/conf.d
+
+# Expõe a porta 80
+EXPOSE 80
+
+# Comando para iniciar o Nginx
+CMD ["nginx", "-g", "daemon off;"] 
