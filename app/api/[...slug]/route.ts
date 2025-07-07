@@ -12,13 +12,22 @@ export async function handler(req: NextRequest) {
   });
 
   try {
+    // Cria novos headers, encaminhando apenas os necessários.
+    const headersToForward = new Headers();
+
+    // Encaminha o Content-Type original da requisição.
+    if (req.headers.has('Content-Type')) {
+      headersToForward.set('Content-Type', req.headers.get('Content-Type'));
+    }
+
+    // Encaminha o token de autorização, se existir.
+    if (req.headers.has('Authorization')) {
+      headersToForward.set('Authorization', req.headers.get('Authorization'));
+    }
+
     const response = await fetch(url.toString(), {
       method: req.method,
-      headers: {
-        'Content-Type': 'application/json',
-        // Copia outros headers importantes, se necessário
-        Authorization: req.headers.get('Authorization') || '',
-      },
+      headers: headersToForward, // Usa os headers encaminhados
       body: req.body,
       // Garante que o fetch não use cache interno
       cache: 'no-store',
