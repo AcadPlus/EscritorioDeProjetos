@@ -8,13 +8,12 @@ import {
   ParticipanteStatus,
 } from '../types/eventTypes'
 import { toast } from '@/hooks/use-toast'
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1'
+import { api } from '../api'
 
 export function useEventApi() {
   const { fetchWithToken } = useApi()
   const queryClient = useQueryClient()
+  const API_BASE_URL = api.getUri()
 
   const createEvent = async (
     eventData: EventCreate,

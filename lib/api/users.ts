@@ -2,13 +2,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { UserType, UserCreateData, UserWithType } from '../types/userTypes'
 import { useApi } from '../hooks/useApi'
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1'
+import { api } from '../api'
 
 export const useUserApi = () => {
   const { fetchWithToken } = useApi()
   const queryClient = useQueryClient()
+  const API_BASE_URL = api.getUri()
 
   const getCurrentUser = async () => {
     const response = await fetchWithToken(`${API_BASE_URL}/users/me`)

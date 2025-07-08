@@ -3,10 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useApi } from '../hooks/useApi'
 import type { Event, EventStatus } from '@/lib/types/event'
 import { toast } from '@/hooks/use-toast'
-import { config } from '@/config'
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1'
+import { api } from '../api'
 
 /**
  * Hook para gerenciar eventos
@@ -14,6 +11,7 @@ const API_BASE_URL =
 export const useEventsApi = () => {
   const { fetchWithToken } = useApi()
   const queryClient = useQueryClient()
+  const API_BASE_URL = api.getUri()
 
   const createEvent = async (
     eventData: Omit<Event, 'id' | 'uid_admin'>,
