@@ -1,7 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { UserType } from '../types/userTypes'
 import { toast } from '@/hooks/use-toast'
-import { api } from '../api'
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1'
 
 interface LoginResponse {
   is_admin: string
@@ -28,21 +30,19 @@ export const useAuthApi = () => {
     password,
     userType,
   }: LoginParams): Promise<LoginResponse> => {
-    const response = await api.post(
-      `/auth/login`,
-      new URLSearchParams({
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
         username,
         password,
         scope: userType,
       }),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      },
-    )
+    })
 
-    if (response.status !== 200) {
+    if (!response.ok) {
       if (response.status === 401) {
         toast({
           title: 'Erro',
@@ -54,7 +54,7 @@ export const useAuthApi = () => {
       throw new Error('Login failed')
     }
 
-    const data = response.data
+    const data = await response.json()
 
     localStorage.setItem('accessToken', data.data.access_token)
     localStorage.setItem('refreshToken', data.data.refresh_token)
@@ -71,20 +71,21 @@ export const useAuthApi = () => {
       throw new Error('No refresh token available')
     }
 
-    const response = await api.post(`/auth/refresh`, null, {
+    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${refreshToken}`,
       },
     })
 
-    if (response.status !== 200) {
+    if (!response.ok) {
       if (response.status === 401) {
         throw new Error('Invalid refresh token')
       }
       throw new Error('Failed to refresh token')
     }
 
-    const data = response.data
+    const data = await response.json()
     localStorage.setItem('accessToken', data.data.access_token)
     localStorage.setItem('refreshToken', data.data.refresh_token)
     localStorage.setItem('userType', data.data.user_type)
@@ -99,13 +100,14 @@ export const useAuthApi = () => {
       throw new Error('No access token available')
     }
 
-    const response = await api.post(`/auth/logout`, null, {
+    const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     })
 
-    if (response.status !== 200) {
+    if (!response.ok) {
       if (response.status === 401) {
         throw new Error('Token expired')
       }

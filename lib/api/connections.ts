@@ -5,12 +5,13 @@ import {
   RequestType,
   ConnectionStatus,
 } from '../types/connectionTypes'
-import { api } from '../api'
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1'
 
 export function useConnectionRequests() {
   const queryClient = useQueryClient()
   const { fetchWithToken } = useApi()
-  const API_BASE_URL = api.getUri()
 
   const getRequests = async (
     requestType: RequestType,

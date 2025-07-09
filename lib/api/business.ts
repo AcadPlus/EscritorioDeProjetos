@@ -8,12 +8,52 @@ import type {
   PapelNegocio,
 } from '../types/businessTypes'
 import { toast } from '@/hooks/use-toast'
-import { api } from '../api';
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1'
+
+// Nova função para fetching no lado do servidor (sem hooks)
+export const fetchPublicBusinessesForServer = async (
+  status: string = 'aprovado',
+): Promise<NegocioResponse[] | null> => {
+  // Reutiliza API_BASE_URL definido no escopo do módulo
+  const API_BASE_URL_LOCAL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL_LOCAL}/business/?status=${status}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Adicionar cache revalidate para Server Components se desejado
+        // next: { revalidate: 60 } // Revalida a cada 60 segundos, por exemplo
+      },
+    );
+
+    if (!response.ok) {
+      console.error(
+        'Server-side fetch failed:',
+        response.status,
+        response.statusText,
+      );
+      // Poderia logar response.text() para mais detalhes do erro
+      return null;
+    }
+
+    const data = await response.json();
+    return data.data as NegocioResponse[];
+  } catch (error) {
+    console.error('Error fetching public businesses for server:', error);
+    return null;
+  }
+};
 
 export const useBusinessApi = () => {
   const { fetchWithToken } = useApi()
   const queryClient = useQueryClient()
-  const API_BASE_URL = api.getUri();
 
   const createBusiness = async (
     businessData: NegocioCreate,
