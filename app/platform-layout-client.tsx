@@ -8,8 +8,8 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { MainSidebar } from '@/components/sidebar'
 import { SidebarWrapper } from '@/components/sidebar-wrapper'
 import PrivateRoute from '@/components/private_route'
-import { Providers } from '@/components/providers' // Mantido aqui para envolver a lógica de PrivateRoute
-import { NotificationsProvider } from '@/lib/context/NotificationsContext' // Mantido aqui
+import { Providers } from '@/components/providers'
+import { NotificationsProvider } from '@/lib/context/NotificationsContext'
 
 interface PlatformLayoutClientProps {
   children: React.ReactNode
@@ -20,11 +20,11 @@ export default function PlatformLayoutClient({ children }: PlatformLayoutClientP
   const [isMounted, setIsMounted] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
 
-  // Rotas públicas atualizadas (sem /linka)
+  const isLandingPage = pathname === '/'
+
   const isPublicRoute =
     pathname === '/login' ||
-    pathname === '/' || 
-    pathname?.startsWith('/negocios') || 
+    pathname?.startsWith('/negocios') ||
     pathname?.startsWith('/iniciativas')
 
   useEffect(() => {
@@ -57,11 +57,16 @@ export default function PlatformLayoutClient({ children }: PlatformLayoutClientP
     </div>
   )
 
-  // Providers e NotificationsProvider envolvem a lógica de PrivateRoute e o conteúdo
   return (
     <Providers>
       <NotificationsProvider>
-        {isPublicRoute ? layoutContent : <PrivateRoute>{layoutContent}</PrivateRoute>}
+        {isLandingPage ? (
+          <>{children}</>
+        ) : isPublicRoute ? (
+          layoutContent
+        ) : (
+          <PrivateRoute>{layoutContent}</PrivateRoute>
+        )}
       </NotificationsProvider>
     </Providers>
   )
