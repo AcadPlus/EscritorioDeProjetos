@@ -244,8 +244,11 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
       })
       setIsEditProfileOpen(false)
       toast.success('Perfil atualizado com sucesso')
+      localStorage.removeItem('user')
+      // Redirecionar para a página de login
+      router.push('/login')
     } catch (error) {
-      console.error('Error updating profile:', error)
+      console.error('Erro ao atualizar o usuário:', error)
       toast.error('Erro ao atualizar perfil')
     }
   }

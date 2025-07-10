@@ -38,7 +38,7 @@ export const NoResults = ({
         {isAuthenticated && (
           <Button
             className="mt-4 bg-black text-white hover:bg-black/70"
-            onClick={() => router.push('/linka/minhas-iniciativas')}
+            onClick={() => router.push('/minhas-iniciativas')}
           >
             <Plus className="w-4 h-4 mr-2" />
             Gerenciar Minhas Iniciativas

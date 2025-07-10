@@ -225,7 +225,7 @@ export default function EventManagementPage() {
             Crie seu primeiro evento para começar!
           </p>
           <Button
-            onClick={() => router.push('/linka/meus-eventos/novo')}
+            onClick={() => router.push('/meus-eventos/novo')}
             className="bg-black text-white hover:bg-black/70"
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -251,7 +251,7 @@ export default function EventManagementPage() {
             <Card
               className="flex flex-col hover:shadow-lg transition-all duration-200 cursor-pointer group"
               onClick={() =>
-                router.push(`/linka/eventos/${event.uid}`)
+                router.push(`/eventos/${event.uid}`)
               }
             >
               <CardHeader>
@@ -267,7 +267,7 @@ export default function EventManagementPage() {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation()
-                            router.push(`/linka/eventos/${event.uid}`)
+                            router.push(`/eventos/${event.uid}`)
                           }}
                         >
                           <Edit className="h-4 w-4" />
@@ -428,7 +428,7 @@ export default function EventManagementPage() {
                 <div className="flex items-center justify-center">
                   <Button
                     className="w-full h-full bg-black text-white hover:bg-black/70"
-                    onClick={() => router.push('/linka/meus-eventos/novo')}
+                    onClick={() => router.push('/meus-eventos/novo')}
                   >
                     <Plus className="mr-2 h-5 w-5" />
                     Novo Evento

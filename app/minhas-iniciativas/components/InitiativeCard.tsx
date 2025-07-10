@@ -56,7 +56,7 @@ export const InitiativeCard = ({
       <Card
         className="flex flex-col hover:shadow-lg transition-all duration-200 cursor-pointer group"
         onClick={() =>
-          router.push(`/linka/minhas-iniciativas/${initiative.uid}`)
+          router.push(`/minhas-iniciativas/${initiative.uid}`)
         }
       >
         <CardHeader>
@@ -72,7 +72,7 @@ export const InitiativeCard = ({
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation()
-                      router.push(`/linka/iniciativas/${initiative.uid}`)
+                      router.push(`/iniciativas/${initiative.uid}`)
                     }}
                   >
                     <Edit className="h-4 w-4" />

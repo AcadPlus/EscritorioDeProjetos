@@ -25,7 +25,7 @@ export default function EventosPage() {
   const { data: events, isLoading } = useListEvents(selectedStatus)
 
   const handleCreateEvent = () => {
-    router.push('/linka/eventos/novo')
+    router.push('/eventos/novo')
   }
 
   const handleSearch = (term: string) => {
@@ -54,20 +54,10 @@ export default function EventosPage() {
         <div className="mb-8">
           <div className="flex flex-col gap-6">
             {/* Título e Botão */}
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Central de Eventos
-                </h2>
-                <p className="text-sm text-gray-500">
-                  Gerencie e acompanhe todos os eventos do ecossistema
-                </p>
-              </div>
-              <Button
-                onClick={handleCreateEvent}
-                className="bg-black text-white hover:bg-black/70"
-              >
-                <Plus className="mr-2 h-4 w-4 " />
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-3xl font-bold">Eventos</h1>
+              <Button onClick={() => router.push('/eventos/novo')}>
+                <Plus className="mr-2 h-4 w-4" />
                 Criar Evento
               </Button>
             </div>

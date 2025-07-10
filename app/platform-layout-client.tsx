@@ -25,7 +25,7 @@ export default function PlatformLayoutClient({ children }: PlatformLayoutClientP
   const isPublicRoute =
     pathname === '/login' ||
     pathname?.startsWith('/negocios') ||
-    pathname?.startsWith('/iniciativas')
+    pathname?.startsWith('/inspecionar-negocio')
 
   useEffect(() => {
     setIsMounted(true)

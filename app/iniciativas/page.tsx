@@ -15,7 +15,7 @@ import { ErrorState } from './components/ErrorState'
 import { Filters } from './components/Filters'
 import { NoResults } from './components/NoResults'
 import { SearchAndSort } from './components/SearchAndSort'
-import { InitiativeList } from './components/InitiativeList'
+import InitiativeList from './components/InitiativeList'
 
 export default function InitiativesPage() {
   const { isAuthenticated } = useAuth()

@@ -129,7 +129,7 @@ export default function InitiativePublicPage({
         <div className="container mx-auto py-8 max-w-4xl">
           <h1 className="text-2xl font-semibold">Iniciativa não encontrada</h1>
           <Button
-            onClick={() => router.push('/linka/iniciativas')}
+            onClick={() => router.push('/iniciativas')}
             className="mt-4"
           >
             Voltar para Iniciativas
@@ -467,7 +467,7 @@ export default function InitiativePublicPage({
               {userId === initiative.owner_id && (
                 <Button
                   onClick={() =>
-                    router.push(`/linka/minhas-iniciativas/${initiative.uid}`)
+                    router.push(`/minhas-iniciativas/${initiative.uid}`)
                   }
                   variant="secondary"
                   size="sm"

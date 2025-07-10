@@ -48,6 +48,7 @@ import {
   Edit,
   AlertCircle,
   Save,
+  Eye,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -120,7 +121,11 @@ export default function InitiativePage({
         title: 'Sucesso!',
         description: 'Iniciativa atualizada com sucesso',
       })
+      // Refetch das iniciativas após a atualização
+      // queryClient.invalidateQueries({ queryKey: ['initiatives'] })
+      router.push('/minhas-iniciativas')
     } catch (error) {
+      console.error('Erro ao atualizar iniciativa:', error)
       toast({
         title: 'Erro',
         description: 'Erro ao atualizar iniciativa',
@@ -133,7 +138,7 @@ export default function InitiativePage({
     if (window.confirm('Tem certeza que deseja excluir esta iniciativa?')) {
       try {
         await deleteInitiative.mutateAsync(resolvedParams.id)
-        router.push('/linka/minhas-iniciativas')
+        router.push('/minhas-iniciativas')
         toast({
           title: 'Sucesso!',
           description: 'Iniciativa excluída com sucesso',
@@ -348,7 +353,7 @@ export default function InitiativePage({
       <div className="container mx-auto py-8">
         <h1 className="text-2xl font-semibold">Iniciativa não encontrada</h1>
         <Button
-          onClick={() => router.push('/linka/minhas-iniciativas')}
+          onClick={() => router.push('/minhas-iniciativas')}
           className="mt-4"
         >
           Voltar para Minhas Iniciativas
@@ -359,7 +364,7 @@ export default function InitiativePage({
 
   // Se não é o dono nem admin, redireciona para a visualização pública
   if (!canManage) {
-    router.push(`/linka/iniciativas/${resolvedParams.id}`)
+    router.push(`/iniciativas/${resolvedParams.id}`)
     return null
   }
 
@@ -369,6 +374,25 @@ export default function InitiativePage({
       animate={{ opacity: 1 }}
       className="container mx-auto px-4 py-8"
     >
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Editar Iniciativa</h1>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => router.push('/minhas-iniciativas')}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={() =>
+              router.push(`/iniciativas/${resolvedParams.id}`)
+            }
+          >
+            <Eye className="mr-2 h-4 w-4" />
+            Visualizar
+          </Button>
+        </div>
+      </div>
       <div className="space-y-6">
         <AnimatePresence mode="wait">
           {isLoadingInitiative ? (

@@ -8,17 +8,17 @@ export const EmptyInitiativesState = () => {
   return (
     <div className="flex flex-col items-center justify-center space-y-4 py-12">
       <h2 className="text-2xl font-semibold">
-        Você ainda não tem iniciativas
+        Você ainda não cadastrou nenhuma iniciativa.
       </h2>
       <p className="text-muted-foreground">
         Crie sua primeira iniciativa ou participe de uma existente!
       </p>
       <Button
-        onClick={() => router.push('/linka/iniciativas/nova')}
-        className="bg-black text-white hover:bg-black/70"
+        className="mt-6 bg-black text-white hover:bg-black/70"
+        onClick={() => router.push('/iniciativas/nova')}
       >
-        <Plus className="mr-2 h-4 w-4" />
-        Criar Iniciativa
+        <Plus className="w-4 h-4 mr-2" />
+        Cadastrar minha primeira iniciativa
       </Button>
     </div>
   )

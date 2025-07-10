@@ -61,10 +61,9 @@ export function useAuth() {
   }
 
   const logout = () => {
-    localStorage.removeItem('user')
-    setAuth({ user: null, loading: false, error: null })
-    router.push('/login')
-  }
+    localStorage.removeItem('token');
+    router.push('/login');
+  };
 
   return {
     user: auth.user,

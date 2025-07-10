@@ -2,66 +2,44 @@
 
 import { useAuth } from '@/lib/context/AuthContext'
 import { type ReactNode, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Toaster } from '@/components/ui/toaster'
+import { useRouter, usePathname } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
-import { LoadingSkeleton } from '@/components/LoadingSkeleton'
-import { Button } from '@/components/ui/button'
+import { publicRoutes } from '@/lib/config/publicRoutes'
 
 interface PrivateRouteProps {
   children: ReactNode
 }
 
-const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
+export default function PrivateRoute({ children }: PrivateRouteProps) {
   const { isAuthenticated, isLoading } = useAuth()
+  const pathname = usePathname()
   const router = useRouter()
   const { toast } = useToast()
 
+  const isPublicRoute = publicRoutes.some((route) => {
+    if (route === '/') return pathname === route
+    return pathname.startsWith(route)
+  })
+
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isLoading && !isAuthenticated && !isPublicRoute) {
       toast({
         title: 'Acesso restrito',
-        description: 'Você precisa estar autenticado para acessar esta página. Por favor, faça login para continuar.',
-        duration: 5000,
+        description: 'Você precisa estar autenticado para acessar esta página.',
         variant: 'destructive',
+        duration: 5000,
       })
+      router.push('/login')
     }
-  }, [isAuthenticated, isLoading, toast])
-
-  const handleLogin = () => {
-    router.push('/linka/login')
-  }
+  }, [isLoading, isAuthenticated, isPublicRoute, router, toast])
 
   if (isLoading) {
-    return <LoadingSkeleton />
+    return <div>Carregando...</div> // Ou um componente de skeleton/loading
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-        <div className="p-8 bg-white rounded-lg shadow-md text-center">
-          <h1 className="text-2xl font-bold mb-4">Acesso Restrito</h1>
-          <p className="mb-6">
-            Você precisa estar autenticado para acessar esta página.
-          </p>
-          <Button
-            className="bg-black text-white hover:bg-[#808080]"
-            onClick={handleLogin}
-          >
-            Entendi, fazer login
-          </Button>
-        </div>
-        <Toaster />
-      </div>
-    )
+  if (!isAuthenticated && !isPublicRoute) {
+    return null // Retorna null para não renderizar nada enquanto redireciona
   }
 
-  return (
-    <>
-      {children}
-      <Toaster />
-    </>
-  )
+  return <>{children}</>
 }
-
-export default PrivateRoute

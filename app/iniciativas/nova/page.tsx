@@ -42,7 +42,7 @@ export default function CriarIniciativa() {
 
   useEffect(() => {
     if (businesses && businesses.length === 0) {
-      router.push('/linka/minhas-iniciativas')
+      router.push('/minhas-iniciativas')
     }
   }, [businesses, router])
 
@@ -60,7 +60,7 @@ export default function CriarIniciativa() {
     if (currentStep === 'details') {
       try {
         await createInitiativeMutation.mutateAsync(formData as IniciativaCreate)
-        router.push('/linka/iniciativas')
+        router.push('/minhas-iniciativas')
       } catch (error) {
         console.error(error)
       }
@@ -92,7 +92,7 @@ export default function CriarIniciativa() {
                 </p>
                 <Button
                   type="button"
-                  onClick={() => router.push('/linka/meus-negocios')}
+                  onClick={() => router.push('/meus-negocios')}
                   variant="secondary"
                 >
                   Criar Negócio

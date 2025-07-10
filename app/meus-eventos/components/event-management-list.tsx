@@ -153,7 +153,7 @@ export function EventManagementList({
                 >
                   <Card className="bg-white hover:shadow-lg transition-all duration-200 cursor-pointer group"
                     onClick={() => {
-                      window.location.href = `/linka/eventos/${event.uid}`;
+                      window.location.href = `/eventos/${event.uid}`;
                     }}
                   >
                     <CardHeader>

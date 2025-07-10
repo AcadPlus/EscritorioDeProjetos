@@ -314,9 +314,9 @@ export default function InitiativesManagementPage() {
                     className="w-full h-full bg-black text-white hover:bg-black/70"
                     onClick={() => {
                       if (!businesses || businesses.length === 0) {
-                        router.push('/linka/meus-negocios')
+                        router.push('/meus-negocios')
                       } else {
-                        router.push('/linka/iniciativas/nova')
+                        router.push('/iniciativas/nova')
                       }
                     }}
                   >

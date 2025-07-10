@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Plus, Building2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export const EmptyBusinessState = () => {
@@ -11,17 +11,15 @@ export const EmptyBusinessState = () => {
         Você ainda não tem nenhum negócio cadastrado
       </h2>
       <p className="text-muted-foreground text-center">
-        Para criar uma iniciativa, primeiro você precisa cadastrar um
-        negócio.
-        <br />
-        Cadastre seu primeiro negócio para começar!
+        Para começar, você precisa ter um negócio cadastrado.
       </p>
+
       <Button
-        onClick={() => router.push('/linka/meus-negocios')}
-        className="bg-black text-white hover:bg-black/70"
+        className="mt-6 bg-black text-white hover:bg-black/70"
+        onClick={() => router.push('/meus-negocios')}
       >
-        <Plus className="mr-2 h-4 w-4" />
-        Criar Negócio
+        <Building2 className="w-4 h-4 mr-2" />
+        Cadastrar meu negócio
       </Button>
     </div>
   )

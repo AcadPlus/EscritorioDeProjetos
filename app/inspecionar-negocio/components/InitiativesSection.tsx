@@ -23,12 +23,12 @@ export const InitiativesSection: React.FC<InitiativesSectionProps> = ({
 
   // Função para navegar para a página de detalhes da iniciativa
   const navigateToInitiative = (iniciativaId: string) => {
-    router.push(`/linka/iniciativas/${iniciativaId}`)
+    router.push(`/iniciativas/${iniciativaId}`)
   }
 
   // Função para navegar para a página de criação de iniciativa
   const navigateToCreateInitiative = () => {
-    router.push(`/linka/minhas-iniciativas?negocioId=${business.id}`)
+    router.push(`/minhas-iniciativas?negocioId=${business.id}`)
   }
 
   return (

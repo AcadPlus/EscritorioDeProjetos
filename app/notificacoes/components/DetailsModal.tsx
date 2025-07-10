@@ -76,7 +76,7 @@ export const DetailsModal = ({
                 if (resourceType === 'business') {
                   router.push(`/inspecionar-negocio/${resourceId}`);
                 } else if (resourceType === 'initiative') {
-                  router.push(`/linka/iniciativas/${resourceId}`);
+                  router.push(`/iniciativas/${resourceId}`);
                 }
               }}
             >

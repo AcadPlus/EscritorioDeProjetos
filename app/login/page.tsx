@@ -27,7 +27,7 @@ export default function LoginScreen() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/linka/negocios')
+      router.push('/negocios')
     }
   }, [isAuthenticated, router])
 
@@ -41,7 +41,7 @@ export default function LoginScreen() {
 
     try {
       await login(email, password, userType)
-      router.push('/linka/negocios')
+      router.push('/negocios')
     } catch (error: any) {
       if (error.response && error.response.data) {
         setError(error.response.data.detail || 'Erro ao fazer login')

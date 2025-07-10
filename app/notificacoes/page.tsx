@@ -342,7 +342,7 @@ export default function NotificacoesPage() {
         
       case NotificationType.INICIATIVA_APROVADA:
         if (notification.data?.initiative_id) {
-          router.push(`/linka/iniciativas/${notification.data.initiative_id}`);
+          router.push(`/iniciativas/${notification.data.initiative_id}`);
         }
         break;
         

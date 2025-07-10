@@ -5,78 +5,51 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button'
 import { Building2, HandshakeIcon, CalendarCheck } from 'lucide-react'
 
-export default function AdministrativoPage() {
+export default function AdminPage() {
   const router = useRouter()
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold">Painel Administrativo</h1>
-        <p className="text-muted-foreground">
-          Gerencie negócios, iniciativas e eventos da plataforma
-        </p>
-      </div>
-
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-6">Painel Administrativo</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xl font-bold">Administração de Negócios</CardTitle>
-            <Building2 className="h-6 w-6 text-blue-500" />
+        <Card>
+          <CardHeader>
+            <CardTitle>Gerenciar Negócios</CardTitle>
           </CardHeader>
           <CardContent>
-            <CardDescription className="min-h-[100px]">
-              Gerencie todos os negócios da plataforma. Aprove ou rejeite solicitações, 
-              visualize métricas e monitore o desempenho dos negócios ativos.
-            </CardDescription>
+            <p>Aprovar, visualizar e gerenciar todos os negócios cadastrados na plataforma.</p>
           </CardContent>
           <CardFooter>
-            <Button 
-              className="w-full" 
-              onClick={() => router.push('/linka/administrativo/negocios')}
-            >
-              Gerenciar Negócios
+            <Button onClick={() => router.push('/administrativo/negocios')}>
+              Acessar
             </Button>
           </CardFooter>
         </Card>
 
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xl font-bold">Administração de Iniciativas</CardTitle>
-            <HandshakeIcon className="h-6 w-6 text-green-500" />
+        <Card>
+          <CardHeader>
+            <CardTitle>Gerenciar Iniciativas</CardTitle>
           </CardHeader>
           <CardContent>
-            <CardDescription className="min-h-[100px]">
-              Gerencie todas as iniciativas. Aprove ou rejeite solicitações pendentes,
-              analise métricas de engajamento e acompanhe o progresso das iniciativas ativas.
-            </CardDescription>
+            <p>Aprovar, visualizar e gerenciar todas as iniciativas cadastradas na plataforma.</p>
           </CardContent>
           <CardFooter>
-            <Button 
-              className="w-full" 
-              onClick={() => router.push('/linka/administrativo/iniciativas')}
-            >
-              Gerenciar Iniciativas
+            <Button onClick={() => router.push('/administrativo/iniciativas')}>
+              Acessar
             </Button>
           </CardFooter>
         </Card>
 
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xl font-bold">Administração de Eventos</CardTitle>
-            <CalendarCheck className="h-6 w-6 text-purple-500" />
+        <Card>
+          <CardHeader>
+            <CardTitle>Gerenciar Eventos</CardTitle>
           </CardHeader>
           <CardContent>
-            <CardDescription className="min-h-[100px]">
-              Monitore e gerencie todos os eventos da plataforma. Valide informações,
-              analise a participação e acompanhe eventos passados e futuros.
-            </CardDescription>
+            <p>Crie, edite e gerencie todos os eventos da plataforma.</p>
           </CardContent>
           <CardFooter>
-            <Button 
-              className="w-full" 
-              onClick={() => router.push('/linka/administrativo/eventos')}
-            >
-              Gerenciar Eventos
+            <Button onClick={() => router.push('/administrativo/eventos')}>
+              Acessar
             </Button>
           </CardFooter>
         </Card>
