@@ -15,58 +15,55 @@ interface PlatformLayoutClientProps {
   children: React.ReactNode
 }
 
-export default function PlatformLayoutClient({ children }: PlatformLayoutClientProps) {
+export default function PlatformLayoutClient({
+  children,
+}: PlatformLayoutClientProps) {
   const pathname = usePathname()
   const [isMounted, setIsMounted] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
 
   const isLandingPage = pathname === '/'
 
-  const isPublicRoute =
-    pathname === '/login' ||
-    pathname?.startsWith('/negocios') ||
-    pathname?.startsWith('/inspecionar-negocio')
-
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  const layoutContent = (
-    <div className="flex min-h-screen bg-gray-100">
-      {isMounted && <SidebarWrapper />}
-      {isMounted && (
-        <div className="block md:hidden fixed top-5 right-4 z-50">
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="bg-white shadow-sm"
-              >
-                <Menu className="h-4 w-4" />
-                <span className="sr-only">Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[280px] p-0 border-r">
-              <MainSidebar onClose={() => setIsOpen(false)} />
-            </SheetContent>
-          </Sheet>
-        </div>
-      )}
-      <main className="flex-1 overflow-y-auto p-4">{children}</main>
-    </div>
-  )
+  if (isLandingPage) {
+    return (
+      <Providers>
+        <NotificationsProvider>{children}</NotificationsProvider>
+      </Providers>
+    )
+  }
 
   return (
     <Providers>
       <NotificationsProvider>
-        {isLandingPage ? (
-          <>{children}</>
-        ) : isPublicRoute ? (
-          layoutContent
-        ) : (
-          <PrivateRoute>{layoutContent}</PrivateRoute>
-        )}
+        <div className="flex min-h-screen bg-gray-100">
+          {isMounted && <SidebarWrapper />}
+          {isMounted && (
+            <div className="block md:hidden fixed top-5 right-4 z-50">
+              <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="bg-white shadow-sm"
+                  >
+                    <Menu className="h-4 w-4" />
+                    <span className="sr-only">Menu</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[280px] p-0 border-r">
+                  <MainSidebar onClose={() => setIsOpen(false)} />
+                </SheetContent>
+              </Sheet>
+            </div>
+          )}
+          <main className="flex-1 overflow-y-auto p-4">
+            <PrivateRoute>{children}</PrivateRoute>
+          </main>
+        </div>
       </NotificationsProvider>
     </Providers>
   )
