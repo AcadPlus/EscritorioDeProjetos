@@ -102,40 +102,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Testimonials Section */}
-        <section id="testimonials" className="w-full py-20 md:py-24 lg:py-32 relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-purple-900/20 via-slate-800/30 to-purple-900/20"></div>
-          <div className="container mx-auto px-6 text-center relative z-10">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-600/10 to-violet-600/10 border border-purple-500/20 backdrop-blur-sm mb-6">
-              <Users className="h-4 w-4 text-purple-400" />
-              <span className="text-sm font-medium text-purple-300">Depoimentos</span>
-            </div>
-
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent mb-4">
-              O que nossos usuários dizem
-            </h2>
-
-            <p className="max-w-2xl mx-auto text-lg text-gray-400 mb-12">
-              Veja como a Linka está transformando o ecossistema de inovação.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <TestimonialCard
-                name="João da Silva"
-                role="CEO, InovaTech"
-                message="A Linka foi fundamental para conectarmos com parceiros estratégicos e acelerar nosso crescimento. Recomendo a todos!"
-                avatarFallback="JS"
-              />
-              <TestimonialCard
-                name="Maria Almeida"
-                role="Pesquisadora, Universidade Federal"
-                message="Encontrei na Linka um espaço incrível para divulgar minhas pesquisas e colaborar com a indústria. Essencial!"
-                avatarFallback="MA"
-              />
-            </div>
-          </div>
-        </section>
-
         {/* CTA Section */}
         <section className="w-full py-20 md:py-24 lg:py-32 relative">
           <div className="absolute inset-0 bg-gradient-to-r from-purple-900/30 via-violet-900/30 to-purple-900/30"></div>
@@ -148,7 +114,7 @@ export default function LandingPage() {
                 Junte-se à comunidade de inovadores da UFC e transforme suas ideias em realidade.
               </p>
               <Link
-                href="/cadastro"
+                href="/login"
                 className="group relative inline-flex h-14 items-center justify-center rounded-lg bg-gradient-to-r from-purple-600 to-violet-600 px-12 text-base font-semibold text-white shadow-lg transition-all duration-300 hover:shadow-purple-500/25 hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-900 overflow-hidden"
                 prefetch={false}
               >

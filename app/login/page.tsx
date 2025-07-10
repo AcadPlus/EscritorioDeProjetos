@@ -61,7 +61,7 @@ export default function LoginScreen() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center mr-2 mb-8">
               <ArrowLeft className="h-5 w-5 text-[#808080]" />
-              <p className="text-sm text-[#808080] ml-2">Voltar ao EP</p>
+              <p className="text-sm text-[#808080] ml-2">Voltar ao Início</p>
             </Link>
           </div>
           <CardTitle>{isRegistering ? 'Cadastro' : 'Login'}</CardTitle>
