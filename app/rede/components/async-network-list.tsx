@@ -65,7 +65,7 @@ export function AsyncNetworkList({
     isLoadingUsers || isLoadingSent || isLoadingReceived || isLoadingConnections
 
   const connections = useMemo(() => {
-    if (!sentRequests || !receivedRequests || !userConnections) return []
+    if (!sentRequests || !receivedRequests || !userConnections) return null
 
     const connectionMap = new Map()
 
@@ -107,29 +107,30 @@ export function AsyncNetworkList({
   }, [sentRequests, receivedRequests, userConnections])
 
   const filteredUsers = useMemo(() => {
-    return users
-      ? users.filter(
-          (user: {
-            uid: string | null
-            nome: string
-            tipo_usuario: string
-          }) => {
-            const isNotCurrentUser = user.uid !== currentUserId
-            const matchesSearch = user.nome
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase())
-            const matchesRole =
-              roleFilter === 'all' || user.tipo_usuario === roleFilter
-            return matchesSearch && matchesRole && isNotCurrentUser
-          },
-        )
-      : []
-  }, [users, searchQuery, roleFilter, currentUserId])
+    if (!users || !connections) return []
+    return users.filter(
+      (user: {
+        uid: string | null
+        nome: string
+        tipo_usuario: string
+      }) => {
+        const isNotCurrentUser = user.uid !== currentUserId
+        const matchesSearch = user.nome
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+        const matchesRole =
+          roleFilter === 'all' || user.tipo_usuario === roleFilter
+        return matchesSearch && matchesRole && isNotCurrentUser
+      },
+    )
+  }, [users, searchQuery, roleFilter, currentUserId, connections])
 
   const categorizedUsers = useMemo(() => {
     const connected: UserCreateData[] = []
     const pending: UserCreateData[] = []
     const all: UserCreateData[] = []
+
+    if (!connections) return { connected, pending, all }
 
     filteredUsers.forEach((user: UserCreateData) => {
       const connection = connections.find((conn) => conn.id === user.uid)
@@ -214,7 +215,7 @@ export function AsyncNetworkList({
     ],
   )
 
-  if (isLoading) {
+  if (isLoading || !connections) {
     return (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {[...Array(3)].map((_, index) => (
