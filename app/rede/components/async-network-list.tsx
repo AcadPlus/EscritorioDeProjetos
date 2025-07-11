@@ -65,7 +65,7 @@ export function AsyncNetworkList({
     isLoadingUsers || isLoadingSent || isLoadingReceived || isLoadingConnections
 
   const connections = useMemo(() => {
-    if (!sentRequests || !receivedRequests || !userConnections) return null
+    if (!sentRequests || !receivedRequests || !userConnections) return []
 
     const connectionMap = new Map()
 
@@ -107,7 +107,7 @@ export function AsyncNetworkList({
   }, [sentRequests, receivedRequests, userConnections])
 
   const filteredUsers = useMemo(() => {
-    if (!users || !connections) return []
+    if (!users) return []
     return users.filter(
       (user: {
         uid: string | null
@@ -123,14 +123,12 @@ export function AsyncNetworkList({
         return matchesSearch && matchesRole && isNotCurrentUser
       },
     )
-  }, [users, searchQuery, roleFilter, currentUserId, connections])
+  }, [users, searchQuery, roleFilter, currentUserId])
 
   const categorizedUsers = useMemo(() => {
     const connected: UserCreateData[] = []
     const pending: UserCreateData[] = []
     const all: UserCreateData[] = []
-
-    if (!connections) return { connected, pending, all }
 
     filteredUsers.forEach((user: UserCreateData) => {
       const connection = connections.find((conn) => conn.id === user.uid)
@@ -167,9 +165,13 @@ export function AsyncNetworkList({
       setLoadingActions((prev) => ({ ...prev, [targetId]: true }))
       try {
         if (action === 'send') {
-          const existingConnection = connections.find(conn => conn.id === targetId)
+          const existingConnection = connections.find(
+            (conn) => conn.id === targetId,
+          )
           if (existingConnection) {
-            console.error('Já existe uma conexão ou solicitação pendente com este usuário')
+            console.error(
+              'Já existe uma conexão ou solicitação pendente com este usuário',
+            )
             return
           }
         }
@@ -211,11 +213,11 @@ export function AsyncNetworkList({
       updateRequestMutation,
       cancelRequestMutation,
       removeConnectionMutation,
-      connections
+      connections,
     ],
   )
 
-  if (isLoading || !connections) {
+  if (isLoading) {
     return (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {[...Array(3)].map((_, index) => (

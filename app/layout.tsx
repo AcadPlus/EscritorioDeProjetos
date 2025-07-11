@@ -29,7 +29,10 @@ export default function RootLayout({
         <SpeedInsights />
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
       </head>
-      <body className={`${poppins.className} flex flex-col min-h-screen`}>
+      <body
+        className={`${poppins.className} flex flex-col min-h-screen`}
+        suppressHydrationWarning
+      >
         <PlatformLayoutClient>{children}</PlatformLayoutClient>
         <Toaster />
         <SonnerToaster />
