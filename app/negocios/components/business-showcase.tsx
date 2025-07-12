@@ -13,6 +13,7 @@ import { BusinessList } from "./business-list"
 import { BusinessRefresh } from "./business-refresh"
 import { Sparkles, Store, TrendingUp } from "lucide-react"
 import type { NegocioType, NegocioResponse } from "@/lib/types/businessTypes"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface BusinessShowcaseProps {
   initialBusinesses?: NegocioResponse[] | null
@@ -50,11 +51,6 @@ export function BusinessShowcase({ initialBusinesses }: BusinessShowcaseProps) {
       setVisibleBusinesses([])
     }
   }, [businesses, initialBusinesses, isLoading, error])
-
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setCurrentPage(1)
-  }
 
   const handleSortChange = (value: "recent" | "oldest" | "alphabetical") => {
     setSortBy(value)
@@ -169,63 +165,95 @@ export function BusinessShowcase({ initialBusinesses }: BusinessShowcaseProps) {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-12">
-        {/* Controls Section */}
-        <motion.div
-          className="mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
+        <Tabs
+          defaultValue="all"
+          className="w-full"
+          onValueChange={(value) => setFilter(value as NegocioType | "all")}
         >
-          <div className="flex flex-col gap-8">
-            {/* Search Bar */}
-            <div className="max-w-2xl mx-auto w-full">
-              <BusinessSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} handleSearch={handleSearch} />
-            </div>
-
-            {/* Filter Cards */}
-            <div className="grid flex-1 grid-cols-1 lg:grid-cols-2 gap-6">
-              <motion.div
-                className="bg-white rounded-2xl p-6 shadow-lg border border-purple-100"
-                whileHover={{ y: -2 }}
-                transition={{ duration: 0.2 }}
+          <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between mb-8">
+            <TabsList className="bg-white border border-purple-100 p-1 rounded-2xl shadow-lg flex-wrap h-auto justify-start">
+              <TabsTrigger
+                value="all"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl px-4 sm:px-6 py-3 font-medium transition-all duration-300 flex items-center gap-2"
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <Store className="h-5 w-5 text-purple-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900">Filtrar por Tipo</h3>
-                  <BusinessSort handleSortChange={handleSortChange} />
-                <BusinessRefresh
-                  handleRefreshButtonClick={async () => {
-                    await refetch()
-                  }}
-                />
-                </div>
-                <BusinessFilter filter={filter} setFilter={setFilter} />
-                
-                
-              </motion.div>
+                Todos
+              </TabsTrigger>
+              <TabsTrigger
+                value="startup"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl px-4 sm:px-6 py-3 font-medium transition-all duration-300 flex items-center gap-2"
+              >
+                Startup
+              </TabsTrigger>
+              <TabsTrigger
+                value="spin-off"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl px-4 sm:px-6 py-3 font-medium transition-all duration-300 flex items-center gap-2"
+              >
+                Spin-off
+              </TabsTrigger>
+              <TabsTrigger
+                value="empresa-junior"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl px-4 sm:px-6 py-3 font-medium transition-all duration-300 flex items-center gap-2"
+              >
+                Empresa Júnior
+              </TabsTrigger>
+            </TabsList>
+
+            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+              <div className="flex-1 w-full sm:w-auto lg:w-80">
+                <BusinessSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+              </div>
+              <BusinessSort handleSortChange={handleSortChange} />
             </div>
           </div>
-        </motion.div>
-
-        {/* Business List */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-        >
-          <BusinessList
-            businesses={visibleBusinesses}
-            filter={filter}
-            searchTerm={searchTerm}
-            sortBy={sortBy}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            itemsPerPage={itemsPerPage}
-            loading={isLoading}
-          />
-        </motion.div>
+          <TabsContent value="all">
+            <BusinessList
+              businesses={visibleBusinesses}
+              filter="all"
+              searchTerm={searchTerm}
+              sortBy={sortBy}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              itemsPerPage={itemsPerPage}
+              loading={isLoading}
+            />
+          </TabsContent>
+          <TabsContent value="startup">
+            <BusinessList
+              businesses={visibleBusinesses}
+              filter="startup"
+              searchTerm={searchTerm}
+              sortBy={sortBy}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              itemsPerPage={itemsPerPage}
+              loading={isLoading}
+            />
+          </TabsContent>
+          <TabsContent value="spin-off">
+            <BusinessList
+              businesses={visibleBusinesses}
+              filter="spin-off"
+              searchTerm={searchTerm}
+              sortBy={sortBy}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              itemsPerPage={itemsPerPage}
+              loading={isLoading}
+            />
+          </TabsContent>
+          <TabsContent value="empresa-junior">
+            <BusinessList
+              businesses={visibleBusinesses}
+              filter="empresa-junior"
+              searchTerm={searchTerm}
+              sortBy={sortBy}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              itemsPerPage={itemsPerPage}
+              loading={isLoading}
+            />
+          </TabsContent>
+        </Tabs>
 
         {/* Error States */}
         {error && visibleBusinesses.length === 0 && (
