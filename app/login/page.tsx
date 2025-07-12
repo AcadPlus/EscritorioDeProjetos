@@ -344,56 +344,56 @@ export default function LoginScreen() {
                   <CardTitle className="text-xl font-bold text-center text-gray-900">
                     {isRegistering ? 'Criar Conta' : 'Fazer Login'}
                   </CardTitle>
-                </CardHeader>
+        </CardHeader>
                 
                 <CardContent className="relative z-10">
-                  {isRegistering ? (
-                    <StepByStepRegister onRegisterSuccess={handleRegisterSuccess} />
-                  ) : (
-                    <LoginForm
-                      onSubmit={handleLogin}
-                      error={error}
-                      successMessage={successMessage}
-                    />
-                  )}
-                </CardContent>
+          {isRegistering ? (
+            <StepByStepRegister onRegisterSuccess={handleRegisterSuccess} />
+          ) : (
+            <LoginForm
+              onSubmit={handleLogin}
+              error={error}
+              successMessage={successMessage}
+            />
+          )}
+        </CardContent>
                 
                 <CardFooter className="flex flex-col space-y-4 relative z-10">
                   <div className="text-sm text-gray-600 text-center">
-                    {isRegistering ? (
-                      <>
-                        Já tem uma conta?{' '}
-                        <Button
-                          variant="link"
+            {isRegistering ? (
+              <>
+                Já tem uma conta?{' '}
+                <Button
+                  variant="link"
                           className="p-0 text-purple-600 hover:text-purple-700 font-medium"
-                          onClick={() => {
-                            setIsRegistering(false)
-                            setError('')
-                            setSuccessMessage('')
-                          }}
-                        >
-                          Faça login
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        Não tem uma conta?{' '}
-                        <Button
-                          variant="link"
+                  onClick={() => {
+                    setIsRegistering(false)
+                    setError('')
+                    setSuccessMessage('')
+                  }}
+                >
+                  Faça login
+                </Button>
+              </>
+            ) : (
+              <>
+                Não tem uma conta?{' '}
+                <Button
+                  variant="link"
                           className="p-0 text-purple-600 hover:text-purple-700 font-medium"
-                          onClick={() => {
-                            setIsRegistering(true)
-                            setError('')
-                            setSuccessMessage('')
-                          }}
-                        >
-                          Cadastre-se
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </CardFooter>
-              </Card>
+                  onClick={() => {
+                    setIsRegistering(true)
+                    setError('')
+                    setSuccessMessage('')
+                  }}
+                >
+                  Cadastre-se
+                </Button>
+              </>
+            )}
+          </div>
+        </CardFooter>
+      </Card>
             </motion.div>
           </div>
         </div>

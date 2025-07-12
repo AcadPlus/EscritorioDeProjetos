@@ -10,10 +10,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Facebook, Instagram, Linkedin, LinkIcon } from 'lucide-react'
+import { Facebook, Instagram, Linkedin, LinkIcon, Mail, MapPin, Lightbulb, Target, ArrowRight, ExternalLink } from 'lucide-react'
 import { NegocioResponse } from '@/lib/types/businessTypes'
 import Link from 'next/link'
 import Image from 'next/image'
+import { motion } from 'framer-motion'
 
 // Define a new interface for the component's props
 interface BusinessCardProps {
@@ -37,76 +38,146 @@ export function BusinessCard({ business }: BusinessCardProps) {
   }
 
   const getBusinessTypeBadge = (type: NegocioResponse['tipo_negocio']) => {
-    const bgColor = type === 'partec' ? 'bg-blue-500' : 'bg-green-500'
+    const config = {
+      'incubado': { bg: 'bg-gradient-to-r from-emerald-500 to-emerald-600', text: 'Incubado', icon: '🚀' },
+      'parceiro': { bg: 'bg-gradient-to-r from-blue-500 to-blue-600', text: 'Parceiro', icon: '🤝' }
+    }
+    
+    const typeConfig = config[type] || { bg: 'bg-gradient-to-r from-purple-500 to-purple-600', text: type, icon: '🏢' }
+    
     return (
-      <Badge className={`${bgColor} text-white absolute top-4 right-4 z-10`}>
-        {type}
-      </Badge>
+      <div className={`${typeConfig.bg} text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-lg`}>
+        <span>{typeConfig.icon}</span>
+        {typeConfig.text}
+      </div>
     )
+  }
+
+  const getStageColor = (stage: string) => {
+    const stageColors = {
+      'IDEACAO': 'text-amber-600 bg-amber-50',
+      'VALIDACAO': 'text-blue-600 bg-blue-50',
+      'MVP': 'text-purple-600 bg-purple-50',
+      'OPERACAO': 'text-green-600 bg-green-50',
+      'CRESCIMENTO': 'text-orange-600 bg-orange-50',
+      'ESCALA': 'text-red-600 bg-red-50'
+    }
+    return stageColors[stage] || 'text-gray-600 bg-gray-50'
   }
 
   return (
     <>
-      <Card className="group relative overflow-hidden hover:shadow-lg transition-all duration-300 bg-gradient-to-b from-white to-gray-50">
-        <Link
-          href={`/inspecionar-negocio/${business.id}`}
-          className="block"
-        >
-          <div className="relative p-6 flex flex-col items-center">
-            {getBusinessTypeBadge(business.tipo_negocio)}
+      <motion.div
+        whileHover={{ y: -2, scale: 1.01 }}
+        transition={{ duration: 0.2 }}
+        className="group"
+      >
+        <Card className="relative overflow-hidden bg-white border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all duration-300 h-64">
+          <Link
+            href={`/inspecionar-negocio/${business.id}`}
+            className="block h-full"
+          >
+            {/* Purple accent line */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-violet-500 to-purple-600" />
             
-            <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-gray-100 shadow-sm relative">
-              {business.foto_perfil ? (
-                <Image
-                  src={business.foto_perfil}
-                  alt={`Logo de ${business.nome}`}
-                  fill
-                  sizes="(max-width: 96px) 100vw, 96px"
-                  className="object-cover"
-                />
-              ) : (
-                <Avatar className="w-full h-full">
-                  <AvatarFallback className="text-3xl bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                    {business.nome.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-              )}
+            {/* Content */}
+            <div className="p-5 h-full flex flex-col">
+              {/* Header */}
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  {/* Logo */}
+                  <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-purple-100 bg-gradient-to-br from-purple-50 to-violet-50 flex items-center justify-center flex-shrink-0">
+                    {business.foto_perfil ? (
+                      <Image
+                        src={business.foto_perfil}
+                        alt={`Logo de ${business.nome}`}
+                        width={48}
+                        height={48}
+                        className="object-cover rounded-xl"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center">
+                        <span className="text-white font-bold text-lg">
+                          {business.nome.charAt(0)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Company Info */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-bold text-gray-900 leading-tight truncate">
+                      {business.nome}
+                    </h3>
+                    <p className="text-sm text-gray-600 truncate">
+                      {business.area_atuacao}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Type Badge */}
+                <div className="flex-shrink-0 ml-2">
+                  {getBusinessTypeBadge(business.tipo_negocio)}
+                </div>
+              </div>
+
+              {/* Problem & Solution */}
+              <div className="flex-1 mb-4 space-y-3">
+                {/* Problem */}
+                <div className="flex items-start gap-2">
+                  <Target className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-red-700 mb-1">Problema</p>
+                    <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
+                      {business.descricao_problema.slice(0, 60)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Solution */}
+                <div className="flex items-start gap-2">
+                  <Lightbulb className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-green-700 mb-1">Solução</p>
+                    <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
+                      {business.solucao_proposta.slice(0, 60)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Keywords & Stage */}
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex flex-wrap gap-1">
+                    {business.palavras_chave.slice(0, 2).map((keyword, index) => (
+                      <span 
+                        key={index} 
+                        className="px-2 py-1 bg-purple-50 text-purple-700 rounded-md text-xs font-medium"
+                      >
+                        {keyword}
+                      </span>
+                    ))}
+                    {business.palavras_chave.length > 2 && (
+                      <span className="px-2 py-1 bg-gray-50 text-gray-600 rounded-md text-xs font-medium">
+                        +{business.palavras_chave.length - 2}
+                      </span>
+                    )}
+                  </div>
+                  <div className="ml-auto">
+                    <span className={`px-2 py-1 rounded-md text-xs font-medium ${getStageColor(business.estagio)}`}>
+                      {business.estagio}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <h3 className="text-lg font-semibold text-gray-900 mb-2 text-center">
-              {business.nome}
-            </h3>
-
-            <div className="flex flex-wrap justify-center gap-2 mb-4">
-              {business.palavras_chave.slice(0, 3).map((keyword, index) => (
-                <Badge 
-                  key={index} 
-                  variant="secondary" 
-                  className="text-xs bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                >
-                  {keyword}
-                </Badge>
-              ))}
-              {business.palavras_chave.length > 3 && (
-                <Badge 
-                  variant="secondary" 
-                  className="text-xs bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                >
-                  +{business.palavras_chave.length - 3}
-                </Badge>
-              )}
-            </div>
-
-            <p className="text-sm text-gray-600 text-center line-clamp-2">
-              {business.tipo_negocio === 'partec'
-                ? business.descricao_problema
-                : business.demanda}
-            </p>
-
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </div>
-        </Link>
-      </Card>
+            {/* Hover Effect */}
+            <div className="absolute inset-0 bg-gradient-to-t from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </Link>
+        </Card>
+      </motion.div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-2xl">
@@ -157,41 +228,24 @@ export function BusinessCard({ business }: BusinessCardProps) {
                   </div>
                 )}
 
-                {business.tipo_negocio === 'partec' ? (
-                  <div className="grid gap-4">
-                    <div>
-                      <h3 className="font-semibold mb-2">
-                        Descrição do Problema
-                      </h3>
-                      <p className="text-sm">{business.descricao_problema}</p>
-                    </div>
-                    <div className="grid gap-2 text-sm">
-                      <p>
-                        <strong>Área Estratégica:</strong>{' '}
-                        {business.area_estrategica}
-                      </p>
-                      <p>
-                        <strong>Campus:</strong> {business.campus}
-                      </p>
-                    </div>
+                <div className="grid gap-4">
+                  <div>
+                    <h3 className="font-semibold mb-2">Descrição do Problema</h3>
+                    <p className="text-sm">{business.descricao_problema}</p>
                   </div>
-                ) : (
-                  <div className="grid gap-4">
-                    <div>
-                      <h3 className="font-semibold mb-2">Sobre o Negócio</h3>
-                      <p className="text-sm">{business.demanda}</p>
-                    </div>
-                    <div className="grid gap-2 text-sm">
-                      <p>
-                        <strong>CNAE:</strong> {business.cnae}
-                      </p>
-                      <p>
-                        <strong>Área de Atuação:</strong>{' '}
-                        {business.area_de_atuacao}
-                      </p>
-                    </div>
+                  <div>
+                    <h3 className="font-semibold mb-2">Solução Proposta</h3>
+                    <p className="text-sm">{business.solucao_proposta}</p>
                   </div>
-                )}
+                  <div className="grid gap-2 text-sm">
+                    <p>
+                      <strong>Área de Atuação:</strong> {business.area_atuacao}
+                    </p>
+                    <p>
+                      <strong>Estágio:</strong> {business.estagio}
+                    </p>
+                  </div>
+                </div>
 
                 {business.id_iniciativas &&
                   business.id_iniciativas.length > 0 && (
