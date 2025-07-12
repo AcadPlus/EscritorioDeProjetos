@@ -221,10 +221,10 @@ export const NetworkCard = React.memo(function NetworkCard({
       whileHover={{ y: -4 }}
     >
       <Card className="overflow-hidden shadow-lg border border-purple-100 bg-white hover:shadow-purple-500/10 transition-all duration-300 h-full">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           {/* User Info */}
-          <div className="flex items-start space-x-4 mb-4">
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 mb-4">
+            <div className="relative flex-shrink-0">
               <div className="relative h-16 w-16 rounded-2xl overflow-hidden bg-gradient-to-br from-purple-100 to-violet-100 border-2 border-white shadow-lg">
                 {user.foto_url ? (
                   <Image
@@ -244,41 +244,49 @@ export const NetworkCard = React.memo(function NetworkCard({
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-bold text-gray-900 mb-2 truncate">{user.nome}</h3>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
+                <h3 className="text-lg font-bold text-gray-900 truncate">{user.nome}</h3>
+              </div>
               <Badge
                 className={`${getUserBadgeColor} text-white border-0 text-xs font-medium mb-2 flex items-center gap-1 w-fit`}
               >
                 {getUserIcon}
                 {getUserRole}
               </Badge>
-              {getAffiliation && getAffiliation !== "N/A" && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  {user.tipo_usuario === PublicUserType.EXTERNO ? (
-                    <Building2 className="h-3 w-3" />
+              <div className="flex items-center text-sm text-gray-500 mt-2 flex-wrap">
+                <div className="flex items-center mr-4 mb-1">
+                  {user.tipo_usuario === "EXTERNO" ? (
+                    <Building2 className="h-4 w-4 mr-1.5 text-gray-400" />
                   ) : (
-                    <MapPin className="h-3 w-3" />
+                    <MapPin className="h-4 w-4 mr-1.5 text-gray-400" />
                   )}
                   <span className="truncate">{getAffiliation}</span>
                 </div>
-              )}
+                {user.cidade && (
+                  <div className="flex items-center mb-1">
+                    <MapPin className="h-4 w-4 mr-1.5 text-gray-400" />
+                    <span className="truncate">{user.cidade}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Status and View Profile */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col space-y-4">
             {renderStatusTag()}
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleViewProfile}
-              className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 p-2"
-            >
-              <Eye className="w-4 h-4" />
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2 w-full">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleViewProfile}
+                className="flex-1 border-gray-200 text-gray-700 hover:bg-gray-50 bg-transparent"
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Ver Perfil
+              </Button>
+              <div className="flex-1">{renderActionButton()}</div>
+            </div>
           </div>
-
-          {/* Action Button */}
-          <div className="mt-4">{renderActionButton()}</div>
         </CardContent>
       </Card>
     </motion.div>

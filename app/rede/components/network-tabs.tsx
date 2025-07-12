@@ -26,26 +26,26 @@ export function NetworkTabs({
   return (
     <div className="space-y-8">
       <Tabs defaultValue="all" className="w-full">
-        <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between mb-8">
           {/* Tabs */}
-          <TabsList className="bg-white border border-purple-100 p-1 rounded-2xl shadow-lg">
+          <TabsList className="bg-white border border-purple-100 p-1 rounded-2xl shadow-lg flex overflow-x-auto h-auto justify-start">
             <TabsTrigger
               value="all"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl px-6 py-3 font-medium transition-all duration-300 flex items-center gap-2"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl px-4 sm:px-6 py-3 font-medium transition-all duration-300 flex items-center gap-2"
             >
               <Users className="h-4 w-4" />
               Todos
             </TabsTrigger>
             <TabsTrigger
               value="connected"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl px-6 py-3 font-medium transition-all duration-300 flex items-center gap-2"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl px-4 sm:px-6 py-3 font-medium transition-all duration-300 flex items-center gap-2"
             >
               <UserCheck className="h-4 w-4" />
               Conectados
             </TabsTrigger>
             <TabsTrigger
               value="pending"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl px-6 py-3 font-medium transition-all duration-300 flex items-center gap-2"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl px-4 sm:px-6 py-3 font-medium transition-all duration-300 flex items-center gap-2"
             >
               <Clock className="h-4 w-4" />
               Pendentes
@@ -53,8 +53,8 @@ export function NetworkTabs({
           </TabsList>
 
           {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-            <div className="flex-1 lg:w-80">
+          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+            <div className="flex-1 w-full sm:w-auto lg:w-80">
               <NetworkSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             </div>
             <NetworkFilter roleFilter={roleFilter} setRoleFilter={setRoleFilter} />
