@@ -215,6 +215,8 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
     const file = event.target.files?.[0]
     if (!file) return
 
+    console.log("Arquivo selecionado:", file.name, file.type, file.size)
+
     if (!file.type.startsWith("image/")) {
       toast.error("Por favor, selecione apenas arquivos de imagem")
       return
@@ -624,25 +626,34 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
                     {/* Edit buttons for own profile */}
                     {isViewingOwnProfile && (
                       <motion.div
-                        className="absolute -bottom-2 -right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        initial={{ opacity: 0 }}
-                        whileHover={{ opacity: 1 }}
+                        className="absolute -bottom-2 -right-2 flex gap-2"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3, delay: 0.2 }}
                       >
                         <motion.button
-                          className="w-10 h-10 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-purple-500/25"
+                          className="w-10 h-10 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-purple-500/25 border-2 border-white"
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.95 }}
-                          onClick={() => fileInputRef.current?.click()}
+                          onClick={() => {
+                            console.log("Botão de câmera clicado")
+                            fileInputRef.current?.click()
+                          }}
                           disabled={isUploading}
+                          title="Alterar foto de perfil"
                         >
                           <Camera className="h-5 w-5" />
                         </motion.button>
                         {user?.foto_url && (
                           <motion.button
-                            className="w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-red-500/25"
+                            className="w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-red-500/25 border-2 border-white"
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
-                            onClick={() => setIsDeleteImageDialogOpen(true)}
+                            onClick={() => {
+                              console.log("Botão de deletar clicado")
+                              setIsDeleteImageDialogOpen(true)
+                            }}
+                            title="Remover foto de perfil"
                           >
                             <Trash2 className="h-5 w-5" />
                           </motion.button>
@@ -656,6 +667,7 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
                       className="hidden"
                       accept="image/*"
                       onChange={handleFileSelect}
+                      onClick={() => console.log("Input de arquivo clicado")}
                     />
                   </div>
 
