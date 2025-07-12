@@ -9,7 +9,7 @@ import {
   Card,
   CardContent,
 } from '@/components/ui/card'
-import { Bell } from 'lucide-react'
+import { Bell, Sparkles, CheckCircle, Clock } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -375,61 +375,120 @@ export default function NotificacoesPage() {
 
   return (
     <PrivateRoute>
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen"
-    >
-      {/* Modais de Confirmação */}
-      <ConfirmationModal
-        isOpen={deleteModalData.isOpen}
-        onClose={() =>
-          setDeleteModalData({ isOpen: false, notificationId: '' })
-        }
-        onConfirm={handleDeleteConfirm}
-        title="Excluir Notificação"
-        description="Tem certeza que deseja excluir esta notificação? Esta ação não pode ser desfeita."
-        confirmText="Excluir"
-        confirmVariant="destructive"
-      />
+      <div className="min-h-screen bg-white">
+        {/* Hero Section */}
+        <div className="relative bg-gradient-to-br from-purple-600 via-violet-600 to-purple-700 text-white overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white/3 rounded-full blur-2xl"></div>
+          </div>
 
-      <ConfirmationModal
-        isOpen={acceptModalData.isOpen}
-        onClose={() =>
-          setAcceptModalData({
-            isOpen: false,
-            notificationId: '',
-            initiativeId: '',
-            type: NotificationType.CONVITE_INICIATIVA,
-          })
-        }
-        onConfirm={handleAcceptConfirm}
-        title="Aceitar Convite"
-        description={`Tem certeza que deseja aceitar o convite para participar ${acceptModalData.type === NotificationType.CONVITE_NEGOCIO ? 'deste negócio' : 'desta iniciativa'}?`}
-        confirmText="Aceitar"
-        confirmVariant="default"
-      />
+          <div className="relative z-10 container mx-auto px-4 py-16 sm:py-20">
+            <motion.div
+              className="text-center max-w-4xl mx-auto"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              {/* Badge */}
+              <motion.div
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm mb-6"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+              >
+                <Sparkles className="h-4 w-4 text-white" />
+                <span className="text-sm font-medium text-white">Central de Comunicação</span>
+              </motion.div>
 
-      <ConfirmationModal
-        isOpen={rejectModalData.isOpen}
-        onClose={() =>
-          setRejectModalData({
-            isOpen: false,
-            notificationId: '',
-            initiativeId: '',
-            userId: '',
-            type: NotificationType.CONVITE_INICIATIVA,
-          })
-        }
-        onConfirm={handleRejectConfirm}
-        title="Recusar Convite"
-        description={`Tem certeza que deseja recusar o convite para participar ${rejectModalData.type === NotificationType.CONVITE_NEGOCIO ? 'deste negócio' : 'desta iniciativa'}?`}
-        confirmText="Recusar"
-        confirmVariant="destructive"
-      />
+              {/* Title */}
+              <motion.h1
+                className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.6 }}
+              >
+                Notificações
+              </motion.h1>
 
-      {/* Modal de Detalhes da Rejeição */}
+              {/* Stats */}
+              <motion.div
+                className="flex flex-wrap justify-center gap-6 text-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8, duration: 0.6 }}
+              >
+                <div className="flex items-center gap-2">
+                  <Bell className="h-5 w-5 text-purple-200" />
+                  <span className="text-2xl font-bold">{notifications.length}</span>
+                  <span className="text-purple-200">Total</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-purple-200" />
+                  <span className="text-2xl font-bold">{notifications.filter(n => !n.lida).length}</span>
+                  <span className="text-purple-200">Não lidas</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-purple-200" />
+                  <span className="text-2xl font-bold">{notifications.filter(n => n.lida).length}</span>
+                  <span className="text-purple-200">Lidas</span>
+                </div>
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Modais de Confirmação */}
+        <ConfirmationModal
+          isOpen={deleteModalData.isOpen}
+          onClose={() =>
+            setDeleteModalData({ isOpen: false, notificationId: '' })
+          }
+          onConfirm={handleDeleteConfirm}
+          title="Excluir Notificação"
+          description="Tem certeza que deseja excluir esta notificação? Esta ação não pode ser desfeita."
+          confirmText="Excluir"
+          confirmVariant="destructive"
+        />
+
+        <ConfirmationModal
+          isOpen={acceptModalData.isOpen}
+          onClose={() =>
+            setAcceptModalData({
+              isOpen: false,
+              notificationId: '',
+              initiativeId: '',
+              type: NotificationType.CONVITE_INICIATIVA,
+            })
+          }
+          onConfirm={handleAcceptConfirm}
+          title="Aceitar Convite"
+          description={`Tem certeza que deseja aceitar o convite para participar ${acceptModalData.type === NotificationType.CONVITE_NEGOCIO ? 'deste negócio' : 'desta iniciativa'}?`}
+          confirmText="Aceitar"
+          confirmVariant="default"
+        />
+
+        <ConfirmationModal
+          isOpen={rejectModalData.isOpen}
+          onClose={() =>
+            setRejectModalData({
+              isOpen: false,
+              notificationId: '',
+              initiativeId: '',
+              userId: '',
+              type: NotificationType.CONVITE_INICIATIVA,
+            })
+          }
+          onConfirm={handleRejectConfirm}
+          title="Recusar Convite"
+          description={`Tem certeza que deseja recusar o convite para participar ${rejectModalData.type === NotificationType.CONVITE_NEGOCIO ? 'deste negócio' : 'desta iniciativa'}?`}
+          confirmText="Recusar"
+          confirmVariant="destructive"
+        />
+
+        {/* Modal de Detalhes da Rejeição */}
         <DetailsModal
           isOpen={detailsModal.isOpen}
           onClose={() => setDetailsModal({...detailsModal, isOpen: false})}
@@ -441,73 +500,71 @@ export default function NotificacoesPage() {
           resourceName={detailsModal.resourceName}
         />
 
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-        className="container mx-auto px-4 py-8"
-      >
-        {/* Cabeçalho e Controles */}
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.3 }}
-          className="mb-8"
-        >
-          <div className="flex flex-col gap-6">
-            {/* Título e Botão */}
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Central de Notificações
-                </h2>
-                <p className="text-sm text-gray-500">
-                  Acompanhe todas as suas notificações e interações no sistema
-                </p>
-              </div>
-              {notifications.length > 0 && (
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    onClick={handleMarkAllAsRead}
-                    className="bg-black text-white hover:bg-black/70"
-                  >
-                    Marcar todas como lidas
-                  </Button>
-                </motion.div>
-              )}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Lista de Notificações */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="space-y-4"
-        >
-          {notifications.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
+        {/* Main Content */}
+        <div className="container mx-auto px-4 py-12">
+          {/* Header Actions */}
+          {notifications.length > 0 && (
+            <motion.div 
+              className="flex justify-end mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
             >
-              <Card>
-                <CardContent className="p-8">
-                  <div className="text-center">
-                    <Bell className="mx-auto h-12 w-12 text-gray-400" />
-                    <p className="mt-4 text-gray-600">
-                      Nenhuma notificação encontrada
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  onClick={handleMarkAllAsRead}
+                  className="bg-gradient-to-r from-purple-600 to-violet-600 hover:shadow-purple-500/25 hover:shadow-lg transition-all duration-300 text-white"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Marcar todas como lidas
+                </Button>
+              </motion.div>
             </motion.div>
-          ) : (
-            <>
-              {paginatedNotifications.map((notification, index) => (
+          )}
+
+          {/* Lista de Notificações */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="space-y-6"
+          >
+            {notifications.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Card className="shadow-lg border border-purple-100 bg-white relative overflow-hidden">
+                  {/* Decorative background */}
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-purple-100/50 to-violet-100/30 rounded-full -mr-32 -mt-32" />
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-purple-100/30 to-violet-100/20 rounded-full -ml-24 -mb-24" />
+                  
+                  <CardContent className="p-16 relative z-10">
+                    <div className="text-center">
+                      <motion.div
+                        className="w-24 h-24 bg-gradient-to-br from-purple-100 to-violet-100 rounded-full flex items-center justify-center mx-auto mb-6"
+                        initial={{ scale: 0.8 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                      >
+                        <Bell className="h-12 w-12 text-purple-600" />
+                      </motion.div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                        Nenhuma notificação
+                      </h3>
+                      <p className="text-gray-600 text-lg">
+                        Você está em dia! Não há notificações pendentes.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ) : (
+              <>
+                {paginatedNotifications.map((notification, index) => (
                   <NotificationCard
-                  key={notification.id}
+                    key={notification.id}
                     notification={notification}
                     index={index}
                     isClickableNotification={isClickableNotification}
@@ -517,20 +574,20 @@ export default function NotificacoesPage() {
                     setAcceptModalData={setAcceptModalData}
                     setRejectModalData={setRejectModalData}
                   />
-              ))}
-              
-              {/* Paginação */}
+                ))}
+                
+                {/* Paginação */}
                 <Pagination 
                   currentPage={currentPage}
                   totalPages={totalPages}
                   goToNextPage={goToNextPage}
                   goToPreviousPage={goToPreviousPage}
                 />
-            </>
-          )}
-        </motion.div>
-      </motion.div>
-    </motion.div>
+              </>
+            )}
+          </motion.div>
+        </div>
+      </div>
     </PrivateRoute>
   )
 }
