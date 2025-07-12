@@ -1,77 +1,70 @@
-/* eslint-disable @next/next/no-img-element */
-'use client'
+"use client"
 
-import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2, ChevronUp } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { ImageCropModal } from '@/components/ImageCropModal'
-import { useToast } from '@/components/ui/use-toast'
-import { useAuth } from '@/lib/context/AuthContext'
-import { useBusinessApi } from '@/lib/api/business'
-import { useUserApi } from '@/lib/api/users'
-import { NegocioUpdate, PapelNegocio } from '@/lib/types/businessTypes'
+import React, { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
+import { Loader2, ChevronUp, ArrowLeft } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { ImageCropModal } from "@/components/ImageCropModal"
+import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/lib/context/AuthContext"
+import { useBusinessApi } from "@/lib/api/business"
+import { useUserApi } from "@/lib/api/users"
+import { type NegocioUpdate, PapelNegocio } from "@/lib/types/businessTypes"
 
-// Componentes
-import { BusinessHeader } from '../components/BusinessHeader'
-import { BusinessInfo } from '../components/BusinessInfo'
-import { MembersSection } from '../components/MembersSection'
-import { InitiativesSection } from '../components/InitiativesSection'
+// Components
+import { BusinessHeader } from "../components/BusinessHeader"
+import { BusinessInfo } from "../components/BusinessInfo"
+import { MembersSection } from "../components/MembersSection"
+import { InitiativesSection } from "../components/InitiativesSection"
 
 interface BusinessDetailPageProps {
-  params: Promise<{
-    id: string
-  }>
+  params: Promise<{ id: string }>
 }
 
 interface UserType {
   uid: string
   nome: string
+  foto_url?: string
 }
 
-export default function BusinessDetailPage({
-  params,
-}: BusinessDetailPageProps) {
-  // Usar a função use() para desempacotar params
+export default function BusinessDetailPage({ params }: BusinessDetailPageProps) {
   const { id } = React.use(params)
-  const {
-    useGetBusiness,
-    useUpdateBusinessPhotos,
-    useUpdateBusiness,
-    useAddBusinessMember,
-    useRemoveBusinessMember,
-  } = useBusinessApi()
+  const router = useRouter()
+
+  const { useGetBusiness, useUpdateBusinessPhotos, useUpdateBusiness, useAddBusinessMember, useRemoveBusinessMember } =
+    useBusinessApi()
+
   const { useFetchUsers } = useUserApi()
   const auth = useAuth()
+
+  // States
   const [isEditingFields, setIsEditingFields] = useState(false)
   const [editedBusiness, setEditedBusiness] = useState<NegocioUpdate>({})
   const [isCropModalOpen, setIsCropModalOpen] = useState(false)
   const [showInviteDialog, setShowInviteDialog] = useState(false)
   const [selectedImage, setSelectedImage] = useState<{
     file: File
-    type: 'profile' | 'cover'
+    type: "profile" | "cover"
   } | null>(null)
-  const { data: users = [] } = useFetchUsers()
-  const { mutate: addMember } = useAddBusinessMember()
-  const { mutate: removeMember } = useRemoveBusinessMember()
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
   const [userRoles, setUserRoles] = useState<Record<string, PapelNegocio>>({})
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTerm, setSearchTerm] = useState("")
   const [showScrollTop, setShowScrollTop] = useState(false)
-  const [activeTab, setActiveTab] = useState<
-    'info' | 'members' | 'initiatives'
-  >('info')
+  const [activeTab, setActiveTab] = useState<"info" | "members" | "initiatives">("info")
 
+  // API Hooks
   const { data: business, isLoading, error, refetch } = useGetBusiness(id)
+  const { data: users = [] } = useFetchUsers()
   const updatePhotosMutation = useUpdateBusinessPhotos()
   const updateBusinessMutation = useUpdateBusiness()
+  const { mutate: addMember } = useAddBusinessMember()
+  const { mutate: removeMember } = useRemoveBusinessMember()
   const { toast } = useToast()
 
-  // Refs para os inputs de arquivo
+  // Refs
   const profileInputRef = React.useRef<HTMLInputElement>(null)
   const coverInputRef = React.useRef<HTMLInputElement>(null)
-  const contentRef = React.useRef<HTMLDivElement>(null)
 
   const isOwner = business?.uid_admin === auth.userId
 
@@ -85,19 +78,14 @@ export default function BusinessDetailPage({
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowScrollTop(true)
-      } else {
-        setShowScrollTop(false)
-      }
+      setShowScrollTop(window.scrollY > 300)
     }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
   const handleFieldChange = (field: keyof NegocioUpdate, value: string) => {
@@ -117,22 +105,19 @@ export default function BusinessDetailPage({
       setEditedBusiness({})
       await refetch()
       toast({
-        title: 'Sucesso',
-        description: 'Informações atualizadas com sucesso',
+        title: "Sucesso",
+        description: "Informações atualizadas com sucesso",
       })
     } catch (error) {
       toast({
-        title: 'Erro',
-        description: 'Não foi possível atualizar as informações',
-        variant: 'destructive',
+        title: "Erro",
+        description: "Não foi possível atualizar as informações",
+        variant: "destructive",
       })
     }
   }
 
-  const handleFileSelect = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: 'profile' | 'cover',
-  ) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: "profile" | "cover") => {
     const file = e.target.files?.[0]
     if (file) {
       setSelectedImage({ file, type })
@@ -146,26 +131,24 @@ export default function BusinessDetailPage({
     try {
       const updateData = {
         businessId: id,
-        fotoPerfil: selectedImage.type === 'profile' ? croppedImage : undefined,
-        fotoCapa: selectedImage.type === 'cover' ? croppedImage : undefined,
+        fotoPerfil: selectedImage.type === "profile" ? croppedImage : undefined,
+        fotoCapa: selectedImage.type === "cover" ? croppedImage : undefined,
       }
 
       await updatePhotosMutation.mutateAsync(updateData)
-
       setIsCropModalOpen(false)
       setSelectedImage(null)
       await refetch()
-
       toast({
-        title: 'Sucesso',
-        description: 'Imagem atualizada com sucesso',
+        title: "Sucesso",
+        description: "Imagem atualizada com sucesso",
       })
     } catch (error) {
-      console.error('Erro ao atualizar imagem:', error)
+      console.error("Erro ao atualizar imagem:", error)
       toast({
-        title: 'Erro',
-        description: 'Não foi possível atualizar a imagem',
-        variant: 'destructive',
+        title: "Erro",
+        description: "Não foi possível atualizar a imagem",
+        variant: "destructive",
       })
     }
   }
@@ -174,9 +157,9 @@ export default function BusinessDetailPage({
     try {
       if (selectedUsers.length === 0) {
         toast({
-          title: 'Aviso',
-          description: 'Selecione pelo menos um usuário para convidar',
-          variant: 'default',
+          title: "Aviso",
+          description: "Selecione pelo menos um usuário para convidar",
+          variant: "default",
         })
         return
       }
@@ -194,17 +177,16 @@ export default function BusinessDetailPage({
       setSelectedUsers([])
       setUserRoles({})
       await refetch()
-
       toast({
-        title: 'Sucesso',
-        description: 'Convites enviados com sucesso',
+        title: "Sucesso",
+        description: "Convites enviados com sucesso",
       })
     } catch (error) {
-      console.error('Erro ao adicionar usuários:', error)
+      console.error("Erro ao adicionar usuários:", error)
       toast({
-        title: 'Erro',
-        description: 'Não foi possível enviar os convites',
-        variant: 'destructive',
+        title: "Erro",
+        description: "Não foi possível enviar os convites",
+        variant: "destructive",
       })
     }
   }
@@ -217,58 +199,55 @@ export default function BusinessDetailPage({
       })
       await refetch()
       toast({
-        title: 'Sucesso',
-        description: 'Membro removido com sucesso',
+        title: "Sucesso",
+        description: "Membro removido com sucesso",
       })
     } catch (error) {
       toast({
-        title: 'Erro',
-        description: 'Não foi possível remover o membro',
-        variant: 'destructive',
+        title: "Erro",
+        description: "Não foi possível remover o membro",
+        variant: "destructive",
       })
     }
   }
 
   const filteredUsers = React.useMemo(() => {
     if (!users || !business) return []
-
     return users.filter((user: UserType) => {
       const membros = business.membros || {}
       const isMember = Object.keys(membros).includes(user.uid)
       const isOwner = user.uid === business.uid_admin
-      const matchesSearch = user.nome
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
+      const matchesSearch = user.nome.toLowerCase().includes(searchTerm.toLowerCase())
       return !isMember && !isOwner && matchesSearch
     })
   }, [users, business, searchTerm])
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+      <div className="flex items-center justify-center min-h-screen bg-white">
         <motion.div
-          className="flex flex-col items-center gap-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          className="flex flex-col items-center gap-6"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
+          <div className="relative">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+            >
+              <Loader2 className="h-12 w-12 text-purple-600" />
+            </motion.div>
+            <div className="absolute inset-0 rounded-full bg-purple-600/20 animate-pulse" />
+          </div>
           <motion.div
-            animate={{ rotate: 360 }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: 'linear',
-            }}
-          >
-            <Loader2 className="h-12 w-12 text-primary" />
-          </motion.div>
-          <motion.p
-            className="text-muted-foreground text-lg"
+            className="text-center"
             animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
+            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
           >
-            Carregando negócio...
-          </motion.p>
+            <p className="text-gray-800 text-lg font-medium">Carregando negócio...</p>
+            <p className="text-gray-500 text-sm mt-1">Preparando informações</p>
+          </motion.div>
         </motion.div>
       </div>
     )
@@ -277,13 +256,13 @@ export default function BusinessDetailPage({
   if (error || !business) {
     return (
       <motion.div
-        className="flex flex-col items-center justify-center min-h-screen gap-4 bg-gradient-to-b from-gray-50 to-gray-100"
+        className="flex flex-col items-center justify-center min-h-screen gap-4 bg-white"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
         <p className="text-lg text-gray-600 mb-4">Negócio não encontrado</p>
-        <Button variant="outline" onClick={() => window.history.back()}>
+        <Button variant="outline" onClick={() => router.back()} className="border-purple-200 text-purple-600 hover:bg-purple-50">
           Voltar
         </Button>
       </motion.div>
@@ -291,8 +270,9 @@ export default function BusinessDetailPage({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 w-full">
-      {/* Capa e Foto de Perfil */}
+    <div className="min-h-screen bg-white">
+
+      {/* Business Header */}
       <BusinessHeader
         business={business}
         isOwner={isOwner}
@@ -300,53 +280,40 @@ export default function BusinessDetailPage({
         onCoverPhotoClick={() => coverInputRef.current?.click()}
       />
 
-      {/* Navegação em dispositivos móveis */}
-      <div className="sticky top-0 z-30 bg-white shadow-md md:hidden mt-12">
-        <div className="flex justify-between border-b">
-          <button
-            onClick={() => setActiveTab('info')}
-            className={`flex-1 py-3 text-center font-medium text-sm ${
-              activeTab === 'info'
-                ? 'text-gray-900 border-b-2 border-black'
-                : 'text-gray-500'
-            }`}
-          >
-            Informações
-          </button>
-          <button
-            onClick={() => setActiveTab('members')}
-            className={`flex-1 py-3 text-center font-medium text-sm ${
-              activeTab === 'members'
-                ? 'text-gray-900 border-b-2 border-black'
-                : 'text-gray-500'
-            }`}
-          >
-            Membros
-          </button>
-          <button
-            onClick={() => setActiveTab('initiatives')}
-            className={`flex-1 py-3 text-center font-medium text-sm ${
-              activeTab === 'initiatives'
-                ? 'text-gray-900 border-b-2 border-black'
-                : 'text-gray-500'
-            }`}
-          >
-            Iniciativas
-          </button>
+      {/* Mobile Navigation */}
+      <div className="sticky top-16 z-40 bg-white/95 backdrop-blur-md shadow-sm md:hidden border-b border-purple-100">
+        <div className="flex justify-between">
+          {[
+            { key: "info", label: "Informações" },
+            { key: "members", label: "Membros" },
+            { key: "initiatives", label: "Iniciativas" },
+          ].map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key as any)}
+              className={`flex-1 py-4 text-center font-medium text-sm transition-all ${
+                activeTab === key
+                  ? "text-purple-600 border-b-2 border-purple-600 bg-purple-50/50"
+                  : "text-gray-500 hover:text-purple-600 hover:bg-purple-50/30"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Conteúdo Principal */}
-      <div className="pb-8 w-full" ref={contentRef}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="pt-8 md:pt-0">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
-              {/* Informações do Negócio - Visível em todos os dispositivos em desktop, apenas quando selecionado em mobile */}
+      {/* Main Content */}
+      <div className="pb-8 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="pt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              {/* Business Info */}
               <AnimatePresence mode="wait">
-                {(activeTab === 'info' || window.innerWidth >= 768) && (
+                {(activeTab === "info" || window.innerWidth >= 1024) && (
                   <motion.div
                     key="info"
-                    className="md:col-span-7 lg:col-span-8"
+                    className="lg:col-span-8"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
@@ -363,67 +330,66 @@ export default function BusinessDetailPage({
                     />
                   </motion.div>
                 )}
-
-                {/* Coluna da Direita - Membros e Iniciativas */}
-                <motion.div
-                  className="md:col-span-5 lg:col-span-4 space-y-6"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  {/* Membros do Negócio - Visível em desktop ou quando selecionado em mobile */}
-                  {(activeTab === 'members' || window.innerWidth >= 768) && (
-                    <motion.div
-                      key="members"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <MembersSection
-                        business={business}
-                        isOwner={isOwner}
-                        users={users}
-                        showInviteDialog={showInviteDialog}
-                        setShowInviteDialog={setShowInviteDialog}
-                        selectedUsers={selectedUsers}
-                        setSelectedUsers={setSelectedUsers}
-                        userRoles={userRoles}
-                        setUserRoles={setUserRoles}
-                        searchTerm={searchTerm}
-                        setSearchTerm={setSearchTerm}
-                        filteredUsers={filteredUsers}
-                        onInviteUsers={handleInviteUsers}
-                        onRemoveMember={handleRemoveMember}
-                      />
-                    </motion.div>
-                  )}
-
-                  {/* Iniciativas do Negócio - Visível em desktop ou quando selecionado em mobile */}
-                  {(activeTab === 'initiatives' ||
-                    window.innerWidth >= 768) && (
-                    <motion.div
-                      key="initiatives"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <InitiativesSection business={business} />
-                    </motion.div>
-                  )}
-                </motion.div>
               </AnimatePresence>
+
+              {/* Sidebar */}
+              <motion.div
+                className="lg:col-span-4 space-y-6"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                {/* Members */}
+                {(activeTab === "members" || window.innerWidth >= 1024) && (
+                  <motion.div
+                    key="members"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <MembersSection
+                      business={business}
+                      isOwner={isOwner}
+                      users={users}
+                      showInviteDialog={showInviteDialog}
+                      setShowInviteDialog={setShowInviteDialog}
+                      selectedUsers={selectedUsers}
+                      setSelectedUsers={setSelectedUsers}
+                      userRoles={userRoles}
+                      setUserRoles={setUserRoles}
+                      searchTerm={searchTerm}
+                      setSearchTerm={setSearchTerm}
+                      filteredUsers={filteredUsers}
+                      onInviteUsers={handleInviteUsers}
+                      onRemoveMember={handleRemoveMember}
+                    />
+                  </motion.div>
+                )}
+
+                {/* Initiatives */}
+                {(activeTab === "initiatives" || window.innerWidth >= 1024) && (
+                  <motion.div
+                    key="initiatives"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <InitiativesSection business={business} isOwner={isOwner} isAuthenticated={true} />
+                  </motion.div>
+                )}
+              </motion.div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Botão de voltar ao topo */}
+      {/* Scroll to Top Button */}
       <AnimatePresence>
         {showScrollTop && (
           <motion.button
-            className="fixed bottom-6 right-6 p-3 bg-primary text-white rounded-full shadow-lg z-50"
+            className="fixed bottom-6 right-6 p-3 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-full shadow-lg z-50 hover:shadow-purple-500/25 hover:shadow-2xl transition-all duration-300 hover:scale-105"
             onClick={scrollToTop}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -436,31 +402,31 @@ export default function BusinessDetailPage({
         )}
       </AnimatePresence>
 
-      {/* Modais */}
+      {/* Modals */}
       {selectedImage?.file && (
         <ImageCropModal
           isOpen={isCropModalOpen}
           onClose={() => setIsCropModalOpen(false)}
           onCropComplete={handleCropComplete}
           imageFile={selectedImage.file}
-          aspectRatio={selectedImage.type === 'profile' ? 1 : 16 / 9}
+          aspectRatio={selectedImage.type === "profile" ? 1 : 16 / 9}
         />
       )}
 
-      {/* Input files ocultos */}
+      {/* Hidden File Inputs */}
       <input
         type="file"
         ref={profileInputRef}
         className="hidden"
         accept="image/*"
-        onChange={(e) => handleFileSelect(e, 'profile')}
+        onChange={(e) => handleFileSelect(e, "profile")}
       />
       <input
         type="file"
         ref={coverInputRef}
         className="hidden"
         accept="image/*"
-        onChange={(e) => handleFileSelect(e, 'cover')}
+        onChange={(e) => handleFileSelect(e, "cover")}
       />
     </div>
   )

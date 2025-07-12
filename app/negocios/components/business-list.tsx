@@ -1,14 +1,17 @@
-import { useMemo } from 'react'
-import { BusinessCard } from '@/components/business-card'
-import { BusinessCardSkeleton } from './business-card-skeleton'
-import { Pagination } from '@/components/ui/pagination'
-import { NegocioResponse, NegocioType } from '@/lib/types/businessTypes'
+"use client"
+
+import { useMemo } from "react"
+import { motion } from "framer-motion"
+import { BusinessCard } from "@/components/business-card"
+import { BusinessCardSkeleton } from "./business-card-skeleton"
+import { Pagination } from "@/components/ui/pagination"
+import type { NegocioResponse, NegocioType } from "@/lib/types/businessTypes"
 
 interface BusinessListProps {
   businesses: NegocioResponse[]
-  filter: NegocioType | 'all'
+  filter: NegocioType | "all"
   searchTerm: string
-  sortBy: 'recent' | 'oldest' | 'alphabetical'
+  sortBy: "recent" | "oldest" | "alphabetical"
   currentPage: number
   setCurrentPage: (page: number) => void
   itemsPerPage: number
@@ -27,32 +30,22 @@ export function BusinessList({
 }: BusinessListProps) {
   const filteredAndSortedBusinesses = useMemo(() => {
     const result = businesses.filter((business) => {
-      const matchesFilter = filter === 'all' || business.tipo_negocio === filter
+      const matchesFilter = filter === "all" || business.tipo_negocio === filter
       const matchesSearch =
         business.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        business.palavras_chave.some((keyword) =>
-          keyword.toLowerCase().includes(searchTerm.toLowerCase()),
-        )
+        business.palavras_chave.some((keyword) => keyword.toLowerCase().includes(searchTerm.toLowerCase()))
       return matchesFilter && matchesSearch
     })
 
     switch (sortBy) {
-      case 'oldest':
-        result.sort(
-          (a, b) =>
-            new Date(a.data_cadastro).getTime() -
-            new Date(b.data_cadastro).getTime(),
-        )
+      case "oldest":
+        result.sort((a, b) => new Date(a.data_cadastro).getTime() - new Date(b.data_cadastro).getTime())
         break
-      case 'alphabetical':
-        result.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+      case "alphabetical":
+        result.sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"))
         break
       default: // 'recent'
-        result.sort(
-          (a, b) =>
-            new Date(b.data_cadastro).getTime() -
-            new Date(a.data_cadastro).getTime(),
-        )
+        result.sort((a, b) => new Date(b.data_cadastro).getTime() - new Date(a.data_cadastro).getTime())
     }
 
     return result
@@ -68,7 +61,14 @@ export function BusinessList({
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {Array.from({ length: itemsPerPage }).map((_, index) => (
-          <BusinessCardSkeleton key={index} />
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1, duration: 0.3 }}
+          >
+            <BusinessCardSkeleton />
+          </motion.div>
         ))}
       </div>
     )
@@ -77,20 +77,32 @@ export function BusinessList({
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {currentItems.map((business) => (
-          <BusinessCard key={business.id} business={business} />
+        {currentItems.map((business, index) => (
+          <motion.div
+            key={business.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1, duration: 0.3 }}
+          >
+            <BusinessCard business={business} />
+          </motion.div>
         ))}
       </div>
 
       {filteredAndSortedBusinesses.length > itemsPerPage && (
-        <div className="mt-8 flex justify-center">
+        <motion.div
+          className="mt-12 flex justify-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.3 }}
+        >
           <Pagination
             currentPage={currentPage}
             totalCount={filteredAndSortedBusinesses.length}
             pageSize={itemsPerPage}
             onPageChange={setCurrentPage}
           />
-        </div>
+        </motion.div>
       )}
     </>
   )

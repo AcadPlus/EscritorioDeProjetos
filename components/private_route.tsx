@@ -32,13 +32,14 @@ export default function PrivateRoute({ children }: PrivateRouteProps) {
     return <div>Carregando...</div> // Ou um componente de skeleton/loading
   }
 
-  return (
-    <>
-      {children}
+  if (!isAuthenticated && !isPublicRoute) {
+    return (
       <AuthRequiredModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
-    </>
-  )
+    )
+  }
+
+  return <>{children}</>
 }

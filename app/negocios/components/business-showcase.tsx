@@ -1,14 +1,18 @@
-'use client'
+"use client"
 
-import { useEffect, useState } from 'react'
-import { useBusinessApi } from '@/lib/api/business'
-import { BusinessSearch } from './business-search'
-import { BusinessFilter } from './business-filter'
-import { BusinessSort } from './business-sort'
-import { BusinessStatus } from './business-status'
-import { BusinessList } from './business-list'
-import { BusinessRefresh } from './business-refresh'
-import type { NegocioType, NegocioResponse } from '@/lib/types/businessTypes'
+import type React from "react"
+
+import { useEffect, useState } from "react"
+import { motion } from "framer-motion"
+import { useBusinessApi } from "@/lib/api/business"
+import { BusinessSearch } from "./business-search"
+import { BusinessFilter } from "./business-filter"
+import { BusinessSort } from "./business-sort"
+import { BusinessStatus } from "./business-status"
+import { BusinessList } from "./business-list"
+import { BusinessRefresh } from "./business-refresh"
+import { Sparkles, Store, TrendingUp } from "lucide-react"
+import type { NegocioType, NegocioResponse } from "@/lib/types/businessTypes"
 
 interface BusinessShowcaseProps {
   initialBusinesses?: NegocioResponse[] | null
@@ -17,15 +21,13 @@ interface BusinessShowcaseProps {
 export function BusinessShowcase({ initialBusinesses }: BusinessShowcaseProps) {
   const { useListBusinesses } = useBusinessApi()
 
-  const [filter, setFilter] = useState<NegocioType | 'all'>('all')
-  const [searchTerm, setSearchTerm] = useState('')
+  const [filter, setFilter] = useState<NegocioType | "all">("all")
+  const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [visibleBusinesses, setVisibleBusinesses] = useState<NegocioResponse[]>(
     initialBusinesses?.filter((b) => b.visivel === true) || [],
   )
-  const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'alphabetical'>(
-    'recent',
-  )
+  const [sortBy, setSortBy] = useState<"recent" | "oldest" | "alphabetical">("recent")
   const itemsPerPage = 9
 
   const {
@@ -33,23 +35,19 @@ export function BusinessShowcase({ initialBusinesses }: BusinessShowcaseProps) {
     isLoading,
     error,
     refetch,
-  } = useListBusinesses('aprovado', {
+  } = useListBusinesses("aprovado", {
     initialData: initialBusinesses,
   })
 
   useEffect(() => {
     if (businesses) {
-      const filtered = businesses.filter(
-        (business: NegocioResponse) => business.visivel === true,
-      )
+      const filtered = businesses.filter((business: NegocioResponse) => business.visivel === true)
       setVisibleBusinesses(filtered)
     } else if (!businesses && initialBusinesses) {
-      const filtered = initialBusinesses.filter(
-        (business: NegocioResponse) => business.visivel === true,
-      )
+      const filtered = initialBusinesses.filter((business: NegocioResponse) => business.visivel === true)
       setVisibleBusinesses(filtered)
     } else if (!businesses && !initialBusinesses && !isLoading && !error) {
-      setVisibleBusinesses([]);
+      setVisibleBusinesses([])
     }
   }, [businesses, initialBusinesses, isLoading, error])
 
@@ -58,85 +56,165 @@ export function BusinessShowcase({ initialBusinesses }: BusinessShowcaseProps) {
     setCurrentPage(1)
   }
 
-  const handleSortChange = (value: 'recent' | 'oldest' | 'alphabetical') => {
+  const handleSortChange = (value: "recent" | "oldest" | "alphabetical") => {
     setSortBy(value)
     setCurrentPage(1)
   }
 
   if (initialBusinesses === null && isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <p>Carregando negócios...</p>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <motion.div
+          className="flex flex-col items-center gap-6"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="relative">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+            >
+              <Store className="h-12 w-12 text-purple-600" />
+            </motion.div>
+            <div className="absolute inset-0 rounded-full bg-purple-600/20 animate-pulse" />
+          </div>
+          <motion.div
+            className="text-center"
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+          >
+            <p className="text-gray-800 text-lg font-medium">Carregando negócios...</p>
+            <p className="text-gray-500 text-sm mt-1">Preparando vitrine</p>
+          </motion.div>
+        </motion.div>
       </div>
-    );
+    )
   }
 
   if (error && !businesses && !initialBusinesses) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center text-red-500">
-        <p>Erro ao carregar os negócios: {error.message}.</p>
-        <p>Por favor, tente atualizar a página ou contate o suporte.</p>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <motion.div
+          className="text-center max-w-md mx-auto px-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Store className="h-8 w-8 text-red-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Erro ao carregar negócios</h3>
+          <p className="text-gray-600 mb-4">{error.message}</p>
+          <p className="text-sm text-gray-500">Por favor, tente atualizar a página ou contate o suporte.</p>
+        </motion.div>
       </div>
-    );
+    )
   }
 
   return (
-    <div className="min-h-scree">
-      <div className="container mx-auto px-4 py-8">
-        {/* Cabeçalho e Controles */}
-        <div className="mb-8">
-          <div className="flex flex-col gap-6">
-            {/* Título */}
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                Vitrine de Negócios
-              </h2>
-              <p className="text-sm text-gray-500">
-                Explore startups e empresas inovadoras do nosso ecossistema
-              </p>
-            </div>
-
-            {/* Barra de Pesquisa e Filtros */}
-            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
-              <div className="flex-1 w-full lg:max-w-2xl">
-                <BusinessSearch
-                  searchTerm={searchTerm}
-                  setSearchTerm={setSearchTerm}
-                  handleSearch={handleSearch}
-                />
-              </div>
-              <div className="flex flex-wrap gap-4 items-center">
-                <BusinessSort handleSortChange={handleSortChange} />
-                <BusinessRefresh handleRefreshButtonClick={async () => { await refetch(); }} />
-              </div>
-            </div>
-
-            {/* Status e Filtros em linha */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white rounded-lg px-4 py-3 shadow-sm">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">
-                  Filtrar por Tipo
-                </h3>
-                <BusinessFilter filter={filter} setFilter={setFilter} />
-              </div>
-
-              <div className="bg-white rounded-lg px-4 py-3 shadow-sm">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">
-                  Status dos Negócios
-                </h3>
-                <BusinessStatus
-                  activeBusinesses={visibleBusinesses}
-                  pendingBusinesses={
-                    businesses?.filter((b: NegocioResponse) => !b.visivel) || []
-                  }
-                />
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <div className="relative bg-gradient-to-br from-purple-600 via-violet-600 to-purple-700 text-white overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
         </div>
 
-        {/* Lista de Negócios */}
-        <div>
+        <div className="relative z-10 container mx-auto px-4 py-16 sm:py-20">
+          <motion.div
+            className="text-center max-w-4xl mx-auto"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            {/* Badge */}
+            <motion.div
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm mb-6"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
+              <Sparkles className="h-4 w-4 text-white" />
+              <span className="text-sm font-medium text-white">Ecossistema de Inovação UFC</span>
+            </motion.div>
+
+            {/* Title */}
+            <motion.h1
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+            >
+              Vitrine de Negócios
+            </motion.h1>
+
+            {/* Stats */}
+            <motion.div
+              className="flex flex-wrap justify-center gap-8 text-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.6 }}
+            >
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-purple-200" />
+                <span className="text-2xl font-bold">{visibleBusinesses.length}</span>
+                <span className="text-purple-200">Negócios</span>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-12">
+        {/* Controls Section */}
+        <motion.div
+          className="mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+        >
+          <div className="flex flex-col gap-8">
+            {/* Search Bar */}
+            <div className="max-w-2xl mx-auto w-full">
+              <BusinessSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} handleSearch={handleSearch} />
+            </div>
+
+            {/* Filter Cards */}
+            <div className="grid flex-1 grid-cols-1 lg:grid-cols-2 gap-6">
+              <motion.div
+                className="bg-white rounded-2xl p-6 shadow-lg border border-purple-100"
+                whileHover={{ y: -2 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <Store className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">Filtrar por Tipo</h3>
+                  <BusinessSort handleSortChange={handleSortChange} />
+                <BusinessRefresh
+                  handleRefreshButtonClick={async () => {
+                    await refetch()
+                  }}
+                />
+                </div>
+                <BusinessFilter filter={filter} setFilter={setFilter} />
+                
+                
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Business List */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.6 }}
+        >
           <BusinessList
             businesses={visibleBusinesses}
             filter={filter}
@@ -147,27 +225,64 @@ export function BusinessShowcase({ initialBusinesses }: BusinessShowcaseProps) {
             itemsPerPage={itemsPerPage}
             loading={isLoading}
           />
-        </div>
+        </motion.div>
 
+        {/* Error States */}
         {error && visibleBusinesses.length === 0 && (
-          <div className="text-red-500 mt-4 text-center">
-            Falha ao atualizar os negócios: {error.message}.
-            {initialBusinesses === null && " Os dados iniciais do servidor também não puderam ser carregados."}
-          </div>
-        )}
-        
-        {!isLoading && !error && visibleBusinesses.length === 0 && (businesses && businesses.length > 0 || initialBusinesses && initialBusinesses.length > 0) && (
-          <div className="text-center mt-8 text-gray-500">
-            Nenhum negócio encontrado com os filtros atuais.
-          </div>
+          <motion.div
+            className="text-center mt-12 p-8 bg-red-50 rounded-2xl border border-red-100"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Store className="h-8 w-8 text-red-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-red-800 mb-2">Falha ao atualizar os negócios</h3>
+            <p className="text-red-600">{error.message}</p>
+            {initialBusinesses === null && (
+              <p className="text-red-500 text-sm mt-2">
+                Os dados iniciais do servidor também não puderam ser carregados.
+              </p>
+            )}
+          </motion.div>
         )}
 
-         {!isLoading && !error && (!businesses || businesses.length === 0) && (!initialBusinesses || initialBusinesses.length === 0) && (
-          <div className="text-center mt-8 text-gray-500">
-            Ainda não há negócios cadastrados ou visíveis.
-          </div>
-        )}
+        {!isLoading &&
+          !error &&
+          visibleBusinesses.length === 0 &&
+          ((businesses && businesses.length > 0) || (initialBusinesses && initialBusinesses.length > 0)) && (
+            <motion.div
+              className="text-center mt-12 p-8 bg-purple-50 rounded-2xl border border-purple-100"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Store className="h-8 w-8 text-purple-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum negócio encontrado</h3>
+              <p className="text-gray-600">Tente ajustar os filtros ou termos de busca.</p>
+            </motion.div>
+          )}
 
+        {!isLoading &&
+          !error &&
+          (!businesses || businesses.length === 0) &&
+          (!initialBusinesses || initialBusinesses.length === 0) && (
+            <motion.div
+              className="text-center mt-12 p-8 bg-gray-50 rounded-2xl border border-gray-100"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Store className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Ainda não há negócios cadastrados</h3>
+              <p className="text-gray-600">Seja o primeiro a cadastrar seu negócio na plataforma!</p>
+            </motion.div>
+          )}
       </div>
     </div>
   )

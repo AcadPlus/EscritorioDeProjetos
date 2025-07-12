@@ -39,7 +39,7 @@ export default function PlatformLayoutClient({
   return (
     <Providers>
       <NotificationsProvider>
-        <div className="flex min-h-screen bg-gray-100">
+        <div className="flex">
           {isMounted && <SidebarWrapper />}
           {isMounted && (
             <div className="block md:hidden fixed top-5 right-4 z-50">
@@ -60,7 +60,7 @@ export default function PlatformLayoutClient({
               </Sheet>
             </div>
           )}
-          <main className="flex-1 overflow-y-auto p-4">
+          <main className="flex-1 overflow-y-auto">
             <PrivateRoute>{children}</PrivateRoute>
           </main>
         </div>

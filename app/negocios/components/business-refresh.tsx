@@ -1,15 +1,15 @@
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { RefreshCcwIcon } from 'lucide-react'
-import { cn } from '@/lib/utils' // Caso tenha uma função utilitária para classes condicionais
+"use client"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { RefreshCcw } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface BusinessRefreshButton {
   handleRefreshButtonClick: () => Promise<void> | void
 }
 
-export function BusinessRefresh({
-  handleRefreshButtonClick,
-}: BusinessRefreshButton) {
+export function BusinessRefresh({ handleRefreshButtonClick }: BusinessRefreshButton) {
   const [isRefreshing, setIsRefreshing] = useState(false)
 
   const handleClick = async () => {
@@ -24,15 +24,15 @@ export function BusinessRefresh({
     <Button
       onClick={handleClick}
       variant="outline"
-      className="bg-white w-full sm:w-auto"
+      className="bg-white border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300 w-full sm:w-auto"
       disabled={isRefreshing}
     >
-      <RefreshCcwIcon
-        className={cn('mr-2 h-4 w-4 transition-transform', {
-          'animate-spin': isRefreshing,
+      <RefreshCcw
+        className={cn("h-4 w-4 transition-transform", {
+          "animate-spin": isRefreshing,
         })}
       />
-      Atualizar
+      
     </Button>
   )
 }
