@@ -179,22 +179,16 @@ export function BusinessShowcase({ initialBusinesses }: BusinessShowcaseProps) {
                 Todos
               </TabsTrigger>
               <TabsTrigger
-                value="startup"
+                value="incubado"
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl px-4 sm:px-6 py-3 font-medium transition-all duration-300 flex items-center gap-2"
               >
-                Startup
+                Incubados
               </TabsTrigger>
               <TabsTrigger
-                value="spin-off"
+                value="parceiro"
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl px-4 sm:px-6 py-3 font-medium transition-all duration-300 flex items-center gap-2"
               >
-                Spin-off
-              </TabsTrigger>
-              <TabsTrigger
-                value="empresa-junior"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl px-4 sm:px-6 py-3 font-medium transition-all duration-300 flex items-center gap-2"
-              >
-                Empresa Júnior
+                Parceiros
               </TabsTrigger>
             </TabsList>
 
@@ -217,10 +211,10 @@ export function BusinessShowcase({ initialBusinesses }: BusinessShowcaseProps) {
               loading={isLoading}
             />
           </TabsContent>
-          <TabsContent value="startup">
+          <TabsContent value="incubado">
             <BusinessList
               businesses={visibleBusinesses}
-              filter="startup"
+              filter="incubado"
               searchTerm={searchTerm}
               sortBy={sortBy}
               currentPage={currentPage}
@@ -229,10 +223,10 @@ export function BusinessShowcase({ initialBusinesses }: BusinessShowcaseProps) {
               loading={isLoading}
             />
           </TabsContent>
-          <TabsContent value="spin-off">
+          <TabsContent value="parceiro">
             <BusinessList
               businesses={visibleBusinesses}
-              filter="spin-off"
+              filter="parceiro"
               searchTerm={searchTerm}
               sortBy={sortBy}
               currentPage={currentPage}
@@ -241,18 +235,7 @@ export function BusinessShowcase({ initialBusinesses }: BusinessShowcaseProps) {
               loading={isLoading}
             />
           </TabsContent>
-          <TabsContent value="empresa-junior">
-            <BusinessList
-              businesses={visibleBusinesses}
-              filter="empresa-junior"
-              searchTerm={searchTerm}
-              sortBy={sortBy}
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
-              itemsPerPage={itemsPerPage}
-              loading={isLoading}
-            />
-          </TabsContent>
+          
         </Tabs>
 
         {/* Error States */}
