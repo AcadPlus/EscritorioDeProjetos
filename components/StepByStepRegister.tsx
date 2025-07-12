@@ -11,18 +11,13 @@ import {
 } from '@/lib/types/userTypes'
 import { useUserApi } from '@/lib/api/users'
 import { useVerificationApi } from '@/lib/api/verification'
-import { UserTypeStep } from './registration/UserTypeStep'
 import { BasicInfoStep } from './registration/BasicInfoStep'
 import { EmailVerificationStep } from './registration/EmailVerificationStep'
 import { PasswordStep } from './registration/PasswordStep'
 import { AdditionalInfoStep } from './registration/AdditionalInfoStep'
+import { TermsStep } from './registration/TermsStep'
 
 const steps = [
-  {
-    title: 'Tipo de Usuário',
-    subtitle: 'Selecione o tipo de conta que você deseja criar.',
-    fields: ['tipo_usuario'],
-  },
   {
     title: 'Informações Básicas',
     subtitle: 'Preencha suas informações pessoais.',
@@ -43,6 +38,11 @@ const steps = [
     subtitle: 'Forneça informações específicas para o seu tipo de usuário.',
     fields: ['additional_info'],
   },
+  {
+    title: 'Termos e Condições',
+    subtitle: 'Aceite os termos e condições para finalizar o cadastro.',
+    fields: ['terms'],
+  },
 ]
 
 export function StepByStepRegister({
@@ -58,7 +58,7 @@ export function StepByStepRegister({
 
   const [currentStep, setCurrentStep] = useState(0)
   const [formData, setFormData] = useState<UserCreateData>({
-    tipo_usuario: PublicUserType.ESTUDANTE,
+    tipo_usuario: PublicUserType.EXTERNO, // Default, will be auto-detected
     nome: '',
     email: '',
     senha: '',
@@ -77,8 +77,29 @@ export function StepByStepRegister({
   const [showCodeInput, setShowCodeInput] = useState(false)
   const [generalError, setGeneralError] = useState<string>('')
 
+  // Função para detectar o tipo de usuário baseado no email
+  const detectUserType = (email: string): PublicUserType => {
+    if (email.endsWith('@alu.ufc.br')) {
+      return PublicUserType.ESTUDANTE
+    } else if (email.endsWith('@ufc.br')) {
+      return PublicUserType.PESQUISADOR
+    } else {
+      return PublicUserType.EXTERNO
+    }
+  }
+
+  // Auto-detectar tipo de usuário quando email muda
   useEffect(() => {
-    if (currentStep === 2) {
+    if (formData.email.includes('@')) {
+      const detectedType = detectUserType(formData.email)
+      if (detectedType !== formData.tipo_usuario) {
+        handleUserTypeChange(detectedType)
+      }
+    }
+  }, [formData.email])
+
+  useEffect(() => {
+    if (currentStep === 1) {
       setIsEmailVerified(false)
       setShowCodeInput(false)
       setVerificationCode('')
@@ -92,18 +113,9 @@ export function StepByStepRegister({
   }
 
   const handleUserTypeChange = (value: PublicUserType) => {
-    const currentUsername = formData.email.split('@')[0]
-    const domain =
-      value === PublicUserType.ESTUDANTE
-        ? '@alu.ufc.br'
-        : value === PublicUserType.PESQUISADOR
-          ? '@ufc.br'
-          : ''
-
     let newFormData = {
       ...formData,
       tipo_usuario: value,
-      email: currentUsername + domain,
     }
 
     if (value === PublicUserType.ESTUDANTE) {
@@ -211,17 +223,12 @@ export function StepByStepRegister({
     } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        email_verification: 'Código de verificação inválido. Tente novamente.',
+        email_verification: 'Código de verificação inválido.',
       }))
     }
   }
 
   const handleSubmit = async () => {
-    setGeneralError('')
-    if (!validatePassword(formData.senha)) {
-      return
-    }
-
     try {
       await createUserMutation.mutateAsync(formData)
       onRegisterSuccess()
@@ -235,7 +242,7 @@ export function StepByStepRegister({
           setGeneralError(
             'Email já cadastrado. Por favor, use outro email ou faça login.',
           )
-          setCurrentStep(1)
+          setCurrentStep(0)
         } else if (
           error.response.data.detail.includes('Password validation failed')
         ) {
@@ -261,15 +268,6 @@ export function StepByStepRegister({
     switch (currentStep) {
       case 0:
         return (
-          <UserTypeStep
-            userType={formData.tipo_usuario}
-            onUserTypeChange={handleUserTypeChange}
-            acceptedTerms={acceptedTerms}
-            onTermsChange={setAcceptedTerms}
-          />
-        )
-      case 1:
-        return (
           <BasicInfoStep
             nome={formData.nome}
             email={formData.email}
@@ -279,7 +277,7 @@ export function StepByStepRegister({
             onInputChange={handleInputChange}
           />
         )
-      case 2:
+      case 1:
         return (
           <EmailVerificationStep
             email={formData.email}
@@ -294,7 +292,7 @@ export function StepByStepRegister({
             onCodeChange={setVerificationCode}
           />
         )
-      case 3:
+      case 2:
         return (
           <PasswordStep
             password={formData.senha}
@@ -302,13 +300,20 @@ export function StepByStepRegister({
             onChange={(value) => handleInputChange('senha', value)}
           />
         )
-      case 4:
+      case 3:
         return (
           <AdditionalInfoStep
             userType={formData.tipo_usuario}
             formData={formData}
             onInputChange={handleInputChange}
             onSocialMediaChange={handleSocialMediaChange}
+          />
+        )
+      case 4:
+        return (
+          <TermsStep
+            acceptedTerms={acceptedTerms}
+            onTermsChange={setAcceptedTerms}
           />
         )
       default:
@@ -322,17 +327,17 @@ export function StepByStepRegister({
 
     switch (currentStep) {
       case 0:
-        return allFieldsValid && acceptedTerms
-      case 1:
         return (
           allFieldsValid && formData.nome && formData.email && formData.telefone
         )
-      case 2:
+      case 1:
         return allFieldsValid && isEmailVerified
-      case 3:
+      case 2:
         return allFieldsValid && utilValidatePassword(formData.senha) === null
-      case 4:
+      case 3:
         return allFieldsValid
+      case 4:
+        return allFieldsValid && acceptedTerms
       default:
         return false
     }
