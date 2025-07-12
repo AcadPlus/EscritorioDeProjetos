@@ -29,7 +29,7 @@ export function AuthRequiredModal({
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent>
+      <AlertDialogContent className='bg-white rounded-xl'>
         <AlertDialogHeader>
           <AlertDialogTitle>Acesso Restrito</AlertDialogTitle>
           <AlertDialogDescription>
@@ -39,7 +39,7 @@ export function AuthRequiredModal({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={onClose}>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={handleLoginRedirect}>
+          <AlertDialogAction className='bg-purple-600 text-white' onClick={handleLoginRedirect}>
             Fazer Login
           </AlertDialogAction>
         </AlertDialogFooter>
