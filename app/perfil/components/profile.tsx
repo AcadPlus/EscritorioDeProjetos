@@ -1,7 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-'use client'
+"use client"
+
+import type React from "react"
 
 import {
   Building2,
@@ -18,11 +17,18 @@ import {
   UserPlus,
   UserMinus,
   UserCheck,
-} from 'lucide-react'
-import Image from 'next/image'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
+  Users,
+  Heart,
+  ArrowLeft,
+  Crown,
+  Shield,
+  Briefcase,
+  GraduationCap,
+} from "lucide-react"
+import Image from "next/image"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,14 +38,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { UserType } from '@/lib/types/userTypes'
-import { useRouter } from 'next/navigation'
-import { ProfileSkeleton } from './profile-skeleton'
-import { useUserApi } from '@/lib/api/users'
-import { useRef, useState, useEffect } from 'react'
-import { toast } from 'sonner'
-import { ImageCropModal } from '@/components/ImageCropModal'
+} from "@/components/ui/alert-dialog"
+import { UserType } from "@/lib/types/userTypes"
+import { useRouter } from "next/navigation"
+import { useUserApi } from "@/lib/api/users"
+import { useRef, useState, useEffect } from "react"
+import { toast } from "sonner"
+import { ImageCropModal } from "@/components/ImageCropModal"
 import {
   Dialog,
   DialogContent,
@@ -47,12 +52,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { useConnectionRequests } from '@/lib/api/connections'
-import { ConnectionStatus } from '@/lib/types/connectionTypes'
-import { motion } from 'framer-motion'
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useConnectionRequests } from "@/lib/api/connections"
+import { ConnectionStatus } from "@/lib/types/connectionTypes"
+import { motion } from "framer-motion"
+import { Badge } from "@/components/ui/badge"
 
 interface ProfilePageProps {
   userId?: string | null
@@ -71,13 +77,8 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
     useGetUserById,
   } = useUserApi()
 
-  const {
-    useCreateRequest,
-    useUpdateRequest,
-    useCancelRequest,
-    useRemoveConnection,
-    useGetConnectionStatus,
-  } = useConnectionRequests()
+  const { useCreateRequest, useUpdateRequest, useCancelRequest, useRemoveConnection, useGetConnectionStatus } =
+    useConnectionRequests()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -88,33 +89,31 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false)
   const [editProfileData, setEditProfileData] = useState({
-    nome: '',
-    email: '',
-    empresa: '',
-    campus: '',
+    nome: "",
+    email: "",
+    empresa: "",
+    campus: "",
   })
   const [passwordData, setPasswordData] = useState({
-    oldPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   })
 
   const isViewingOwnProfile = !userId
   const viewingUserType = (userType as UserType) || UserType.ESTUDANTE
 
   // Fetch current user data
-  const { data: currentUser, isLoading: isCurrentUserLoading } =
-    useGetCurrentUser()
+  const { data: currentUser, isLoading: isCurrentUserLoading } = useGetCurrentUser()
   // Fetch other user data if viewing someone else's profile
-  const { data: otherUser, isLoading: isOtherUserLoading } = useGetUserById(
-    viewingUserType,
-    userId || '',
-    { enabled: !!userId && !!userType },
-  )
+  const { data: otherUser, isLoading: isOtherUserLoading } = useGetUserById(viewingUserType, userId || "", {
+    enabled: !!userId && !!userType,
+  })
 
   // Get connection status if viewing someone else's profile
-  const { data: connectionStatus, isLoading: isConnectionStatusLoading } =
-    useGetConnectionStatus(userId || '', { enabled: !!userId && !!currentUser })
+  const { data: connectionStatus, isLoading: isConnectionStatusLoading } = useGetConnectionStatus(userId || "", {
+    enabled: !!userId && !!currentUser,
+  })
 
   // Connection mutations
   const sendConnectionMutation = useCreateRequest()
@@ -132,36 +131,60 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
 
   // Determine which user data to display
   const user = isViewingOwnProfile ? currentUser : otherUser?.user
-  const isLoading = isViewingOwnProfile
-    ? isCurrentUserLoading
-    : isOtherUserLoading
+  const isLoading = isViewingOwnProfile ? isCurrentUserLoading : isOtherUserLoading
 
   useEffect(() => {
     if (user) {
       setEditProfileData({
-        nome: user.nome || '',
-        email: user.email || '',
-        empresa: user.empresa || '',
-        campus: user.campus || '',
+        nome: user.nome || "",
+        email: user.email || "",
+        empresa: user.empresa || "",
+        campus: user.campus || "",
       })
     }
   }, [user])
 
   const handleDeleteAccount = () => {
     localStorage.clear()
-    router.push('/linka/login')
+    router.push("/linka/login")
   }
 
   const getUserTitle = (type: UserType) => {
     switch (type) {
       case UserType.PESQUISADOR:
-        return 'professor'
+        return "Professor"
       case UserType.ESTUDANTE:
-        return 'estudante'
+        return "Estudante"
       case UserType.EXTERNO:
-        return 'profissional externo'
+        return "Profissional Externo"
       default:
-        return 'usuário'
+        return "Usuário"
+    }
+  }
+
+  const getUserIcon = (type: UserType) => {
+    switch (type) {
+      case UserType.PESQUISADOR:
+        return <Crown className="h-4 w-4" />
+      case UserType.ESTUDANTE:
+        return <GraduationCap className="h-4 w-4" />
+      case UserType.EXTERNO:
+        return <Briefcase className="h-4 w-4" />
+      default:
+        return <Shield className="h-4 w-4" />
+    }
+  }
+
+  const getUserBadgeColor = (type: UserType) => {
+    switch (type) {
+      case UserType.PESQUISADOR:
+        return "bg-gradient-to-r from-yellow-500 to-orange-500"
+      case UserType.ESTUDANTE:
+        return "bg-gradient-to-r from-blue-500 to-indigo-500"
+      case UserType.EXTERNO:
+        return "bg-gradient-to-r from-green-500 to-emerald-500"
+      default:
+        return "bg-gradient-to-r from-purple-500 to-violet-500"
     }
   }
 
@@ -170,7 +193,7 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
   }
 
   const handleDeleteProfile = async () => {
-    if (window.confirm('Tem certeza que deseja deletar seu perfil?')) {
+    if (window.confirm("Tem certeza que deseja deletar seu perfil?")) {
       try {
         await deleteUserMutation.mutateAsync({
           userType: currentUser?.user?.tipo_usuario,
@@ -178,8 +201,8 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
         })
         handleDeleteAccount()
       } catch (error) {
-        console.error('Error deleting profile:', error)
-        toast.error('Erro ao deletar perfil')
+        console.error("Error deleting profile:", error)
+        toast.error("Erro ao deletar perfil")
       }
     }
   }
@@ -192,13 +215,13 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
     const file = event.target.files?.[0]
     if (!file) return
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('Por favor, selecione apenas arquivos de imagem')
+    if (!file.type.startsWith("image/")) {
+      toast.error("Por favor, selecione apenas arquivos de imagem")
       return
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('A imagem deve ter no máximo 5MB')
+      toast.error("A imagem deve ter no máximo 5MB")
       return
     }
 
@@ -212,10 +235,10 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
 
     try {
       const result = await uploadProfileImageMutation.mutateAsync(croppedImage)
-      toast.success('Foto de perfil atualizada com sucesso')
+      toast.success("Foto de perfil atualizada com sucesso")
     } catch (error) {
-      console.error('Error uploading profile image:', error)
-      toast.error('Erro ao atualizar foto de perfil')
+      console.error("Error uploading profile image:", error)
+      toast.error("Erro ao atualizar foto de perfil")
     } finally {
       setIsUploading(false)
       setSelectedFile(null)
@@ -228,10 +251,10 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
 
     try {
       await deleteProfileImageMutation.mutateAsync()
-      toast.success('Foto de perfil removida com sucesso')
+      toast.success("Foto de perfil removida com sucesso")
     } catch (error) {
-      console.error('Error deleting profile image:', error)
-      toast.error('Erro ao remover foto de perfil')
+      console.error("Error deleting profile image:", error)
+      toast.error("Erro ao remover foto de perfil")
     } finally {
       setIsUploading(false)
     }
@@ -243,19 +266,19 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
         userData: editProfileData,
       })
       setIsEditProfileOpen(false)
-      toast.success('Perfil atualizado com sucesso')
-      localStorage.removeItem('user')
+      toast.success("Perfil atualizado com sucesso")
+      localStorage.removeItem("user")
       // Redirecionar para a página de login
-      router.push('/login')
+      router.push("/login")
     } catch (error) {
-      console.error('Erro ao atualizar o usuário:', error)
-      toast.error('Erro ao atualizar perfil')
+      console.error("Erro ao atualizar o usuário:", error)
+      toast.error("Erro ao atualizar perfil")
     }
   }
 
   const handleUpdatePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('As senhas não coincidem')
+      toast.error("As senhas não coincidem")
       return
     }
 
@@ -266,14 +289,14 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
       })
       setIsChangePasswordOpen(false)
       setPasswordData({
-        oldPassword: '',
-        newPassword: '',
-        confirmPassword: '',
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
       })
-      toast.success('Senha alterada com sucesso')
+      toast.success("Senha alterada com sucesso")
     } catch (error) {
-      console.error('Error changing password:', error)
-      toast.error('Erro ao alterar senha')
+      console.error("Error changing password:", error)
+      toast.error("Erro ao alterar senha")
     }
   }
 
@@ -283,10 +306,10 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
 
     try {
       await sendConnectionMutation.mutateAsync(userId)
-      toast.success('Solicitação de conexão enviada')
+      toast.success("Solicitação de conexão enviada")
     } catch (error) {
-      console.error('Error sending connection request:', error)
-      toast.error('Erro ao enviar solicitação de conexão')
+      console.error("Error sending connection request:", error)
+      toast.error("Erro ao enviar solicitação de conexão")
     }
   }
 
@@ -298,9 +321,9 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
         userId,
         status: ConnectionStatus.ACCEPTED,
       })
-      toast.success('Solicitação de conexão aceita com sucesso')
+      toast.success("Solicitação de conexão aceita com sucesso")
     } catch (error) {
-      toast.error('Erro ao aceitar solicitação de conexão')
+      toast.error("Erro ao aceitar solicitação de conexão")
     }
   }
 
@@ -312,9 +335,9 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
         userId,
         status: ConnectionStatus.REJECTED,
       })
-      toast.success('Solicitação de conexão rejeitada')
+      toast.success("Solicitação de conexão rejeitada")
     } catch (error) {
-      toast.error('Erro ao rejeitar solicitação de conexão')
+      toast.error("Erro ao rejeitar solicitação de conexão")
     }
   }
 
@@ -323,9 +346,9 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
 
     try {
       await cancelConnectionMutation.mutateAsync(userId)
-      toast.success('Solicitação de conexão cancelada')
+      toast.success("Solicitação de conexão cancelada")
     } catch (error) {
-      toast.error('Erro ao cancelar solicitação de conexão')
+      toast.error("Erro ao cancelar solicitação de conexão")
     }
   }
 
@@ -337,9 +360,9 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
         userId,
         userType: viewingUserType,
       })
-      toast.success('Conexão removida com sucesso')
+      toast.success("Conexão removida com sucesso")
     } catch (error) {
-      toast.error('Erro ao remover conexão')
+      toast.error("Erro ao remover conexão")
     }
   }
 
@@ -347,7 +370,7 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
   const renderConnectionActionButton = () => {
     if (isConnectionStatusLoading) {
       return (
-        <Button disabled className="w-full">
+        <Button disabled className="w-full bg-purple-600 hover:bg-purple-700">
           <Loader2 className="h-4 w-4 animate-spin mr-2" />
           Carregando...
         </Button>
@@ -360,7 +383,7 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
       return (
         <Button
           variant="outline"
-          className="w-full"
+          className="w-full border-red-200 text-red-600 hover:bg-red-50 bg-transparent"
           onClick={handleRemoveConnection}
           disabled={removeConnectionMutation.isPending}
         >
@@ -379,7 +402,7 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
         return (
           <Button
             variant="outline"
-            className="w-full"
+            className="w-full border-red-200 text-red-600 hover:bg-red-50 bg-transparent"
             onClick={handleRemoveConnection}
             disabled={removeConnectionMutation.isPending}
           >
@@ -395,20 +418,20 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
         // Verificar se o usuário atual enviou ou recebeu a solicitação
         const sentRequests = currentUser?.user?.solicitacoes_enviadas || []
         const receivedRequests = currentUser?.user?.solicitacoes_recebidas || []
-        
+
         const isSentByMe = sentRequests.some(
-          (req: any) => req.target_id === userId && req.status === ConnectionStatus.PENDING
+          (req: any) => req.target_id === userId && req.status === ConnectionStatus.PENDING,
         )
-        
+
         const isReceivedByMe = receivedRequests.some(
-          (req: any) => req.requester_id === userId && req.status === ConnectionStatus.PENDING
+          (req: any) => req.requester_id === userId && req.status === ConnectionStatus.PENDING,
         )
 
         if (isSentByMe) {
           return (
             <Button
               variant="outline"
-              className="w-full"
+              className="w-full border-orange-200 text-orange-600 hover:bg-orange-50 bg-transparent"
               onClick={handleCancelConnectionRequest}
               disabled={cancelConnectionMutation.isPending}
             >
@@ -424,7 +447,7 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
           return (
             <div className="flex gap-2 w-full">
               <Button
-                className="flex-1 bg-green-500 hover:bg-green-600"
+                className="flex-1 bg-green-600 hover:bg-green-700"
                 onClick={handleAcceptConnectionRequest}
                 disabled={acceptConnectionMutation.isPending}
               >
@@ -436,7 +459,7 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
                 Aceitar
               </Button>
               <Button
-                className="flex-1 bg-red-500 hover:bg-red-600"
+                className="flex-1 bg-red-600 hover:bg-red-700"
                 onClick={handleRejectConnectionRequest}
                 disabled={rejectConnectionMutation.isPending}
               >
@@ -451,11 +474,7 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
           )
         } else {
           return (
-            <Button
-              variant="outline"
-              className="w-full"
-              disabled={true}
-            >
+            <Button variant="outline" className="w-full bg-transparent" disabled={true}>
               <Loader2 className="h-4 w-4 mr-2" />
               Solicitação Pendente
             </Button>
@@ -465,7 +484,7 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
       default:
         return (
           <Button
-            className="w-full"
+            className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:shadow-purple-500/25 hover:shadow-lg"
             onClick={handleSendConnectionRequest}
             disabled={sendConnectionMutation.isPending}
           >
@@ -482,32 +501,30 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <motion.div
-          className="flex flex-col items-center gap-4"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col items-center gap-6"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
+          <div className="relative">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+            >
+              <Loader2 className="h-12 w-12 text-purple-600" />
+            </motion.div>
+            <div className="absolute inset-0 rounded-full bg-purple-600/20 animate-pulse" />
+          </div>
           <motion.div
-            animate={{
-              rotate: 360,
-            }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: 'linear',
-            }}
-          >
-            <Loader2 className="h-12 w-12 text-primary" />
-          </motion.div>
-          <motion.p
-            className="text-muted-foreground text-lg"
+            className="text-center"
             animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
+            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
           >
-            Carregando perfil...
-          </motion.p>
+            <p className="text-gray-800 text-lg font-medium">Carregando perfil...</p>
+            <p className="text-gray-500 text-sm mt-1">Preparando informações</p>
+          </motion.div>
         </motion.div>
       </div>
     )
@@ -516,15 +533,22 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
   if (!user) {
     return (
       <motion.div
-        className="flex flex-col items-center justify-center min-h-screen gap-4"
+        className="min-h-screen bg-white flex flex-col items-center justify-center gap-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <p className="text-lg text-muted-foreground">
-          Dados do usuário não disponíveis
-        </p>
-        <Button variant="outline" onClick={() => router.back()}>
+        <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+          <User2 className="h-8 w-8 text-purple-600" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900">Perfil não encontrado</h3>
+        <p className="text-gray-600 mb-6">Os dados do usuário não estão disponíveis</p>
+        <Button
+          variant="outline"
+          onClick={() => router.back()}
+          className="border-purple-200 text-purple-600 hover:bg-purple-50"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar
         </Button>
       </motion.div>
@@ -532,348 +556,389 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
   }
 
   return (
-    <motion.div
-      className="p-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="max-w-3xl mx-auto space-y-6">
-        {/* Informações Principais */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Card className="p-6 shadow-lg hover:shadow-xl transition-shadow duration-200">
-            <div className="flex items-start gap-6">
-              <div className="relative group">
-                <motion.div
-                  className="relative w-36 h-36 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden transition-transform duration-200 transform group-hover:scale-105 border-4 border-background shadow-xl"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 10 }}
-                >
-                  {isUploading ? (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm">
-                      <Loader2 className="h-6 w-6 animate-spin text-white" />
-                    </div>
-                  ) : (
-                    <>
-                      {user?.foto_url ? (
-                        <Image
-                          src={user.foto_url}
-                          alt="Foto de perfil"
-                          fill
-                          sizes="(max-width: 144px) 100vw, 144px"
-                          className="object-cover"
-                          priority
-                        />
+    <div className="min-h-screen bg-white">
+      {/* Header with back button */}
+      {!isViewingOwnProfile && (
+        <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-purple-100">
+          <div className="max-w-4xl mx-auto px-6">
+            <div className="flex items-center justify-between h-16">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.back()}
+                className="gap-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Voltar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <motion.div
+        className="p-6 pb-12"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="max-w-4xl mx-auto space-y-8">
+          {/* Profile Header */}
+          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5 }}>
+            <Card className="overflow-hidden shadow-lg border border-purple-100 bg-white relative">
+              {/* Decorative background */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-purple-100/50 to-violet-100/30 rounded-full -mr-32 -mt-32" />
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-purple-100/30 to-violet-100/20 rounded-full -ml-24 -mb-24" />
+
+              <div className="relative p-8">
+                <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8">
+                  {/* Profile Picture */}
+                  <div className="relative group">
+                    <motion.div
+                      className="relative w-32 h-32 lg:w-40 lg:h-40 rounded-2xl bg-gradient-to-br from-purple-100 to-violet-100 flex items-center justify-center overflow-hidden border-4 border-white shadow-2xl"
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 10 }}
+                    >
+                      {isUploading ? (
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm">
+                          <Loader2 className="h-8 w-8 animate-spin text-white" />
+                        </div>
                       ) : (
-                        <User2 className="h-12 w-12 text-gray-400" />
+                        <>
+                          {user?.foto_url ? (
+                            <Image
+                              src={user.foto_url || "/placeholder.svg"}
+                              alt="Foto de perfil"
+                              fill
+                              sizes="(max-width: 160px) 100vw, 160px"
+                              className="object-cover rounded-xl"
+                              priority
+                            />
+                          ) : (
+                            <User2 className="h-16 w-16 text-purple-400" />
+                          )}
+                        </>
                       )}
-                    </>
-                  )}
-                </motion.div>
-                {isViewingOwnProfile && (
-                  <motion.div
-                    className="absolute bottom-0 right-0 flex gap-1.5 bg-background rounded-full p-1.5 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                    initial={{ opacity: 0 }}
-                    whileHover={{ opacity: 1 }}
-                  >
-                    <motion.button
-                      className="h-8 w-8 bg-primary text-primary-foreground hover:bg-primary/90 rounded-full flex items-center justify-center"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={isUploading}
-                    >
-                      <Camera className="h-4 w-4" />
-                    </motion.button>
-                    {user?.foto_url && (
-                      <motion.button
-                        className="h-8 w-8 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-full flex items-center justify-center"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setIsDeleteImageDialogOpen(true)}
+                    </motion.div>
+
+                    {/* Edit buttons for own profile */}
+                    {isViewingOwnProfile && (
+                      <motion.div
+                        className="absolute -bottom-2 -right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        initial={{ opacity: 0 }}
+                        whileHover={{ opacity: 1 }}
                       >
-                        <Trash2 className="h-4 w-4" />
-                      </motion.button>
+                        <motion.button
+                          className="w-10 h-10 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-purple-500/25"
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploading}
+                        >
+                          <Camera className="h-5 w-5" />
+                        </motion.button>
+                        {user?.foto_url && (
+                          <motion.button
+                            className="w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-red-500/25"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setIsDeleteImageDialogOpen(true)}
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </motion.button>
+                        )}
+                      </motion.div>
                     )}
-                  </motion.div>
-                )}
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                />
-              </div>
-              <div className="flex-1 space-y-4">
-                <div>
-                  <motion.h1
-                    className="text-2xl font-bold"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    {user?.nome}
-                  </motion.h1>
-                  <motion.p
-                    className="text-muted-foreground"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    {getUserTitle(user?.tipo_usuario as UserType)}
-                  </motion.p>
-                </div>
 
-                <motion.div
-                  className="flex flex-col gap-2"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Mail className="h-4 w-4" />
-                    <span>{user?.email}</span>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                    />
                   </div>
 
-                  {user?.campus && (
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      <span>{user.campus}</span>
-                    </div>
-                  )}
+                  {/* Profile Info */}
+                  <div className="flex-1 space-y-6">
+                    <div>
+                      <motion.h1
+                        className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        {user?.nome}
+                      </motion.h1>
 
-                  {user?.empresa && (
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Building2 className="h-4 w-4" />
-                      <span>{user.empresa}</span>
+                      <motion.div
+                        className="flex items-center gap-3 mb-4"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        <Badge
+                          className={`${getUserBadgeColor(user?.tipo_usuario as UserType)} text-white border-0 px-3 py-1 text-sm font-medium shadow-lg flex items-center gap-2`}
+                        >
+                          {getUserIcon(user?.tipo_usuario as UserType)}
+                          {getUserTitle(user?.tipo_usuario as UserType)}
+                        </Badge>
+                      </motion.div>
                     </div>
-                  )}
 
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span>
-                      Membro desde{' '}
-                      {new Date(user?.data_cadastro).toLocaleDateString(
-                        'pt-BR',
+                    {/* Contact Info */}
+                    <motion.div
+                      className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4 }}
+                    >
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50/50 border border-purple-100">
+                        <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-violet-600 rounded-lg flex items-center justify-center">
+                          <Mail className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-purple-700">Email</p>
+                          <p className="text-gray-800 truncate">{user?.email}</p>
+                        </div>
+                      </div>
+
+                      {user?.campus && (
+                        <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50/50 border border-purple-100">
+                          <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-violet-600 rounded-lg flex items-center justify-center">
+                            <MapPin className="h-5 w-5 text-white" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-purple-700">Campus</p>
+                            <p className="text-gray-800 truncate">{user.campus}</p>
+                          </div>
+                        </div>
                       )}
-                    </span>
+
+                      {user?.empresa && (
+                        <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50/50 border border-purple-100">
+                          <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-violet-600 rounded-lg flex items-center justify-center">
+                            <Building2 className="h-5 w-5 text-white" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-purple-700">Empresa</p>
+                            <p className="text-gray-800 truncate">{user.empresa}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50/50 border border-purple-100">
+                        <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-violet-600 rounded-lg flex items-center justify-center">
+                          <Calendar className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-purple-700">Membro desde</p>
+                          <p className="text-gray-800">{new Date(user?.data_cadastro).toLocaleDateString("pt-BR")}</p>
+                        </div>
+                      </div>
+                    </motion.div>
+
+                    {/* Action Buttons */}
+                    <motion.div
+                      className="flex flex-col sm:flex-row gap-3"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      {isViewingOwnProfile ? (
+                        <>
+                          <Button
+                            variant="outline"
+                            className="flex-1 border-purple-200 text-purple-600 hover:bg-purple-50 bg-transparent"
+                            onClick={handleEditProfile}
+                          >
+                            <PencilIcon className="h-4 w-4 mr-2" />
+                            Editar Perfil
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="flex-1 border-purple-200 text-purple-600 hover:bg-purple-50 bg-transparent"
+                            onClick={handleChangePassword}
+                          >
+                            <KeyIcon className="h-4 w-4 mr-2" />
+                            Alterar Senha
+                          </Button>
+                        </>
+                      ) : (
+                        <div className="w-full">{renderConnectionActionButton()}</div>
+                      )}
+                    </motion.div>
                   </div>
-                </motion.div>
-
-                {isViewingOwnProfile ? (
-                  <motion.div
-                    className="flex gap-2 pt-2"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                  >
-                    <motion.div
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      <Button
-                        variant="outline"
-                        className="flex-1"
-                        onClick={handleEditProfile}
-                      >
-                        <PencilIcon className="h-4 w-4 mr-2" />
-                        Editar Perfil
-                      </Button>
-                    </motion.div>
-                    <motion.div
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      <Button
-                        variant="outline"
-                        className="flex-1"
-                        onClick={handleChangePassword}
-                      >
-                        <KeyIcon className="h-4 w-4 mr-2" />
-                        Alterar Senha
-                      </Button>
-                    </motion.div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    className="pt-2"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                  >
-                    {renderConnectionActionButton()}
-                  </motion.div>
-                )}
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* Informações Adicionais */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-4">
-              Informações Adicionais
-            </h2>
-            <div className="flex items-center gap-2 text-gray-600">
-              <Calendar className="h-4 w-4" />
-              <span>
-                Criado em:{' '}
-                {new Date(user?.data_cadastro).toLocaleDateString('pt-BR')}
-              </span>
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* Conexões e Favoritos */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-4">Conexões e Favoritos</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-gray-600">Conexões</p>
-                <p className="text-2xl font-bold">
-                  {user?.conexoes?.length || 0}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-600">Favoritos</p>
-                <p className="text-2xl font-bold">0</p>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* Ações - Only show for own profile */}
-        {isViewingOwnProfile && (
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <Card className="p-6 shadow-lg">
-              <h2 className="text-lg font-semibold mb-4">Ações</h2>
-              <div className="space-y-2">
-                <motion.div whileHover={{ x: 5 }} whileTap={{ scale: 0.98 }}>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                    onClick={handleEditProfile}
-                  >
-                    <PencilIcon className="h-4 w-4" />
-                    Editar Perfil
-                  </Button>
-                </motion.div>
-                <Separator />
-                <motion.div whileHover={{ x: 5 }} whileTap={{ scale: 0.98 }}>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                    onClick={() => setIsDeleteDialogOpen(true)}
-                  >
-                    <UserX className="h-4 w-4" />
-                    Deletar Perfil
-                  </Button>
-                </motion.div>
-                <Separator />
-                <motion.div whileHover={{ x: 5 }} whileTap={{ scale: 0.98 }}>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                    onClick={handleChangePassword}
-                  >
-                    <KeyIcon className="h-4 w-4" />
-                    Alterar Senha
-                  </Button>
-                </motion.div>
+                </div>
               </div>
             </Card>
           </motion.div>
-        )}
-      </div>
+
+          {/* Stats Cards */}
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card className="p-6 shadow-lg border border-purple-100 bg-white">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-purple-600 to-violet-600 rounded-xl">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Conexões</h3>
+                  <p className="text-3xl font-bold text-purple-600">{user?.conexoes?.length || 0}</p>
+                  <p className="text-sm text-gray-500">pessoas conectadas</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6 shadow-lg border border-purple-100 bg-white">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl">
+                  <Heart className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Favoritos</h3>
+                  <p className="text-3xl font-bold text-pink-600">0</p>
+                  <p className="text-sm text-gray-500">negócios favoritos</p>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+
+          {/* Actions - Only show for own profile */}
+          {isViewingOwnProfile && (
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <Card className="p-6 shadow-lg border border-purple-100 bg-white">
+                <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <User2 className="h-5 w-5 text-purple-600" />
+                  </div>
+                  Configurações da Conta
+                </h2>
+                <div className="space-y-3">
+                  <motion.div whileHover={{ x: 4 }} whileTap={{ scale: 0.98 }}>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start gap-3 p-4 h-auto text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-xl"
+                      onClick={handleEditProfile}
+                    >
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <PencilIcon className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-medium">Editar Perfil</p>
+                        <p className="text-sm text-gray-500">Atualize suas informações pessoais</p>
+                      </div>
+                    </Button>
+                  </motion.div>
+
+                  <Separator className="bg-purple-100" />
+
+                  <motion.div whileHover={{ x: 4 }} whileTap={{ scale: 0.98 }}>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start gap-3 p-4 h-auto text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-xl"
+                      onClick={handleChangePassword}
+                    >
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <KeyIcon className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-medium">Alterar Senha</p>
+                        <p className="text-sm text-gray-500">Mantenha sua conta segura</p>
+                      </div>
+                    </Button>
+                  </motion.div>
+
+                  <Separator className="bg-purple-100" />
+
+                  <motion.div whileHover={{ x: 4 }} whileTap={{ scale: 0.98 }}>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start gap-3 p-4 h-auto text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl"
+                      onClick={() => setIsDeleteDialogOpen(true)}
+                    >
+                      <div className="p-2 bg-red-100 rounded-lg">
+                        <UserX className="h-4 w-4 text-red-600" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-medium">Deletar Perfil</p>
+                        <p className="text-sm text-gray-500">Remover permanentemente sua conta</p>
+                      </div>
+                    </Button>
+                  </motion.div>
+                </div>
+              </Card>
+            </motion.div>
+          )}
+        </div>
+      </motion.div>
 
       {/* Dialogs - Only show for own profile */}
       {isViewingOwnProfile && (
         <>
-          <AlertDialog
-            open={isDeleteDialogOpen}
-            onOpenChange={setIsDeleteDialogOpen}
-          >
-            <AlertDialogContent>
+          <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+            <AlertDialogContent className="border-purple-100">
               <AlertDialogHeader>
-                <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esta ação não pode ser desfeita. Isso excluirá permanentemente
-                  sua conta e removerá seus dados de nossos servidores.
+                <AlertDialogTitle className="text-gray-900">Você tem certeza?</AlertDialogTitle>
+                <AlertDialogDescription className="text-gray-600">
+                  Esta ação não pode ser desfeita. Isso excluirá permanentemente sua conta e removerá seus dados de
+                  nossos servidores.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDeleteProfile}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  {deleteUserMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    'Deletar Conta'
-                  )}
+                <AlertDialogCancel className="border-purple-200 text-purple-600 hover:bg-purple-50">
+                  Cancelar
+                </AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteProfile} className="bg-red-600 text-white hover:bg-red-700">
+                  {deleteUserMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Deletar Conta"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
 
-          <AlertDialog
-            open={isDeleteImageDialogOpen}
-            onOpenChange={setIsDeleteImageDialogOpen}
-          >
-            <AlertDialogContent>
+          <AlertDialog open={isDeleteImageDialogOpen} onOpenChange={setIsDeleteImageDialogOpen}>
+            <AlertDialogContent className="border-purple-100">
               <AlertDialogHeader>
-                <AlertDialogTitle>Remover foto de perfil</AlertDialogTitle>
-                <AlertDialogDescription>
+                <AlertDialogTitle className="text-gray-900">Remover foto de perfil</AlertDialogTitle>
+                <AlertDialogDescription className="text-gray-600">
                   Você tem certeza que deseja remover sua foto de perfil?
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogCancel className="border-purple-200 text-purple-600 hover:bg-purple-50">
+                  Cancelar
+                </AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleDeleteProfileImage}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  className="bg-red-600 text-white hover:bg-red-700"
                 >
-                  {deleteProfileImageMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    'Remover Foto'
-                  )}
+                  {deleteProfileImageMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Remover Foto"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
 
           <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
-            <DialogContent>
+            <DialogContent className="border-purple-100">
               <DialogHeader>
-                <DialogTitle>Editar Perfil</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="text-gray-900">Editar Perfil</DialogTitle>
+                <DialogDescription className="text-gray-600">
                   Faça as alterações necessárias no seu perfil.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="name">Nome</Label>
+                  <Label htmlFor="name" className="text-purple-700 font-medium">
+                    Nome
+                  </Label>
                   <Input
                     id="name"
                     value={editProfileData.nome}
@@ -883,10 +948,13 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
                         nome: e.target.value,
                       }))
                     }
+                    className="border-purple-200 focus:border-purple-400"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-purple-700 font-medium">
+                    Email
+                  </Label>
                   <Input
                     id="email"
                     type="email"
@@ -897,11 +965,14 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
                         email: e.target.value,
                       }))
                     }
+                    className="border-purple-200 focus:border-purple-400"
                   />
                 </div>
                 {user?.tipo_usuario === UserType.EXTERNO && (
                   <div className="grid gap-2">
-                    <Label htmlFor="empresa">Empresa</Label>
+                    <Label htmlFor="empresa" className="text-purple-700 font-medium">
+                      Empresa
+                    </Label>
                     <Input
                       id="empresa"
                       value={editProfileData.empresa}
@@ -911,13 +982,15 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
                           empresa: e.target.value,
                         }))
                       }
+                      className="border-purple-200 focus:border-purple-400"
                     />
                   </div>
                 )}
-                {(user?.tipo_usuario === UserType.PESQUISADOR ||
-                  user?.tipo_usuario === UserType.ESTUDANTE) && (
+                {(user?.tipo_usuario === UserType.PESQUISADOR || user?.tipo_usuario === UserType.ESTUDANTE) && (
                   <div className="grid gap-2">
-                    <Label htmlFor="campus">Campus</Label>
+                    <Label htmlFor="campus" className="text-purple-700 font-medium">
+                      Campus
+                    </Label>
                     <Input
                       id="campus"
                       value={editProfileData.campus}
@@ -927,6 +1000,7 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
                           campus: e.target.value,
                         }))
                       }
+                      className="border-purple-200 focus:border-purple-400"
                     />
                   </div>
                 )}
@@ -935,37 +1009,32 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
                 <Button
                   variant="outline"
                   onClick={() => setIsEditProfileOpen(false)}
+                  className="border-purple-200 text-purple-600 hover:bg-purple-50"
                 >
                   Cancelar
                 </Button>
                 <Button
                   onClick={handleUpdateProfile}
                   disabled={updateUserMutation.isPending}
+                  className="bg-gradient-to-r from-purple-600 to-violet-600 hover:shadow-purple-500/25 hover:shadow-lg"
                 >
-                  {updateUserMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    'Salvar Alterações'
-                  )}
+                  {updateUserMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar Alterações"}
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
 
-          <Dialog
-            open={isChangePasswordOpen}
-            onOpenChange={setIsChangePasswordOpen}
-          >
-            <DialogContent>
+          <Dialog open={isChangePasswordOpen} onOpenChange={setIsChangePasswordOpen}>
+            <DialogContent className="border-purple-100">
               <DialogHeader>
-                <DialogTitle>Alterar Senha</DialogTitle>
-                <DialogDescription>
-                  Digite sua senha atual e a nova senha.
-                </DialogDescription>
+                <DialogTitle className="text-gray-900">Alterar Senha</DialogTitle>
+                <DialogDescription className="text-gray-600">Digite sua senha atual e a nova senha.</DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="currentPassword">Senha Atual</Label>
+                  <Label htmlFor="currentPassword" className="text-purple-700 font-medium">
+                    Senha Atual
+                  </Label>
                   <Input
                     id="currentPassword"
                     type="password"
@@ -976,10 +1045,13 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
                         oldPassword: e.target.value,
                       }))
                     }
+                    className="border-purple-200 focus:border-purple-400"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="newPassword">Nova Senha</Label>
+                  <Label htmlFor="newPassword" className="text-purple-700 font-medium">
+                    Nova Senha
+                  </Label>
                   <Input
                     id="newPassword"
                     type="password"
@@ -990,10 +1062,13 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
                         newPassword: e.target.value,
                       }))
                     }
+                    className="border-purple-200 focus:border-purple-400"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
+                  <Label htmlFor="confirmPassword" className="text-purple-700 font-medium">
+                    Confirmar Nova Senha
+                  </Label>
                   <Input
                     id="confirmPassword"
                     type="password"
@@ -1004,6 +1079,7 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
                         confirmPassword: e.target.value,
                       }))
                     }
+                    className="border-purple-200 focus:border-purple-400"
                   />
                 </div>
               </div>
@@ -1011,18 +1087,16 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
                 <Button
                   variant="outline"
                   onClick={() => setIsChangePasswordOpen(false)}
+                  className="border-purple-200 text-purple-600 hover:bg-purple-50"
                 >
                   Cancelar
                 </Button>
                 <Button
                   onClick={handleUpdatePassword}
                   disabled={changePasswordMutation.isPending}
+                  className="bg-gradient-to-r from-purple-600 to-violet-600 hover:shadow-purple-500/25 hover:shadow-lg"
                 >
-                  {changePasswordMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    'Alterar Senha'
-                  )}
+                  {changePasswordMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Alterar Senha"}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -1041,6 +1115,6 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
           )}
         </>
       )}
-    </motion.div>
+    </div>
   )
 }

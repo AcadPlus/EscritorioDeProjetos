@@ -1,12 +1,12 @@
-import { Network } from './components/network-main'
-import PrivateRoute from '@/components/private_route'
+import { Network } from "./components/network-main"
+import PrivateRoute from "@/components/private_route"
 
 export default function NetworkPage() {
   return (
-    <>
-      <PrivateRoute>
+    <PrivateRoute>
+      <div className="min-h-screen bg-white">
         <Network />
-      </PrivateRoute>
-    </>
+      </div>
+    </PrivateRoute>
   )
 }
