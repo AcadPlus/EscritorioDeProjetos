@@ -4,6 +4,7 @@ import * as React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ChevronDown } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -18,13 +19,16 @@ const Sidebar = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, children, ...props }, ref) => {
   return (
-    <div
+    <motion.div
       ref={ref}
-      className={cn('flex flex-col h-full bg-white', className)}
+      className={cn('flex flex-col h-full bg-white shadow-sm', className)}
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
       {...props}
     >
       {children}
-    </div>
+    </motion.div>
   )
 })
 Sidebar.displayName = 'Sidebar'
@@ -47,7 +51,7 @@ const SidebarContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex flex-col space-y-4 px-4', className)}
+    className={cn('flex flex-col space-y-4 px-4 flex-1 overflow-y-auto', className)}
     {...props}
   />
 ))
@@ -77,13 +81,14 @@ const SidebarNav = React.forwardRef<
 ))
 SidebarNav.displayName = 'SidebarNav'
 
-interface SidebarNavItemProps extends React.HTMLAttributes<HTMLDivElement> {
+interface SidebarNavItemProps {
+  className?: string
   title: string
-  items: {
+  items: Array<{
     name: string
-    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
+    icon: React.ComponentType<{ className?: string }>
     href: string
-  }[]
+  }>
 }
 
 const SidebarNavItem = React.forwardRef<HTMLDivElement, SidebarNavItemProps>(
@@ -95,33 +100,78 @@ const SidebarNavItem = React.forwardRef<HTMLDivElement, SidebarNavItemProps>(
       <div ref={ref} className={cn('', className)} {...props}>
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" className="w-full justify-between">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-between text-gray-700 hover:text-purple-700 hover:bg-purple-50/50 transition-all duration-200 font-medium"
+            >
               {title}
               <ChevronDown
-                className={cn('h-4 w-4 transition-transform duration-200', {
+                className={cn('h-4 w-4 transition-transform duration-200 text-purple-600', {
                   '-rotate-180': isOpen,
                 })}
               />
             </Button>
           </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-2">
-            {items.map((item) => (
-              <Button
-                key={item.name}
-                asChild
-                variant="ghost"
-                className={cn(
-                  'w-full justify-start',
-                  pathname === item.href && 'bg-muted font-medium',
-                )}
-              >
-                <Link href={item.href}>
-                  <item.icon className="mr-2 h-4 w-4" />
-                  {item.name}
-                </Link>
-              </Button>
-            ))}
-          </CollapsibleContent>
+          <AnimatePresence>
+            {isOpen && (
+              <CollapsibleContent asChild>
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-1 mt-2"
+                >
+                  {items.map((item, index) => {
+                    const isActive = pathname === item.href
+                    const isDisabled = !item.href
+                    
+                    return (
+                      <motion.div
+                        key={item.name}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        <Button
+                          asChild={!isDisabled}
+                          variant="ghost"
+                          className={cn(
+                            'w-full justify-start relative group transition-all duration-200 text-sm',
+                            isActive && 'bg-gradient-to-r from-purple-50 to-violet-50 text-purple-700 font-medium',
+                            !isActive && !isDisabled && 'hover:bg-purple-50/50 hover:text-purple-700',
+                            isDisabled && 'opacity-50 cursor-not-allowed text-gray-400'
+                          )}
+                          disabled={isDisabled}
+                        >
+                          {isDisabled ? (
+                            <div className="flex items-center">
+                              <item.icon className="mr-3 h-4 w-4" />
+                              <span>{item.name}</span>
+                            </div>
+                          ) : (
+                            <Link href={item.href} className="flex items-center w-full">
+                              <item.icon className={cn(
+                                "mr-3 h-4 w-4 transition-colors duration-200",
+                                isActive && "text-purple-600"
+                              )} />
+                              <span>{item.name}</span>
+                              {isActive && (
+                                <motion.div
+                                  layoutId="activeIndicator"
+                                  className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-purple-500 to-violet-500 rounded-l-full"
+                                />
+                              )}
+                            </Link>
+                          )}
+                        </Button>
+                      </motion.div>
+                    )
+                  })}
+                </motion.div>
+              </CollapsibleContent>
+            )}
+          </AnimatePresence>
         </Collapsible>
       </div>
     )
