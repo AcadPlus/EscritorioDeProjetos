@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Info, Plus } from 'lucide-react'
+import { HandHeart, Plus, Search } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { TipoIniciativa, PublicStatusIniciativa } from '@/lib/types/initiativeTypes'
 
 interface NoResultsProps {
@@ -20,31 +20,49 @@ export const NoResults = ({
   const router = useRouter()
   
   return (
-    <Card className="p-8">
-      <div className="text-center">
-        <Info className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-        <p className="text-lg text-muted-foreground mb-2">
-          {searchTerm
-            ? `Nenhuma iniciativa encontrada para "${searchTerm}"`
-            : `Nenhuma iniciativa ${selectedType ? `do tipo ${selectedType}` : ''} com status ${selectedStatus.toLowerCase()}`}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          {searchTerm
-            ? 'Tente usar termos diferentes na sua busca.'
-            : selectedStatus === PublicStatusIniciativa.ATIVA
-              ? 'As iniciativas precisam ser aprovadas por um administrador antes de aparecerem aqui.'
-              : 'Tente mudar os filtros para encontrar mais iniciativas.'}
-        </p>
-        {isAuthenticated && (
-          <Button
-            className="mt-4 bg-black text-white hover:bg-black/70"
-            onClick={() => router.push('/minhas-iniciativas')}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Gerenciar Minhas Iniciativas
-          </Button>
+    <motion.div
+      className="text-center mt-12 p-8 bg-purple-50 rounded-2xl border border-purple-100"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        {searchTerm ? (
+          <Search className="h-8 w-8 text-purple-600" />
+        ) : (
+          <HandHeart className="h-8 w-8 text-purple-600" />
         )}
       </div>
-    </Card>
+      
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        {searchTerm
+          ? 'Nenhuma iniciativa encontrada'
+          : 'Nenhuma iniciativa disponível'}
+      </h3>
+      
+      <p className="text-gray-600 mb-4">
+        {searchTerm
+          ? `Não encontramos iniciativas para "${searchTerm}"`
+          : `Nenhuma iniciativa ${selectedType ? `do tipo ${selectedType}` : ''} com status ${selectedStatus.toLowerCase()}`}
+      </p>
+      
+      <p className="text-sm text-gray-500 mb-6">
+        {searchTerm
+          ? 'Tente usar termos diferentes na sua busca ou ajustar os filtros.'
+          : selectedStatus === PublicStatusIniciativa.ATIVA
+            ? 'As iniciativas precisam ser aprovadas por um administrador antes de aparecerem aqui.'
+            : 'Tente mudar os filtros para encontrar mais iniciativas.'}
+      </p>
+      
+      {isAuthenticated && (
+        <Button
+          className="bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white shadow-lg hover:shadow-purple-500/25 transition-all duration-200"
+          onClick={() => router.push('/minhas-iniciativas')}
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Gerenciar Minhas Iniciativas
+        </Button>
+      )}
+    </motion.div>
   )
 } 
