@@ -5,12 +5,8 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { useBusinessApi } from "@/lib/api/business"
-import { BusinessSearch } from "./business-search"
-import { BusinessFilter } from "./business-filter"
-import { BusinessSort } from "./business-sort"
-import { BusinessStatus } from "./business-status"
+import { BusinessSearchAndSort } from "./business-search-and-sort"
 import { BusinessList } from "./business-list"
-import { BusinessRefresh } from "./business-refresh"
 import { Sparkles, Store, TrendingUp } from "lucide-react"
 import type { NegocioType, NegocioResponse } from "@/lib/types/businessTypes"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -55,6 +51,14 @@ export function BusinessShowcase({ initialBusinesses }: BusinessShowcaseProps) {
   const handleSortChange = (value: "recent" | "oldest" | "alphabetical") => {
     setSortBy(value)
     setCurrentPage(1)
+  }
+
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+  }
+
+  const handleRetry = () => {
+    refetch()
   }
 
   if (initialBusinesses === null && isLoading) {
@@ -165,6 +169,23 @@ export function BusinessShowcase({ initialBusinesses }: BusinessShowcaseProps) {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-12">
+        {/* Search Section */}
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <BusinessSearchAndSort 
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            sortBy={sortBy}
+            handleSortChange={handleSortChange}
+            handleSearch={handleSearch}
+            handleRetry={handleRetry}
+          />
+        </motion.div>
+
         <Tabs
           defaultValue="all"
           className="w-full"
@@ -191,13 +212,6 @@ export function BusinessShowcase({ initialBusinesses }: BusinessShowcaseProps) {
                 Parceiros
               </TabsTrigger>
             </TabsList>
-
-            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-              <div className="flex-1 w-full sm:w-auto lg:w-80">
-                <BusinessSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-              </div>
-              <BusinessSort handleSortChange={handleSortChange} />
-            </div>
           </div>
           <TabsContent value="all">
             <BusinessList
