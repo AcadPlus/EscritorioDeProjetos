@@ -155,7 +155,24 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
 
   const SidebarNavItem = React.forwardRef<HTMLDivElement, SidebarNavItemProps>(
     ({ className, title, items, ...props }, ref) => {
-      const [isOpen, setIsOpen] = React.useState(true)
+      // Definir quais seções ficam expandidas por padrão
+      const defaultExpanded = ['Vitrines', 'Comunidade'].includes(title)
+      
+      // Estado inicial baseado no localStorage ou valor padrão
+      const [isOpen, setIsOpen] = React.useState(() => {
+        if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem(`sidebar-${title}-expanded`)
+          return saved !== null ? JSON.parse(saved) : defaultExpanded
+        }
+        return defaultExpanded
+      })
+
+      // Persistir estado no localStorage
+      React.useEffect(() => {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(`sidebar-${title}-expanded`, JSON.stringify(isOpen))
+        }
+      }, [isOpen, title])
 
       return (
         <div ref={ref} className={cn('', className)} {...props}>
