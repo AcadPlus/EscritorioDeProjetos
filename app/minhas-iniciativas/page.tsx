@@ -98,153 +98,160 @@ export default function InitiativesManagementPage() {
   }, [refetch])
 
   const { activeCount, pausedCount, completedCount, pendingInvitesCount } =
-    useMemo(
-      () => ({
-        activeCount:
-          initiatives?.filter((i) => i.status === StatusIniciativa.ATIVA)
-            .length || 0,
-        pausedCount:
-          initiatives?.filter((i) => i.status === StatusIniciativa.PAUSADA)
-            .length || 0,
-        completedCount:
-          initiatives?.filter((i) => i.status === StatusIniciativa.CONCLUIDA)
-            .length || 0,
-        pendingInvitesCount:
-          initiatives?.reduce((count, initiative) => {
-            const pendingParticipants =
-              initiative.participantes?.filter(
-                (p: Participante) =>
-                  p.status_vinculo === StatusVinculo.PENDENTE,
-              ).length || 0
-            return count + pendingParticipants
-          }, 0) || 0,
-      }),
-      [initiatives],
-  )
+    useMemo(() => {
+      if (!initiatives) {
+        return {
+          activeCount: 0,
+          pausedCount: 0,
+          completedCount: 0,
+          pendingInvitesCount: 0,
+        }
+      }
+
+      const activeCount = initiatives.filter(
+        (initiative) => initiative.status === StatusIniciativa.ATIVA,
+      ).length
+      const pausedCount = initiatives.filter(
+        (initiative) => initiative.status === StatusIniciativa.PAUSADA,
+      ).length
+      const completedCount = initiatives.filter(
+        (initiative) => initiative.status === StatusIniciativa.CONCLUIDA,
+      ).length
+
+      const pendingInvitesCount = initiatives.reduce((count, initiative) => {
+        const pendingParticipants = initiative.participantes?.filter(
+          (participant: Participante) =>
+            participant.status_vinculo === StatusVinculo.PENDENTE,
+        )
+        return count + (pendingParticipants?.length || 0)
+      }, 0)
+
+      return {
+        activeCount,
+        pausedCount,
+        completedCount,
+        pendingInvitesCount,
+      }
+    }, [initiatives])
 
   const filteredInitiatives = useMemo(() => {
     if (!initiatives) return []
 
-    let filtered = [...initiatives]
+    let filtered = initiatives
 
-    // Aplicar busca
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase()
       filtered = filtered.filter(
         (initiative) =>
-          initiative.titulo.toLowerCase().includes(searchLower) ||
-          initiative.descricao.toLowerCase().includes(searchLower) ||
-          initiative.palavras_chave.some((tag) =>
-            tag.toLowerCase().includes(searchLower),
+          initiative.titulo?.toLowerCase().includes(searchLower) ||
+          initiative.descricao?.toLowerCase().includes(searchLower) ||
+          initiative.palavras_chave?.some((keyword) =>
+            keyword.toLowerCase().includes(searchLower),
           ),
       )
     }
 
-    // Aplicar ordenação
-    switch (sortBy) {
-      case 'recent':
-        filtered.sort(
-          (a, b) =>
-            new Date(b.data_inicio).getTime() -
-            new Date(a.data_inicio).getTime(),
-        )
-        break
-      case 'oldest':
-        filtered.sort(
-          (a, b) =>
-            new Date(a.data_inicio).getTime() -
-            new Date(b.data_inicio).getTime(),
-        )
-        break
-      case 'alphabetical':
-        filtered.sort((a, b) => a.titulo.localeCompare(b.titulo))
-        break
-    }
-
-    return filtered
+    return [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case 'oldest':
+          return (
+            new Date(a.data_cadastro || 0).getTime() -
+            new Date(b.data_cadastro || 0).getTime()
+          )
+        case 'alphabetical':
+          return (a.titulo || '').localeCompare(b.titulo || '', 'pt-BR')
+        case 'recent':
+        default:
+          return (
+            new Date(b.data_cadastro || 0).getTime() -
+            new Date(a.data_cadastro || 0).getTime()
+          )
+      }
+    })
   }, [initiatives, searchTerm, sortBy])
 
   const getStatusBadge = (status: StatusIniciativa) => {
-    const statusConfig = {
-      [StatusIniciativa.PENDENTE]: {
-        className: 'bg-yellow-100 text-yellow-800',
-        text: 'Pendente de Aprovação',
-      },
-      [StatusIniciativa.ATIVA]: {
-        className: 'bg-green-100 text-green-800',
-        text: 'Ativa',
-      },
-      [StatusIniciativa.RECUSADA]: {
-        className: 'bg-red-100 text-red-800',
-        text: 'Recusada',
-      },
-      [StatusIniciativa.PAUSADA]: {
-        className: 'bg-orange-100 text-orange-800',
-        text: 'Pausada',
-      },
-      [StatusIniciativa.CONCLUIDA]: {
-        className: 'bg-blue-100 text-blue-800',
-        text: 'Concluída',
-      },
-      [StatusIniciativa.CANCELADA]: {
-        className: 'bg-gray-100 text-gray-800',
-        text: 'Cancelada',
-      },
+    switch (status) {
+      case StatusIniciativa.ATIVA:
+        return (
+          <Badge className="bg-green-100 text-green-800 border-green-200">
+            Ativa
+          </Badge>
+        )
+      case StatusIniciativa.PAUSADA:
+        return (
+          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
+            Pausada
+          </Badge>
+        )
+      case StatusIniciativa.CONCLUIDA:
+        return (
+          <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+            Concluída
+          </Badge>
+        )
+      case StatusIniciativa.CANCELADA:
+        return (
+          <Badge className="bg-red-100 text-red-800 border-red-200">
+            Cancelada
+          </Badge>
+        )
+      default:
+        return (
+          <Badge className="bg-gray-100 text-gray-800 border-gray-200">
+            Desconhecido
+          </Badge>
+        )
     }
-
-    const config =
-      statusConfig[status] || statusConfig[StatusIniciativa.PENDENTE]
-
-    return (
-      <span
-        className={`px-2 py-1 rounded-full text-xs font-medium ${config.className}`}
-      >
-        {config.text}
-      </span>
-    )
   }
 
   const getTipoIniciativaBadge = (tipo: TipoIniciativa) => {
-    const tipoConfig = {
-      [TipoIniciativa.PESQUISA]: {
-        className: 'bg-blue-100 text-blue-800',
-        text: 'Pesquisa',
-      },
-      [TipoIniciativa.INOVACAO]: {
-        className: 'bg-purple-100 text-purple-800',
-        text: 'Inovação',
-      },
-      [TipoIniciativa.EMPREENDEDORISMO]: {
-        className: 'bg-green-100 text-green-800',
-        text: 'Empreendedorismo',
-      },
-      [TipoIniciativa.EXTENSAO]: {
-        className: 'bg-orange-100 text-orange-800',
-        text: 'Extensão',
-      },
-      [TipoIniciativa.OUTROS]: {
-        className: 'bg-gray-100 text-gray-800',
-        text: 'Outros',
-      },
+    switch (tipo) {
+      case TipoIniciativa.PESQUISA:
+        return (
+          <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+            Pesquisa
+          </Badge>
+        )
+      case TipoIniciativa.INOVACAO:
+        return (
+          <Badge className="bg-purple-100 text-purple-800 border-purple-200">
+            Inovação
+          </Badge>
+        )
+      case TipoIniciativa.EMPREENDEDORISMO:
+        return (
+          <Badge className="bg-green-100 text-green-800 border-green-200">
+            Empreendedorismo
+          </Badge>
+        )
+      case TipoIniciativa.EXTENSAO:
+        return (
+          <Badge className="bg-orange-100 text-orange-800 border-orange-200">
+            Extensão
+          </Badge>
+        )
+      case TipoIniciativa.OUTROS:
+        return (
+          <Badge className="bg-gray-100 text-gray-800 border-gray-200">
+            Outros
+          </Badge>
+        )
+      default:
+        return (
+          <Badge className="bg-gray-100 text-gray-800 border-gray-200">
+            {tipo}
+          </Badge>
+        )
     }
-
-    const config = tipoConfig[tipo] || tipoConfig[TipoIniciativa.OUTROS]
-
-    return (
-      <Badge variant="outline" className={config.className}>
-        {config.text}
-      </Badge>
-    )
   }
 
-  // Função auxiliar para formatar datas com segurança
   const formatDate = (initiative: IniciativaBase | undefined, field: 'data_cadastro' | 'data_ultima_atualizacao'): string => {
     if (!initiative || !initiative[field]) return 'Data não disponível'
+    
     try {
-      return format(new Date(initiative[field]), "d 'de' MMMM 'às' HH:mm", {
-        locale: ptBR,
-      })
-    } catch (e) {
+      return format(new Date(initiative[field]), 'dd/MM/yyyy', { locale: ptBR })
+    } catch {
       return 'Data inválida'
     }
   }
@@ -270,7 +277,7 @@ export default function InitiativesManagementPage() {
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="min-h-screen"
+        className="min-h-screen bg-white"
       >
         <div className="container mx-auto px-4 py-8">
           <motion.div 
@@ -301,7 +308,7 @@ export default function InitiativesManagementPage() {
 
               {/* Status e Botão Adicionar */}
               <div className="grid gap-6 md:grid-cols-4">
-                <div className="md:col-span-3 bg-white rounded-lg px-4 py-3 shadow-sm">
+                <div className="md:col-span-3 bg-white rounded-lg px-4 py-3 shadow-sm border border-purple-100">
                   <StatusCounts
                     activeCount={activeCount}
                     pausedCount={pausedCount}
@@ -311,7 +318,7 @@ export default function InitiativesManagementPage() {
                 </div>
                 <div className="flex items-center justify-center">
                   <Button
-                    className="w-full h-full bg-black text-white hover:bg-black/70"
+                    className="w-full h-full bg-gradient-to-r from-purple-600 to-violet-600 hover:shadow-purple-500/25 hover:shadow-lg transition-all duration-300 text-white"
                     onClick={() => {
                       if (!businesses || businesses.length === 0) {
                         router.push('/meus-negocios')
