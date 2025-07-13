@@ -51,7 +51,7 @@ export function BasicInfoStep({
   }
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onInputChange('email', e.target.value)
+      onInputChange('email', e.target.value)
   }
 
   return (
@@ -99,7 +99,7 @@ export function BasicInfoStep({
                 <span className="text-xs font-medium text-purple-700">
                   {getUserTypeLabel(userType)}
                 </span>
-              </div>
+            </div>
             </motion.div>
           )}
         </div>

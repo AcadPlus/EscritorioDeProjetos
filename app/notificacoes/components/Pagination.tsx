@@ -39,8 +39,8 @@ export const Pagination = ({
       
       <div className="flex items-center gap-2">
         <span className="text-sm text-gray-600 font-medium">
-          Página {currentPage} de {totalPages}
-        </span>
+        Página {currentPage} de {totalPages}
+      </span>
       </div>
       
       <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>

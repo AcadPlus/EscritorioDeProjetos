@@ -70,7 +70,7 @@ export const NotificationCard = ({
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-lg font-semibold text-gray-900">
-                      {notification.titulo}
+                    {notification.titulo}
                     </h3>
                     {!notification.lida && (
                       <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gradient-to-r from-purple-100 to-violet-100 text-purple-700 text-xs font-medium">
@@ -160,29 +160,29 @@ export const NotificationCard = ({
                     <div className="flex items-center gap-2 text-sm">
                       <CheckCircle className="w-4 h-4 text-green-600" />
                       <span className="text-gray-600">
-                        {notification.tipo_resposta === 'ACEITO'
-                          ? 'Convite aceito'
-                          : 'Convite recusado'}
+                      {notification.tipo_resposta === 'ACEITO'
+                        ? 'Convite aceito'
+                        : 'Convite recusado'}
                       </span>
                     </div>
                   )}
                 </div>
                 
-                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                  <Button
-                    onClick={() =>
-                      setDeleteModalData({
-                        isOpen: true,
-                        notificationId: notification.id,
-                      })
-                    }
-                    variant="ghost"
-                    size="sm"
+                  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                    <Button
+                      onClick={() =>
+                        setDeleteModalData({
+                          isOpen: true,
+                          notificationId: notification.id,
+                        })
+                      }
+                      variant="ghost"
+                      size="sm"
                     className="text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all duration-300 h-8 w-8 p-0"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </motion.div>
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </motion.div>
               </div>
             </div>
           </div>
@@ -214,52 +214,52 @@ export const NotificationCard = ({
                   )}
                 </div>
                 <p className="text-sm text-gray-500 mb-3">
-                  {format(
-                    new Date(notification.created_at),
-                    "d 'de' MMMM 'às' HH:mm",
-                    {
-                      locale: ptBR,
-                    },
-                  )}
-                </p>
+                    {format(
+                      new Date(notification.created_at),
+                      "d 'de' MMMM 'às' HH:mm",
+                      {
+                        locale: ptBR,
+                      },
+                    )}
+                  </p>
                 <p className="text-gray-700 leading-relaxed">
-                  {notification.mensagem}
-                </p>
-              </div>
+                    {notification.mensagem}
+                  </p>
+                </div>
               
               <div className="flex items-center gap-2 ml-4">
                 {!notification.lida && (
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMarkAsRead(notification.id);
+                        }}
+                      variant="ghost"
+                        size="sm"
+                      className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 transition-all duration-300 h-8 w-8 p-0"
+                      >
+                      <MailOpen className="w-4 h-4" />
+                      </Button>
+                    </motion.div>
+                  )}
+                
+                  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                     <Button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleMarkAsRead(notification.id);
+                        setDeleteModalData({
+                          isOpen: true,
+                          notificationId: notification.id,
+                        });
                       }}
                       variant="ghost"
                       size="sm"
-                      className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 transition-all duration-300 h-8 w-8 p-0"
+                    className="text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all duration-300 h-8 w-8 p-0"
                     >
-                      <MailOpen className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </motion.div>
-                )}
-                
-                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteModalData({
-                        isOpen: true,
-                        notificationId: notification.id,
-                      });
-                    }}
-                    variant="ghost"
-                    size="sm"
-                    className="text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all duration-300 h-8 w-8 p-0"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </motion.div>
               </div>
             </div>
           </div>

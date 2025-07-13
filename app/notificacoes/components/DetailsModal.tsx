@@ -58,8 +58,8 @@ export const DetailsModal = ({
               <div className="flex items-center gap-2 mb-2">
                 <FileText className="h-4 w-4 text-purple-600" />
                 <h4 className="font-medium text-sm text-gray-900">
-                  {resourceType === 'business' ? 'Negócio' : 'Iniciativa'}:
-                </h4>
+                {resourceType === 'business' ? 'Negócio' : 'Iniciativa'}:
+              </h4>
               </div>
               <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-3 rounded-lg border border-purple-100 text-sm text-gray-800">
                 {resourceName}

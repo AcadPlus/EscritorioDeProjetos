@@ -18,7 +18,7 @@ export const LoadingState = () => {
             <Bell className="h-12 w-12 text-purple-600" />
           </motion.div>
           <div className="absolute inset-0 rounded-full bg-purple-600/20 animate-pulse" />
-        </div>
+      </div>
         <motion.div
           className="text-center"
           animate={{ opacity: [0.5, 1, 0.5] }}
