@@ -31,7 +31,8 @@ import {
   ArrowRight,
   Zap,
   TrendingUp,
-  Star
+  Star,
+  Clock
 } from 'lucide-react'
 import { Button } from '../ui/button'
 import {
@@ -47,7 +48,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { motion } from 'framer-motion'
-import Image from 'next/image'
 
 interface InitiativeCardProps {
   initiative: IniciativaBase
@@ -86,19 +86,19 @@ const getMaturityColor = (nivel: NivelMaturidade) => {
 const getTypeIcon = (tipo: TipoIniciativa) => {
   switch (tipo) {
     case TipoIniciativa.PESQUISA:
-      return <GraduationCap className="h-4 w-4" />
+      return <GraduationCap className="h-5 w-5" />
     case TipoIniciativa.INOVACAO:
-      return <Lightbulb className="h-4 w-4" />
+      return <Lightbulb className="h-5 w-5" />
     case TipoIniciativa.EMPREENDEDORISMO:
-      return <Rocket className="h-4 w-4" />
+      return <Rocket className="h-5 w-5" />
     case TipoIniciativa.EXTENSAO:
-      return <Users className="h-4 w-4" />
+      return <Users className="h-5 w-5" />
     case TipoIniciativa.DESENVOLVIMENTO:
-      return <Building className="h-4 w-4" />
+      return <Building className="h-5 w-5" />
     case TipoIniciativa.CONSULTORIA:
-      return <Briefcase className="h-4 w-4" />
+      return <Briefcase className="h-5 w-5" />
     default:
-      return <Lightbulb className="h-4 w-4" />
+      return <Lightbulb className="h-5 w-5" />
   }
 }
 
@@ -106,7 +106,7 @@ const getTypeBadge = (tipo: TipoIniciativa) => {
   const config = {
     [TipoIniciativa.PESQUISA]: { bg: 'bg-gradient-to-r from-indigo-500 to-indigo-600', text: 'Pesquisa', icon: '🎓' },
     [TipoIniciativa.INOVACAO]: { bg: 'bg-gradient-to-r from-purple-500 to-purple-600', text: 'Inovação', icon: '💡' },
-    [TipoIniciativa.EMPREENDEDORISMO]: { bg: 'bg-gradient-to-r from-green-500 to-green-600', text: 'Empreendedorismo', icon: '🚀' },
+    [TipoIniciativa.EMPREENDEDORISMO]: { bg: 'bg-gradient-to-r from-green-500 to-green-600', text: 'Empreendedorismo', icon: '��' },
     [TipoIniciativa.EXTENSAO]: { bg: 'bg-gradient-to-r from-blue-500 to-blue-600', text: 'Extensão', icon: '🤝' },
     [TipoIniciativa.DESENVOLVIMENTO]: { bg: 'bg-gradient-to-r from-orange-500 to-orange-600', text: 'Desenvolvimento', icon: '🏗️' },
     [TipoIniciativa.CONSULTORIA]: { bg: 'bg-gradient-to-r from-teal-500 to-teal-600', text: 'Consultoria', icon: '💼' },
@@ -176,67 +176,64 @@ export function InitiativeCard({
 
   return (
     <motion.div
-      whileHover={{ y: -2, scale: 1.01 }}
+      whileHover={{ y: -2, scale: 1.005 }}
       transition={{ duration: 0.2 }}
       className="group"
     >
       <Card
-        className="relative overflow-hidden bg-white border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all duration-300 h-80 cursor-pointer"
+        className="relative overflow-hidden bg-white border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all duration-300 cursor-pointer"
         onClick={handleClick}
       >
         {/* Purple accent line */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-violet-500 to-purple-600" />
         
         {/* Content */}
-        <div className="p-5 h-full flex flex-col">
+        <div className="p-6">
           {/* Header */}
           <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              {/* Icon/Avatar */}
-              <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-purple-100 bg-gradient-to-br from-purple-50 to-violet-50 flex items-center justify-center flex-shrink-0">
-                <div className="w-full h-full bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center text-white shadow-lg">
                   {getTypeIcon(initiative.tipo)}
                 </div>
-              </div>
-              
-              {/* Initiative Info */}
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-bold text-gray-900 leading-tight line-clamp-1">
-                  {initiative.titulo}
-                </h3>
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge className={`text-xs px-2 py-1 ${getMaturityColor(initiative.nivel_maturidade)}`}>
-                    {initiative.nivel_maturidade}
-                  </Badge>
-                  <Badge variant="outline" className={`text-xs px-2 py-1 ${statusColors[initiative.status]}`}>
-                    {initiative.status}
-                  </Badge>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-xl font-bold text-gray-900 leading-tight mb-1">
+                    {initiative.titulo}
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <Badge className={`text-xs px-2 py-1 ${getMaturityColor(initiative.nivel_maturidade)}`}>
+                      {initiative.nivel_maturidade}
+                    </Badge>
+                    <Badge variant="outline" className={`text-xs px-2 py-1 ${statusColors[initiative.status]}`}>
+                      {initiative.status}
+                    </Badge>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Type Badge */}
-            <div className="flex-shrink-0 ml-2">
+            <div className="flex-shrink-0 ml-4">
               {getTypeBadge(initiative.tipo)}
             </div>
           </div>
 
           {/* Description */}
-          <div className="flex-1 mb-4">
-            <p className="text-sm text-gray-700 line-clamp-3 leading-relaxed">
+          <div className="mb-4">
+            <p className="text-gray-700 line-clamp-2 leading-relaxed">
               {initiative.descricao}
             </p>
           </div>
 
-          {/* Impact & Target */}
-          <div className="mb-4 space-y-2">
+          {/* Impact & Target - Horizontal Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             {initiative.impacto_esperado && (
               <div className="flex items-start gap-2">
-                <Target className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <Target className="h-4 w-4 text-green-500 mt-1 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-green-700 mb-1">Impacto Esperado</p>
                   <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
-                    {initiative.impacto_esperado.slice(0, 80)}...
+                    {initiative.impacto_esperado.slice(0, 100)}...
                   </p>
                 </div>
               </div>
@@ -244,10 +241,10 @@ export function InitiativeCard({
             
             {initiative.publico_alvo && (
               <div className="flex items-start gap-2">
-                <Users className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                <Users className="h-4 w-4 text-blue-500 mt-1 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-blue-700 mb-1">Público-alvo</p>
-                  <p className="text-sm text-gray-700 line-clamp-1">
+                  <p className="text-sm text-gray-700 line-clamp-2">
                     {initiative.publico_alvo}
                   </p>
                 </div>
@@ -258,7 +255,7 @@ export function InitiativeCard({
           {/* Keywords & Technologies */}
           <div className="mb-4">
             <div className="flex flex-wrap gap-1">
-              {initiative.palavras_chave?.slice(0, 3).map((keyword, index) => (
+              {initiative.palavras_chave?.slice(0, 4).map((keyword, index) => (
                 <span 
                   key={index} 
                   className="px-2 py-1 bg-purple-50 text-purple-700 rounded-md text-xs font-medium"
@@ -266,7 +263,7 @@ export function InitiativeCard({
                   {keyword}
                 </span>
               ))}
-              {initiative.tecnologias_utilizadas?.slice(0, 2).map((tech, index) => (
+              {initiative.tecnologias_utilizadas?.slice(0, 3).map((tech, index) => (
                 <span 
                   key={index} 
                   className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium"
@@ -274,139 +271,139 @@ export function InitiativeCard({
                   {tech}
                 </span>
               ))}
-              {((initiative.palavras_chave?.length || 0) + (initiative.tecnologias_utilizadas?.length || 0)) > 5 && (
+              {((initiative.palavras_chave?.length || 0) + (initiative.tecnologias_utilizadas?.length || 0)) > 7 && (
                 <span className="px-2 py-1 bg-gray-50 text-gray-600 rounded-md text-xs font-medium">
-                  +{((initiative.palavras_chave?.length || 0) + (initiative.tecnologias_utilizadas?.length || 0)) - 5}
+                  +{((initiative.palavras_chave?.length || 0) + (initiative.tecnologias_utilizadas?.length || 0)) - 7}
                 </span>
               )}
             </div>
           </div>
 
           {/* Footer */}
-          <div className="mt-auto">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                {/* Collaboration Indicators */}
-                <div className="flex items-center gap-1">
-                  {initiative.aceita_colaboradores && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <UserCheck className="h-4 w-4 text-green-500" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Aceita colaboradores</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                  
-                  {initiative.colaboracao_internacional && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Globe className="h-4 w-4 text-blue-500" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Colaboração internacional</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                  
-                  {initiative.tem_propriedade_intelectual && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Award className="h-4 w-4 text-yellow-500" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Propriedade intelectual</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                </div>
-
-                {/* Participants */}
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-500">
-                    {activeParticipants.length}
-                  </span>
-                </div>
-              </div>
-
-              {/* Actions */}
+          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+            <div className="flex items-center gap-4">
+              {/* Collaboration Indicators */}
               <div className="flex items-center gap-2">
-                {/* Stats */}
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1">
-                    <Heart className="h-4 w-4 text-red-500" />
-                    <span className="text-xs text-gray-500">{initiative.favoritos?.length || 0}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <TrendingUp className="h-4 w-4 text-blue-500" />
-                    <span className="text-xs text-gray-500">{initiative.seguidores?.length || 0}</span>
-                  </div>
-                </div>
-
-                {/* Favorite Button */}
-                {currentUserId && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleFavorite}
-                    className="action-buttons h-8 w-8"
-                  >
-                    {isFavorited ? (
-                      <Heart className="h-4 w-4 fill-red-500 text-red-500" />
-                    ) : (
-                      <HeartIcon className="h-4 w-4 text-gray-400 hover:text-red-500" />
-                    )}
-                  </Button>
+                {initiative.aceita_colaboradores && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <UserCheck className="h-4 w-4 text-green-500" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Aceita colaboradores</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
                 
-                {/* Actions Menu */}
-                {showActions && (
-                  <div className="action-buttons">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onEdit?.()
-                          }}
-                        >
-                          <Edit className="mr-2 h-4 w-4" />
-                          Editar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onDelete?.()
-                          }}
-                          className="text-destructive"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Excluir
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                {initiative.colaboracao_internacional && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Globe className="h-4 w-4 text-blue-500" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Colaboração internacional</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+                
+                {initiative.tem_propriedade_intelectual && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Award className="h-4 w-4 text-yellow-500" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Propriedade intelectual</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </div>
+
+              {/* Participants */}
+              <div className="flex items-center gap-1">
+                <Users className="h-4 w-4 text-gray-500" />
+                <span className="text-sm text-gray-500">
+                  {activeParticipants.length} participantes
+                </span>
+              </div>
+
+              {/* Date */}
+              <div className="flex items-center gap-1">
+                <Calendar className="h-4 w-4 text-gray-500" />
+                <span className="text-sm text-gray-500">
+                  {format(new Date(initiative.data_inicio), 'MMM yyyy', { locale: ptBR })}
+                </span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2">
+              {/* Favorites Only */}
+              <div className="flex items-center gap-2">
+                <Heart className="h-4 w-4 text-red-500" />
+                <span className="text-sm text-gray-500">{initiative.favoritos?.length || 0}</span>
+              </div>
+
+              {/* Favorite Button */}
+              {currentUserId && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleFavorite}
+                  className="action-buttons h-8 w-8"
+                >
+                  {isFavorited ? (
+                    <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+                  ) : (
+                    <HeartIcon className="h-4 w-4 text-gray-400 hover:text-red-500" />
+                  )}
+                </Button>
+              )}
+              
+              {/* Actions Menu */}
+              {showActions && (
+                <div className="action-buttons">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onEdit?.()
+                        }}
+                      >
+                        <Edit className="mr-2 h-4 w-4" />
+                        Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onDelete?.()
+                        }}
+                        className="text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Excluir
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Hover Effect */}
-        <div className="absolute inset-0 bg-gradient-to-t from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </Card>
     </motion.div>
   )
