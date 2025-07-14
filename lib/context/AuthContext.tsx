@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useMemo,
 } from 'react'
 import { useAuthApi, getAccessToken } from '../api/auth'
 import type {
@@ -71,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     checkAuth()
   }, [checkAuth])
 
-  const login = async (
+  const login = useCallback(async (
     username: string,
     password: string,
     userType: SelectableUserType,
@@ -104,9 +105,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error('Login failed:', error)
       throw error
     }
-  }
+  }, [loginMutation, queryClient])
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await logoutMutation.mutateAsync()
       localStorage.removeItem('accessToken')
@@ -122,9 +123,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error('Logout failed:', error)
       throw error
     }
-  }
+  }, [logoutMutation, queryClient])
 
-  const value = {
+  // Memoizar o valor do contexto para evitar re-renderizações desnecessárias
+  const value = useMemo(() => ({
     isAuthenticated,
     userType,
     userId,
@@ -133,7 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     login,
     logout,
     getAccessToken,
-  }
+  }), [isAuthenticated, userType, userId, user, isLoading, login, logout])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

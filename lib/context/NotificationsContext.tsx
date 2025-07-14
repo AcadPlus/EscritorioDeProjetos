@@ -9,6 +9,7 @@ import React, {
   useState,
   useRef,
   useCallback,
+  useMemo,
 } from 'react'
 import { useNotificationsApi } from '@/lib/api/notifications'
 import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query'
@@ -27,18 +28,6 @@ const NotificationsContext = createContext<
   NotificationsContextType | undefined
 >(undefined)
 
-// Função para throttle - limita a frequência de chamadas
-const throttle = (func: (...args: any[]) => any, delay: number) => {
-  let lastCall = 0
-  return function (...args: any[]) {
-    const now = Date.now()
-    if (now - lastCall >= delay) {
-      lastCall = now
-      return func(...args)
-    }
-  }
-}
-
 export function NotificationsProvider({
   children,
 }: {
@@ -47,72 +36,69 @@ export function NotificationsProvider({
   const { isAuthenticated } = useAuth()
   const { useGetNotifications } = useNotificationsApi()
   const { data: notifications = [], refetch } = useGetNotifications()
-  const [unreadCount, setUnreadCount] = useState(0)
-  const [hasUnread, setHasUnread] = useState(false)
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  const lastRefetchTime = useRef<number>(0)
 
-  // Throttled refetch function - no máximo uma chamada a cada 10 segundos
+  // Memoizar as notificações para evitar re-renderizações desnecessárias
+  const memoizedNotifications = useMemo(() => {
+    return isAuthenticated ? notifications : []
+  }, [notifications, isAuthenticated])
+
+  // Memoizar contadores para evitar recalcular a cada render
+  const { unreadCount, hasUnread } = useMemo(() => {
+    if (!isAuthenticated) {
+      return { unreadCount: 0, hasUnread: false }
+    }
+    
+    const unreadNotifications = memoizedNotifications.filter(
+      (notification) => !notification.lida,
+    )
+    
+    return {
+      unreadCount: unreadNotifications.length,
+      hasUnread: unreadNotifications.length > 0,
+    }
+  }, [memoizedNotifications, isAuthenticated])
+
+  // Throttled refetch com intervalo maior
   const throttledRefetch = useCallback(
-    throttle(async (options?: RefetchOptions) => {
-      if (!isAuthenticated) {
-        return
-      }
+    async (options?: RefetchOptions) => {
+      if (!isAuthenticated) return
       await refetch(options)
-    }, 10000),
+    },
     [refetch, isAuthenticated],
   )
 
-  // Efeito para atualizar contadores de notificações não lidas
+  // Polling otimizado - apenas uma vez e com intervalo maior
   useEffect(() => {
-    if (!isAuthenticated) {
-      setUnreadCount(0)
-      setHasUnread(false)
-      return
-    }
-    const unreadNotifications = notifications.filter(
-      (notification) => !notification.lida,
-    )
-    setUnreadCount(unreadNotifications.length)
-    setHasUnread(unreadNotifications.length > 0)
-  }, [notifications, isAuthenticated])
-
-  // Efeito separado para configurar o polling apenas uma vez
-  useEffect(() => {
-    // Limpar qualquer intervalo existente antes de criar um novo
+    // Limpar intervalo existente
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current)
       pollingIntervalRef.current = null
     }
 
-    // Só configura o polling se o usuário estiver autenticado
+    // Só configura polling se autenticado
     if (!isAuthenticated) return
 
-    // Configurar polling a cada 60 segundos (aumentado de 30 para 60)
+    // Polling menos agressivo: a cada 30 segundos
     pollingIntervalRef.current = setInterval(() => {
-      const now = Date.now()
-      // Verifica se passaram pelo menos 10 segundos desde a última chamada
-      if (now - lastRefetchTime.current >= 10000) {
-        lastRefetchTime.current = now
-        refetch()
-      }
-    }, 5000)
+      refetch()
+    }, 30000) // Aumentado de 5000 para 30000
 
-    // Limpar o intervalo quando o componente for desmontado
     return () => {
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current)
         pollingIntervalRef.current = null
       }
     }
-  }, [refetch, isAuthenticated]) // Adicionado isAuthenticated como dependência
+  }, [isAuthenticated]) // Removido refetch das dependências para evitar re-criação
 
-  const value = {
+  // Memoizar o valor do contexto
+  const value = useMemo(() => ({
     hasUnread,
     unreadCount,
-    notifications: isAuthenticated ? notifications : [],
-    refetch: throttledRefetch, // Usando a versão throttled
-  }
+    notifications: memoizedNotifications,
+    refetch: throttledRefetch,
+  }), [hasUnread, unreadCount, memoizedNotifications, throttledRefetch])
 
   return (
     <NotificationsContext.Provider value={value}>

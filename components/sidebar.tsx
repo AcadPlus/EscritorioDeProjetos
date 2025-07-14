@@ -24,7 +24,6 @@ import {
   ChevronDown,
   Sparkles,
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -63,37 +62,35 @@ interface SidebarNavItemProps {
 }
 
 export function MainSidebar({ className, onClose }: MainSidebarProps) {
-  const [isAdmin, setIsAdmin] = React.useState(false)
   const router = useRouter()
   const pathname = usePathname()
   const { hasUnread } = useNotifications()
   const { isAuthenticated, logout } = useAuth()
-  const [isMounted, setIsMounted] = React.useState(false)
+  const [isAdmin, setIsAdmin] = React.useState(false)
 
-  const handleLogout = async () => {
+  const handleLogout = React.useCallback(async () => {
     try {
       router.push('/login')
       await logout()
     } catch (error) {
       console.error('Logout failed:', error)
     }
-  }
+  }, [router, logout])
 
   React.useEffect(() => {
-    setIsMounted(true)
     const admin: boolean = localStorage.getItem('userIsAdmin') === 'true'
     setIsAdmin(admin)
   }, [])
 
-  const vitrinesItems = [
+  const vitrinesItems = React.useMemo(() => [
     { name: 'Negócios', icon: Briefcase, href: '/negocios' },
     { name: 'Iniciativas', icon: HandshakeIcon, href: '/iniciativas' },
-  ]
+  ], [])
 
-  const nextUpdateItems = [
+  const nextUpdateItems = React.useMemo(() => [
     { name: 'Laboratórios', icon: Pickaxe, href: '' },
     { name: 'Competências', icon: GraduationCap, href: '' },
-  ]
+  ], [])
 
   const comunidadeItems = React.useMemo(
     () => [
@@ -104,11 +101,7 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
           <div className="relative">
             <BellIcon className={className} {...props} />
             {hasUnread && (
-              <motion.span 
-                className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-purple-500 to-violet-500 rounded-full" 
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-purple-500 to-violet-500 rounded-full animate-pulse" />
             )}
           </div>
         ),
@@ -119,7 +112,7 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
     [hasUnread],
   )
 
-  const adminItems = [
+  const adminItems = React.useMemo(() => [
     {
       name: 'Painel de Controle',
       icon: GitPullRequestArrow,
@@ -140,9 +133,9 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
       icon: CalendarCheck,
       href: '/administrativo/eventos',
     },
-  ]
+  ], [])
 
-  const personalItems = [
+  const personalItems = React.useMemo(() => [
     { name: 'Meus Negócios', icon: Building2, href: '/meus-negocios' },
     { name: 'Meus Eventos', icon: CalendarCheck, href: '/meus-eventos' },
     {
@@ -151,12 +144,14 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
       href: '/minhas-iniciativas',
     },
     { name: 'Perfil do Usuário', icon: UserCircle, href: '/perfil' },
-  ]
+  ], [])
 
   const SidebarNavItem = React.forwardRef<HTMLDivElement, SidebarNavItemProps>(
     ({ className, title, items, ...props }, ref) => {
       // Definir quais seções ficam expandidas por padrão
-      const defaultExpanded = ['Vitrines', 'Comunidade'].includes(title)
+      const defaultExpanded = React.useMemo(() => 
+        ['Vitrines', 'Comunidade'].includes(title), [title]
+      )
       
       // Estado inicial baseado no localStorage ou valor padrão
       const [isOpen, setIsOpen] = React.useState(() => {
@@ -190,67 +185,51 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
                 />
               </Button>
             </CollapsibleTrigger>
-            <AnimatePresence>
-              {isOpen && (
-                <CollapsibleContent asChild>
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="space-y-1 mt-2"
-                  >
-                    {items.map((item, index) => {
-                      const isActive = pathname === item.href
-                      const isDisabled = !item.href
-                      
-                      return (
-                        <motion.div
-                          key={item.name}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.05 }}
+            {isOpen && (
+              <CollapsibleContent asChild>
+                <div className="space-y-1 mt-2">
+                  {items.map((item) => {
+                    const isActive = pathname === item.href
+                    const isDisabled = !item.href
+                    
+                    return (
+                      <div key={item.name}>
+                        <Button
+                          asChild={!isDisabled}
+                          variant="ghost"
+                          className={cn(
+                            'w-full justify-start relative group transition-all duration-200 text-sm',
+                            isActive && 'bg-gradient-to-r from-purple-50 to-violet-50 text-purple-700 font-medium',
+                            !isActive && !isDisabled && 'hover:bg-purple-50/50 hover:text-purple-700',
+                            isDisabled && 'opacity-50 cursor-not-allowed text-gray-400'
+                          )}
+                          disabled={isDisabled}
                         >
-                          <Button
-                            asChild={!isDisabled}
-                            variant="ghost"
-                            className={cn(
-                              'w-full justify-start relative group transition-all duration-200 text-sm',
-                              isActive && 'bg-gradient-to-r from-purple-50 to-violet-50 text-purple-700 font-medium',
-                              !isActive && !isDisabled && 'hover:bg-purple-50/50 hover:text-purple-700',
-                              isDisabled && 'opacity-50 cursor-not-allowed text-gray-400'
-                            )}
-                            disabled={isDisabled}
-                          >
-                            {isDisabled ? (
-                              <div className="flex items-center">
-                                <item.icon className="mr-3 h-4 w-4" />
-                                <span>{item.name}</span>
-                                <Sparkles className="ml-auto h-3 w-3 text-yellow-500" />
-                              </div>
-                            ) : (
-                              <Link href={item.href} className="flex items-center w-full">
-                                <item.icon className={cn(
-                                  "mr-3 h-4 w-4 transition-colors duration-200",
-                                  isActive && "text-purple-600"
-                                )} />
-                                <span>{item.name}</span>
-                                {isActive && (
-                                  <motion.div
-                                    layoutId="activeIndicator"
-                                    className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-purple-500 to-violet-500 rounded-l-full"
-                                  />
-                                )}
-                              </Link>
-                            )}
-                          </Button>
-                        </motion.div>
-                      )
-                    })}
-                  </motion.div>
-                </CollapsibleContent>
-              )}
-            </AnimatePresence>
+                          {isDisabled ? (
+                            <div className="flex items-center">
+                              <item.icon className="mr-3 h-4 w-4" />
+                              <span>{item.name}</span>
+                              <Sparkles className="ml-auto h-3 w-3 text-yellow-500" />
+                            </div>
+                          ) : (
+                            <Link href={item.href} className="flex items-center w-full">
+                              <item.icon className={cn(
+                                "mr-3 h-4 w-4 transition-colors duration-200",
+                                isActive && "text-purple-600"
+                              )} />
+                              <span>{item.name}</span>
+                              {isActive && (
+                                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-purple-500 to-violet-500 rounded-l-full" />
+                              )}
+                            </Link>
+                          )}
+                        </Button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </CollapsibleContent>
+            )}
           </Collapsible>
         </div>
       )
@@ -267,23 +246,13 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
     >
       <SidebarHeader className="border-b border-purple-100 px-4 py-4 flex justify-between items-center bg-gradient-to-r from-purple-50 to-violet-50">
         <Link href="/negocios" className="flex items-center space-x-2 group">
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="relative"
-          >
+          <div className="relative">
             <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-violet-600 to-purple-700 bg-clip-text text-transparent">
               LINKA
             </span>
-            <motion.div
-              className="absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-purple-500 to-violet-500 rounded-full"
-              initial={{ width: 0 }}
-              whileHover={{ width: '100%' }}
-              transition={{ duration: 0.2 }}
-            />
-          </motion.div>
+          </div>
         </Link>
-        {isMounted && onClose && (
+        {onClose && (
           <Button
             variant="ghost"
             size="icon"
