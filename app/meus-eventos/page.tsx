@@ -64,7 +64,8 @@ export default function EventManagementPage() {
   const handleDeleteEvent = async (eventId: string) => {
     try {
       await deleteEventMutation.mutateAsync(eventId)
-      refetch()
+      // Força a atualização da lista após a deleção
+      await refetch()
     } catch (error) {
       console.error('Erro ao excluir evento:', error)
     }
@@ -295,9 +296,11 @@ export default function EventManagementPage() {
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancelar</AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={() =>
-                                  handleDeleteEvent(event.uid)
-                                }
+                                onClick={async (e) => {
+                                  e.preventDefault()
+                                  e.stopPropagation()
+                                  await handleDeleteEvent(event.uid)
+                                }}
                                 className="bg-red-500 hover:bg-red-600"
                               >
                                 Excluir

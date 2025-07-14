@@ -76,7 +76,8 @@ export default function InitiativesManagementPage() {
   const handleDeleteInitiative = async (initiativeId: string) => {
     try {
       await deleteInitiativeMutation.mutateAsync(initiativeId)
-      refetch()
+      // Força a atualização da lista após a deleção
+      await refetch()
     } catch (error) {
       console.error('Erro ao excluir iniciativa:', error)
     }

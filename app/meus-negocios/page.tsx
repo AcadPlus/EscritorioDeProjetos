@@ -65,7 +65,8 @@ export default function BusinessManagementPage() {
   const handleDeleteBusiness = async (businessId: string) => {
     try {
       await deleteBusinessMutation.mutateAsync(businessId)
-      refetch()
+      // Força a atualização da lista após a deleção
+      await refetch()
     } catch (error) {
       console.error('Erro ao excluir negócio:', error)
     }
@@ -296,9 +297,11 @@ export default function BusinessManagementPage() {
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancelar</AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={() =>
-                                  handleDeleteBusiness(business.id)
-                                }
+                                onClick={async (e) => {
+                                  e.preventDefault()
+                                  e.stopPropagation()
+                                  await handleDeleteBusiness(business.id)
+                                }}
                                 className="bg-red-500 hover:bg-red-600"
                               >
                                 Excluir

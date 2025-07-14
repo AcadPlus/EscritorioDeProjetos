@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useState } from 'react'
 import {
   Card,
   CardContent,
@@ -45,6 +46,18 @@ export const InitiativeCard = ({
   handleDeleteInitiative
 }: InitiativeCardProps) => {
   const router = useRouter()
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDeleteClick = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDeleting(true)
+    try {
+      await handleDeleteInitiative(initiative.uid)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   return (
     <motion.div
@@ -54,10 +67,14 @@ export const InitiativeCard = ({
       transition={{ delay: index * 0.1 }}
     >
       <Card
-        className="flex flex-col hover:shadow-lg transition-all duration-200 cursor-pointer group"
-        onClick={() =>
-          router.push(`/minhas-iniciativas/${initiative.uid}`)
-        }
+        className={`flex flex-col hover:shadow-lg transition-all duration-200 cursor-pointer group ${
+          isDeleting ? 'opacity-50 pointer-events-none' : ''
+        }`}
+        onClick={() => {
+          if (!isDeleting) {
+            router.push(`/minhas-iniciativas/${initiative.uid}`)
+          }
+        }}
       >
         <CardHeader>
           <div className="flex items-start justify-between">
@@ -74,6 +91,7 @@ export const InitiativeCard = ({
                       e.stopPropagation()
                       router.push(`/iniciativas/${initiative.uid}`)
                     }}
+                    disabled={isDeleting}
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
@@ -83,6 +101,7 @@ export const InitiativeCard = ({
                         variant="ghost"
                         size="sm"
                         onClick={(e) => e.stopPropagation()}
+                        disabled={isDeleting}
                       >
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
@@ -100,12 +119,11 @@ export const InitiativeCard = ({
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={() =>
-                            handleDeleteInitiative(initiative.uid)
-                          }
+                          onClick={handleDeleteClick}
+                          disabled={isDeleting}
                           className="bg-red-500 hover:bg-red-600"
                         >
-                          Excluir
+                          {isDeleting ? 'Excluindo...' : 'Excluir'}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>

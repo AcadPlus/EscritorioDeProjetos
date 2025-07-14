@@ -180,10 +180,10 @@ export function InitiativeCard({
       transition={{ duration: 0.2 }}
       className="group"
     >
-      <Card
+    <Card
         className="relative overflow-hidden bg-white border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all duration-300 cursor-pointer"
-        onClick={handleClick}
-      >
+      onClick={handleClick}
+    >
         {/* Purple accent line */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-violet-500 to-purple-600" />
         
@@ -202,8 +202,8 @@ export function InitiativeCard({
                   </h3>
                   <div className="flex items-center gap-2">
                     <Badge className={`text-xs px-2 py-1 ${getMaturityColor(initiative.nivel_maturidade)}`}>
-                      {initiative.nivel_maturidade}
-                    </Badge>
+              {initiative.nivel_maturidade}
+            </Badge>
                     <Badge variant="outline" className={`text-xs px-2 py-1 ${statusColors[initiative.status]}`}>
                       {initiative.status}
                     </Badge>
@@ -224,7 +224,7 @@ export function InitiativeCard({
               {initiative.descricao}
             </p>
           </div>
-
+          
           {/* Impact & Target - Horizontal Layout */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             {initiative.impacto_esperado && (
@@ -284,45 +284,45 @@ export function InitiativeCard({
             <div className="flex items-center gap-4">
               {/* Collaboration Indicators */}
               <div className="flex items-center gap-2">
-                {initiative.aceita_colaboradores && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <UserCheck className="h-4 w-4 text-green-500" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Aceita colaboradores</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-                
-                {initiative.colaboracao_internacional && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Globe className="h-4 w-4 text-blue-500" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Colaboração internacional</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-                
-                {initiative.tem_propriedade_intelectual && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Award className="h-4 w-4 text-yellow-500" />
-                      </TooltipTrigger>
-                      <TooltipContent>
+              {initiative.aceita_colaboradores && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <UserCheck className="h-4 w-4 text-green-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Aceita colaboradores</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              
+              {initiative.colaboracao_internacional && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Globe className="h-4 w-4 text-blue-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Colaboração internacional</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              
+              {initiative.tem_propriedade_intelectual && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Award className="h-4 w-4 text-yellow-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>
                         <p>Propriedade intelectual</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
 
               {/* Participants */}
               <div className="flex items-center gap-1">
@@ -366,45 +366,45 @@ export function InitiativeCard({
               )}
               
               {/* Actions Menu */}
-              {showActions && (
-                <div className="action-buttons">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+            {showActions && (
+              <div className="action-buttons">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onEdit?.()
-                        }}
-                      >
-                        <Edit className="mr-2 h-4 w-4" />
-                        Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onDelete?.()
-                        }}
-                        className="text-destructive"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              )}
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onEdit?.()
+                      }}
+                    >
+                      <Edit className="mr-2 h-4 w-4" />
+                      Editar
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onDelete?.()
+                      }}
+                      className="text-destructive"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Excluir
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
             </div>
           </div>
         </div>
 
         {/* Hover Effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      </Card>
+    </Card>
     </motion.div>
   )
 }

@@ -29,7 +29,8 @@ import {
   CheckCircle,
   XCircle,
   PauseCircle,
-  PlayCircle
+  PlayCircle,
+  ArrowRight
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -45,9 +46,9 @@ import { useAuth } from '@/lib/context/AuthContext'
 import { useInitiativesApi } from '@/lib/api/initiatives'
 import { useUserApi } from '@/lib/api/users'
 import { useBusinessApi } from '@/lib/api/business'
-import { 
-  IniciativaBase, 
-  StatusIniciativa, 
+import {
+  IniciativaBase,
+  StatusIniciativa,
   NivelMaturidade, 
   TipoIniciativa, 
   StatusVinculo 
@@ -69,8 +70,8 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [activeTab, setActiveTab] = useState<'overview' | 'participants' | 'resources'>('overview')
   
-  const { 
-    useGetInitiativeById, 
+  const {
+    useGetInitiativeById,
     useFavoriteInitiative, 
     useUnfavoriteInitiative,
     useFollowInitiative,
@@ -166,8 +167,8 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
             </p>
             <Button onClick={() => router.push('/iniciativas')}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar para Iniciativas
-            </Button>
+            Voltar para Iniciativas
+          </Button>
           </div>
         </div>
       </PrivateRoute>
@@ -177,8 +178,8 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
   const owner = users?.find((u: any) => u.uid === initiative.uid_owner)
   const activeParticipants = initiative.participantes?.filter(
     (p) => p.status_vinculo === StatusVinculo.ACEITO
-  ) || []
-  
+    ) || []
+
   const isFavorited = initiative.favoritos?.includes(auth.userId || '') || false
   const isFollowing = initiative.seguidores?.includes(auth.userId || '') || false
   const isOwner = auth.userId === initiative.uid_owner
@@ -343,7 +344,7 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
                 transition={{ duration: 0.6 }}
               >
                 <div className="flex items-start justify-between mb-6">
-                  <div className="flex-1">
+              <div className="flex-1">
                     <h1 className="text-4xl font-bold mb-4">{initiative.titulo}</h1>
                     <p className="text-xl text-purple-100 mb-6 leading-relaxed">
                       {initiative.descricao}
@@ -399,6 +400,17 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
                     <TrendingUp className="h-5 w-5 text-blue-400" />
                     <span className="text-sm">{initiative.seguidores?.length || 0} seguidores</span>
                   </div>
+                  {business && (
+                    <div className="flex items-center gap-2">
+                      <Building className="h-5 w-5 text-purple-400" />
+                        <button
+                        onClick={() => router.push(`/inspecionar-negocio/${business.id}`)}
+                        className="text-sm text-purple-100 hover:text-white transition-colors underline"
+                        >
+                          {business.nome}
+                        </button>
+                    </div>
+                  )}
                   {initiative.aceita_colaboradores && (
                     <div className="flex items-center gap-2">
                       <UserCheck className="h-5 w-5 text-green-400" />
@@ -415,7 +427,7 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
               </motion.div>
             </div>
           </div>
-        </div>
+            </div>
 
         {/* Content */}
         <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -472,7 +484,7 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
                             {initiative.palavras_chave.map((keyword, index) => (
                               <Badge key={index} variant="secondary" className="bg-purple-50 text-purple-700">
                                 {keyword}
-                              </Badge>
+              </Badge>
                             ))}
                           </div>
                         </div>
@@ -485,9 +497,9 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
                             {initiative.tecnologias_utilizadas.map((tech, index) => (
                               <Badge key={index} variant="secondary" className="bg-blue-50 text-blue-700">
                                 {tech}
-                              </Badge>
-                            ))}
-                          </div>
+                </Badge>
+              ))}
+            </div>
                         </div>
                       )}
                       
@@ -524,15 +536,15 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
                                 style: 'currency',
                                 currency: initiative.moeda || 'BRL'
                               }).format(initiative.orcamento_previsto)}
-                            </span>
-                          </div>
+                </span>
+              </div>
                           {initiative.fonte_financiamento && (
                             <div className="flex items-center justify-between">
                               <span className="text-gray-600">Fonte de Financiamento</span>
                               <span className="font-medium">{initiative.fonte_financiamento}</span>
                             </div>
                           )}
-                        </div>
+            </div>
                       </CardContent>
                     </Card>
                   )}
@@ -546,7 +558,7 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
                       <CardTitle className="text-lg">Status da Iniciativa</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4">
+                <div className="space-y-4">
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">Status</span>
                           <Badge className={getStatusColor(initiative.status)}>
@@ -594,8 +606,8 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
                           <span className={initiative.tem_propriedade_intelectual ? 'text-yellow-700' : 'text-gray-500'}>
                             {initiative.tem_propriedade_intelectual ? 'Tem propriedade intelectual' : 'Sem propriedade intelectual'}
                           </span>
-                        </div>
                       </div>
+                    </div>
                     </CardContent>
                   </Card>
 
@@ -623,10 +635,10 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
                               <p className="text-sm text-gray-600">
                                 {format(new Date(initiative.data_fim), 'PPP', { locale: ptBR })}
                               </p>
-                            </div>
-                          </div>
+                </div>
+              </div>
                         )}
-                      </div>
+                </div>
                     </CardContent>
                   </Card>
 
@@ -641,10 +653,41 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
                           <Avatar className="h-12 w-12">
                             <AvatarImage src={owner.foto_url} alt={owner.nome} />
                             <AvatarFallback>{owner.nome.charAt(0)}</AvatarFallback>
-                          </Avatar>
+                      </Avatar>
                           <div>
                             <p className="font-medium">{owner.nome}</p>
                             <p className="text-sm text-gray-600">{owner.email}</p>
+                </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Business Information */}
+                  {business && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Negócio</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
+                              <Building className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium text-gray-900">{business.nome}</p>
+                              <p className="text-sm text-gray-600">{business.area_atuacao}</p>
+              </div>
+            </div>
+                          <div className="pt-3 border-t border-gray-100">
+                            <button
+                              onClick={() => router.push(`/inspecionar-negocio/${business.id}`)}
+                              className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
+                            >
+                              <ArrowRight className="h-4 w-4" />
+                              Ver Negócio
+                            </button>
                           </div>
                         </div>
                       </CardContent>
@@ -675,7 +718,7 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
                                 <p className="font-medium">{user?.nome || 'Usuário'}</p>
                                 <p className="text-sm text-gray-600">{user?.email}</p>
                               </div>
-                            </div>
+                                </div>
                             <div className="text-right">
                               <Badge variant="outline">{participant.papel}</Badge>
                               {participant.dedicacao_horas && (
@@ -684,16 +727,16 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
                                 </p>
                               )}
                             </div>
-                          </div>
-                        )
-                      })}
+                              </div>
+                            )
+                          })}
                     </div>
                   ) : (
                     <div className="text-center py-8">
                       <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <p className="text-gray-600">Nenhum participante ativo encontrado</p>
-                    </div>
-                  )}
+                              </div>
+                            )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -738,7 +781,7 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
                             <span className="text-gray-700">{metric}</span>
                           </div>
                         ))}
-                      </div>
+                        </div>
                     </CardContent>
                   </Card>
                 )}
@@ -763,7 +806,7 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
               </div>
             </TabsContent>
           </Tabs>
-        </div>
+              </div>
 
         {/* Scroll to Top Button */}
         <AnimatePresence>
@@ -774,13 +817,13 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
               exit={{ opacity: 0, scale: 0.8 }}
               className="fixed bottom-8 right-8 z-50"
             >
-              <Button
+                        <Button
                 size="icon"
                 onClick={scrollToTop}
                 className="rounded-full shadow-lg bg-purple-600 hover:bg-purple-700"
               >
                 <ChevronUp className="h-5 w-5" />
-              </Button>
+                        </Button>
             </motion.div>
           )}
         </AnimatePresence>
