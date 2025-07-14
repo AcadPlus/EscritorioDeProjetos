@@ -152,7 +152,7 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
   const getUserTitle = (type: UserType) => {
     switch (type) {
       case UserType.PESQUISADOR:
-        return "Professor"
+        return "Pesquisador"
       case UserType.ESTUDANTE:
         return "Estudante"
       case UserType.EXTERNO:
@@ -503,7 +503,7 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
         <motion.div
           className="flex flex-col items-center gap-6"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -515,17 +515,17 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
               animate={{ rotate: 360 }}
               transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
             >
-              <Loader2 className="h-12 w-12 text-purple-600" />
+              <Loader2 className="h-12 w-12 text-white" />
             </motion.div>
-            <div className="absolute inset-0 rounded-full bg-purple-600/20 animate-pulse" />
+            <div className="absolute inset-0 rounded-full bg-white/20 animate-pulse" />
           </div>
           <motion.div
             className="text-center"
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
           >
-            <p className="text-gray-800 text-lg font-medium">Carregando perfil...</p>
-            <p className="text-gray-500 text-sm mt-1">Preparando informações</p>
+            <p className="text-white text-lg font-medium">Carregando perfil...</p>
+            <p className="text-white/70 text-sm mt-1">Preparando informações</p>
           </motion.div>
         </motion.div>
       </div>
@@ -535,20 +535,20 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
   if (!user) {
     return (
       <motion.div
-        className="min-h-screen bg-white flex flex-col items-center justify-center gap-4"
+        className="min-h-screen bg-transparent flex flex-col items-center justify-center gap-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-          <User2 className="h-8 w-8 text-purple-600" />
+        <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4">
+          <User2 className="h-8 w-8 text-white" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900">Perfil não encontrado</h3>
-        <p className="text-gray-600 mb-6">Os dados do usuário não estão disponíveis</p>
+        <h3 className="text-lg font-semibold text-white">Perfil não encontrado</h3>
+        <p className="text-white/70 mb-6">Os dados do usuário não estão disponíveis</p>
         <Button
           variant="outline"
           onClick={() => router.back()}
-          className="border-purple-200 text-purple-600 hover:bg-purple-50"
+          className="border-white/30 text-white hover:bg-white/10 bg-transparent"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar
@@ -558,17 +558,17 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-transparent">
       {/* Header with back button */}
       {!isViewingOwnProfile && (
-        <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-purple-100">
+        <div className="sticky top-0 z-50 bg-white/10 backdrop-blur-md border-b border-white/20">
           <div className="max-w-4xl mx-auto px-6">
             <div className="flex items-center justify-between h-16">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => router.back()}
-                className="gap-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50"
+                className="gap-2 text-white hover:text-white hover:bg-white/10"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Voltar

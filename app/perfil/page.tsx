@@ -11,7 +11,7 @@ const Profile = () => {
 
   return (
     <PrivateRoute>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-violet-600 to-purple-700">
         <ProfilePage userId={userId} userType={userType} />
       </div>
     </PrivateRoute>

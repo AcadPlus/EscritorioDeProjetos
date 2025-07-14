@@ -376,67 +376,46 @@ export default function NotificacoesPage() {
   return (
     <PrivateRoute>
       <div className="min-h-screen bg-white">
-        {/* Hero Section */}
-        <div className="relative bg-gradient-to-br from-purple-600 via-violet-600 to-purple-700 text-white overflow-hidden">
-          {/* Decorative elements */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse"></div>
-            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white/3 rounded-full blur-2xl"></div>
+        {/* Hero Section Simplificado */}
+        <div className="relative bg-gradient-to-br from-purple-600 to-purple-700 text-white">
+          {/* Elementos decorativos simplificados - apenas CSS puro */}
+          <div className="absolute inset-0 overflow-hidden opacity-20">
+            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white rounded-full blur-3xl"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-white rounded-full blur-3xl"></div>
           </div>
 
-          <div className="relative z-10 container mx-auto px-4 py-16 sm:py-20">
-            <motion.div
-              className="text-center max-w-4xl mx-auto"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              {/* Badge */}
-              <motion.div
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm mb-6"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-              >
+          <div className="relative z-10 container mx-auto px-4 py-12 sm:py-16">
+            <div className="text-center max-w-4xl mx-auto">
+              {/* Badge Simplificado */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm mb-6">
                 <Sparkles className="h-4 w-4 text-white" />
                 <span className="text-sm font-medium text-white">Central de Comunicação</span>
-              </motion.div>
+              </div>
 
               {/* Title */}
-              <motion.h1
-                className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.6 }}
-              >
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-white">
                 Notificações
-              </motion.h1>
+              </h1>
 
-              {/* Stats */}
-              <motion.div
-                className="flex flex-wrap justify-center gap-6 text-center"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8, duration: 0.6 }}
-              >
+              {/* Stats Simplificadas */}
+              <div className="flex flex-wrap justify-center gap-6 text-center">
                 <div className="flex items-center gap-2">
                   <Bell className="h-5 w-5 text-purple-200" />
-                  <span className="text-2xl font-bold">{notifications.length}</span>
+                  <span className="text-xl font-bold">{notifications.length}</span>
                   <span className="text-purple-200">Total</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-purple-200" />
-                  <span className="text-2xl font-bold">{notifications.filter(n => !n.lida).length}</span>
+                  <span className="text-xl font-bold">{notifications.filter(n => !n.lida).length}</span>
                   <span className="text-purple-200">Não lidas</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-5 w-5 text-purple-200" />
-                  <span className="text-2xl font-bold">{notifications.filter(n => n.lida).length}</span>
+                  <span className="text-xl font-bold">{notifications.filter(n => n.lida).length}</span>
                   <span className="text-purple-200">Lidas</span>
                 </div>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           </div>
         </div>
 

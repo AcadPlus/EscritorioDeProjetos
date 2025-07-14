@@ -371,7 +371,7 @@ export default function InitiativesPage() {
               transition={{ delay: 0.2, duration: 0.5 }}
             >
               <Sparkles className="h-4 w-4 text-white" />
-              <span className="text-sm font-medium text-white">Vitrine Tecnológica UFC</span>
+              <span className="text-sm font-medium text-white">Iniciativas do Ecossistema de Inovação UFC</span>
             </motion.div>
 
             {/* Title */}
@@ -383,17 +383,7 @@ export default function InitiativesPage() {
             >
               Vitrine de Iniciativas
             </motion.h1>
-            
-            {/* Subtitle */}
-            <motion.p
-              className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.6 }}
-            >
-              Descubra projetos inovadores de laboratórios, empresas, startups e pesquisadores da UFC
-            </motion.p>
-            
+
             {/* Stats */}
             <motion.div
               className="flex flex-wrap justify-center gap-8 text-center"
