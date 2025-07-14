@@ -3,6 +3,7 @@ import {
   StatusIniciativa,
   StatusVinculo,
   NivelMaturidade,
+  TipoIniciativa,
 } from '@/lib/types/initiativeTypes'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Badge } from '../ui/badge'
@@ -25,7 +26,12 @@ import {
   Briefcase,
   GraduationCap,
   Rocket,
-  UserCheck
+  UserCheck,
+  Calendar,
+  ArrowRight,
+  Zap,
+  TrendingUp,
+  Star
 } from 'lucide-react'
 import { Button } from '../ui/button'
 import {
@@ -40,6 +46,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { motion } from 'framer-motion'
+import Image from 'next/image'
 
 interface InitiativeCardProps {
   initiative: IniciativaBase
@@ -54,25 +62,65 @@ interface InitiativeCardProps {
 }
 
 const statusColors = {
-  [StatusIniciativa.ATIVA]: 'bg-green-100 text-green-800',
-  [StatusIniciativa.PAUSADA]: 'bg-yellow-100 text-yellow-800',
-  [StatusIniciativa.CONCLUIDA]: 'bg-blue-100 text-blue-800',
-  [StatusIniciativa.CANCELADA]: 'bg-red-100 text-red-800',
+  [StatusIniciativa.ATIVA]: 'bg-green-100 text-green-800 border-green-200',
+  [StatusIniciativa.PAUSADA]: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  [StatusIniciativa.CONCLUIDA]: 'bg-blue-100 text-blue-800 border-blue-200',
+  [StatusIniciativa.CANCELADA]: 'bg-red-100 text-red-800 border-red-200',
 }
 
 const getMaturityColor = (nivel: NivelMaturidade) => {
   switch (nivel) {
     case NivelMaturidade.CONCEITO:
-      return 'bg-red-100 text-red-800'
+      return 'bg-gradient-to-r from-red-500 to-red-600 text-white'
     case NivelMaturidade.PROTOTIPO:
-      return 'bg-yellow-100 text-yellow-800'
+      return 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white'
     case NivelMaturidade.DEMONSTRACAO:
-      return 'bg-blue-100 text-blue-800'
+      return 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
     case NivelMaturidade.COMERCIALIZACAO:
-      return 'bg-green-100 text-green-800'
+      return 'bg-gradient-to-r from-green-500 to-green-600 text-white'
     default:
-      return 'bg-gray-100 text-gray-800'
+      return 'bg-gradient-to-r from-gray-500 to-gray-600 text-white'
   }
+}
+
+const getTypeIcon = (tipo: TipoIniciativa) => {
+  switch (tipo) {
+    case TipoIniciativa.PESQUISA:
+      return <GraduationCap className="h-4 w-4" />
+    case TipoIniciativa.INOVACAO:
+      return <Lightbulb className="h-4 w-4" />
+    case TipoIniciativa.EMPREENDEDORISMO:
+      return <Rocket className="h-4 w-4" />
+    case TipoIniciativa.EXTENSAO:
+      return <Users className="h-4 w-4" />
+    case TipoIniciativa.DESENVOLVIMENTO:
+      return <Building className="h-4 w-4" />
+    case TipoIniciativa.CONSULTORIA:
+      return <Briefcase className="h-4 w-4" />
+    default:
+      return <Lightbulb className="h-4 w-4" />
+  }
+}
+
+const getTypeBadge = (tipo: TipoIniciativa) => {
+  const config = {
+    [TipoIniciativa.PESQUISA]: { bg: 'bg-gradient-to-r from-indigo-500 to-indigo-600', text: 'Pesquisa', icon: '🎓' },
+    [TipoIniciativa.INOVACAO]: { bg: 'bg-gradient-to-r from-purple-500 to-purple-600', text: 'Inovação', icon: '💡' },
+    [TipoIniciativa.EMPREENDEDORISMO]: { bg: 'bg-gradient-to-r from-green-500 to-green-600', text: 'Empreendedorismo', icon: '🚀' },
+    [TipoIniciativa.EXTENSAO]: { bg: 'bg-gradient-to-r from-blue-500 to-blue-600', text: 'Extensão', icon: '🤝' },
+    [TipoIniciativa.DESENVOLVIMENTO]: { bg: 'bg-gradient-to-r from-orange-500 to-orange-600', text: 'Desenvolvimento', icon: '🏗️' },
+    [TipoIniciativa.CONSULTORIA]: { bg: 'bg-gradient-to-r from-teal-500 to-teal-600', text: 'Consultoria', icon: '💼' },
+    [TipoIniciativa.OUTROS]: { bg: 'bg-gradient-to-r from-gray-500 to-gray-600', text: 'Outros', icon: '📋' }
+  }
+  
+  const typeConfig = config[tipo] || { bg: 'bg-gradient-to-r from-gray-500 to-gray-600', text: tipo, icon: '💡' }
+  
+  return (
+    <div className={`${typeConfig.bg} text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-lg`}>
+      <span>{typeConfig.icon}</span>
+      {typeConfig.text}
+    </div>
+  )
 }
 
 export function InitiativeCard({
@@ -127,303 +175,239 @@ export function InitiativeCard({
   }
 
   return (
-    <Card
-      className="cursor-pointer hover:shadow-lg transition-shadow relative"
-      onClick={handleClick}
+    <motion.div
+      whileHover={{ y: -2, scale: 1.01 }}
+      transition={{ duration: 0.2 }}
+      className="group"
     >
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-            <Badge variant="outline" className={getMaturityColor(initiative.nivel_maturidade)}>
-              {initiative.nivel_maturidade}
-            </Badge>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            {/* Botão de Favoritar */}
-            {currentUserId && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleFavorite}
-                className="action-buttons"
-              >
-                {isFavorited ? (
-                  <Heart className="h-4 w-4 fill-red-500 text-red-500" />
-                ) : (
-                  <HeartIcon className="h-4 w-4" />
-                )}
-              </Button>
-            )}
-            
-            {/* Indicadores de Colaboração */}
-            <div className="flex items-center gap-1">
-              {initiative.aceita_colaboradores && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <UserCheck className="h-4 w-4 text-green-500" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Aceita colaboradores</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
+      <Card
+        className="relative overflow-hidden bg-white border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all duration-300 h-80 cursor-pointer"
+        onClick={handleClick}
+      >
+        {/* Purple accent line */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-violet-500 to-purple-600" />
+        
+        {/* Content */}
+        <div className="p-5 h-full flex flex-col">
+          {/* Header */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              {/* Icon/Avatar */}
+              <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-purple-100 bg-gradient-to-br from-purple-50 to-violet-50 flex items-center justify-center flex-shrink-0">
+                <div className="w-full h-full bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center">
+                  {getTypeIcon(initiative.tipo)}
+                </div>
+              </div>
               
-              {initiative.colaboracao_internacional && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Globe className="h-4 w-4 text-blue-500" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Colaboração internacional</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-              
-              {initiative.tem_propriedade_intelectual && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Award className="h-4 w-4 text-yellow-500" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Propriedade intelectual: {initiative.tipo_propriedade}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
+              {/* Initiative Info */}
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-bold text-gray-900 leading-tight line-clamp-1">
+                  {initiative.titulo}
+                </h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge className={`text-xs px-2 py-1 ${getMaturityColor(initiative.nivel_maturidade)}`}>
+                    {initiative.nivel_maturidade}
+                  </Badge>
+                  <Badge variant="outline" className={`text-xs px-2 py-1 ${statusColors[initiative.status]}`}>
+                    {initiative.status}
+                  </Badge>
+                </div>
+              </div>
             </div>
 
-            {showActions && (
-              <div className="action-buttons">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onEdit?.()
-                      }}
-                    >
-                      <Edit className="mr-2 h-4 w-4" />
-                      Editar
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onDelete?.()
-                      }}
-                      className="text-destructive"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Excluir
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+            {/* Type Badge */}
+            <div className="flex-shrink-0 ml-2">
+              {getTypeBadge(initiative.tipo)}
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className="flex-1 mb-4">
+            <p className="text-sm text-gray-700 line-clamp-3 leading-relaxed">
+              {initiative.descricao}
+            </p>
+          </div>
+
+          {/* Impact & Target */}
+          <div className="mb-4 space-y-2">
+            {initiative.impacto_esperado && (
+              <div className="flex items-start gap-2">
+                <Target className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-green-700 mb-1">Impacto Esperado</p>
+                  <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
+                    {initiative.impacto_esperado.slice(0, 80)}...
+                  </p>
+                </div>
+              </div>
+            )}
+            
+            {initiative.publico_alvo && (
+              <div className="flex items-start gap-2">
+                <Users className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-blue-700 mb-1">Público-alvo</p>
+                  <p className="text-sm text-gray-700 line-clamp-1">
+                    {initiative.publico_alvo}
+                  </p>
+                </div>
               </div>
             )}
           </div>
-        </div>
-        
-        <CardTitle className="flex justify-between items-center">
-          <span className="line-clamp-2">{initiative.titulo}</span>
-          <Badge variant={getStatusColor(initiative.status)}>
-            {initiative.status}
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent>
-        <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-          {initiative.descricao}
-        </p>
 
-        {/* Áreas de Conhecimento */}
-        {initiative.areas_conhecimento && initiative.areas_conhecimento.length > 0 && (
-          <div className="mb-3">
-            <p className="text-xs font-medium text-gray-600 mb-1">Áreas de Conhecimento:</p>
+          {/* Keywords & Technologies */}
+          <div className="mb-4">
             <div className="flex flex-wrap gap-1">
-              {initiative.areas_conhecimento.slice(0, 3).map((area: string) => (
-                <Badge key={area} variant="outline" className="text-xs">
-                  {area}
-                </Badge>
+              {initiative.palavras_chave?.slice(0, 3).map((keyword, index) => (
+                <span 
+                  key={index} 
+                  className="px-2 py-1 bg-purple-50 text-purple-700 rounded-md text-xs font-medium"
+                >
+                  {keyword}
+                </span>
               ))}
-              {initiative.areas_conhecimento.length > 3 && (
-                <Badge variant="outline" className="text-xs">
-                  +{initiative.areas_conhecimento.length - 3} mais
-                </Badge>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Tecnologias */}
-        {initiative.tecnologias_utilizadas && initiative.tecnologias_utilizadas.length > 0 && (
-          <div className="mb-3">
-            <p className="text-xs font-medium text-gray-600 mb-1">Tecnologias:</p>
-            <div className="flex flex-wrap gap-1">
-              {initiative.tecnologias_utilizadas.slice(0, 3).map((tech: string) => (
-                <Badge key={tech} variant="secondary" className="text-xs">
+              {initiative.tecnologias_utilizadas?.slice(0, 2).map((tech, index) => (
+                <span 
+                  key={index} 
+                  className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium"
+                >
                   {tech}
-                </Badge>
+                </span>
               ))}
-              {initiative.tecnologias_utilizadas.length > 3 && (
-                <Badge variant="secondary" className="text-xs">
-                  +{initiative.tecnologias_utilizadas.length - 3} mais
-                </Badge>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Palavras-chave */}
-        {initiative.palavras_chave && initiative.palavras_chave.length > 0 && (
-          <div className="mb-3">
-            <div className="flex flex-wrap gap-1">
-              {initiative.palavras_chave.slice(0, 4).map((tag: string) => (
-                <Badge key={tag} variant="outline" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
-              {initiative.palavras_chave.length > 4 && (
-                <Badge variant="outline" className="text-xs">
-                  +{initiative.palavras_chave.length - 4}
-                </Badge>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Informações Financeiras */}
-        {initiative.orcamento_previsto && (
-          <div className="mb-3">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <DollarSign className="h-4 w-4" />
-              <span>
-                {new Intl.NumberFormat('pt-BR', { 
-                  style: 'currency', 
-                  currency: initiative.moeda || 'BRL' 
-                }).format(initiative.orcamento_previsto)}
-              </span>
-              {initiative.fonte_financiamento && (
-                <span className="text-xs text-gray-500">
-                  • {initiative.fonte_financiamento}
+              {((initiative.palavras_chave?.length || 0) + (initiative.tecnologias_utilizadas?.length || 0)) > 5 && (
+                <span className="px-2 py-1 bg-gray-50 text-gray-600 rounded-md text-xs font-medium">
+                  +{((initiative.palavras_chave?.length || 0) + (initiative.tecnologias_utilizadas?.length || 0)) - 5}
                 </span>
               )}
             </div>
           </div>
-        )}
 
-        {/* Impacto Esperado */}
-        {initiative.impacto_esperado && (
-          <div className="mb-3">
-            <div className="flex items-start gap-2">
-              <Target className="h-4 w-4 text-blue-500 mt-0.5" />
-              <div>
-                <p className="text-xs font-medium text-gray-600">Impacto Esperado:</p>
-                <p className="text-xs text-gray-500 line-clamp-2">
-                  {initiative.impacto_esperado}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+          {/* Footer */}
+          <div className="mt-auto">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                {/* Collaboration Indicators */}
+                <div className="flex items-center gap-1">
+                  {initiative.aceita_colaboradores && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <UserCheck className="h-4 w-4 text-green-500" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Aceita colaboradores</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                  
+                  {initiative.colaboracao_internacional && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Globe className="h-4 w-4 text-blue-500" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Colaboração internacional</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                  
+                  {initiative.tem_propriedade_intelectual && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Award className="h-4 w-4 text-yellow-500" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Propriedade intelectual</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
 
-        {/* Público-alvo */}
-        {initiative.publico_alvo && (
-          <div className="mb-3">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Users className="h-4 w-4" />
-              <span className="text-xs">
-                <strong>Público:</strong> {initiative.publico_alvo}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Participantes e Estatísticas */}
-        <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <div className="flex items-center gap-2">
+                {/* Participants */}
+                <div className="flex items-center gap-1">
                   <Users className="h-4 w-4 text-gray-500" />
                   <span className="text-sm text-gray-500">
-                    {activeParticipants.length} participante(s)
+                    {activeParticipants.length}
                   </span>
                 </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <div className="p-2">
-                  <p className="font-semibold mb-1">Participantes:</p>
-                  <ul className="text-sm">
-                    {activeParticipants.map((p) => (
-                      <li key={p.uid}>
-                        {p.papel} - {p.dedicacao_horas || 0}h/semana
-                      </li>
-                    ))}
-                  </ul>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                {/* Stats */}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1">
+                    <Heart className="h-4 w-4 text-red-500" />
+                    <span className="text-xs text-gray-500">{initiative.favoritos?.length || 0}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <TrendingUp className="h-4 w-4 text-blue-500" />
+                    <span className="text-xs text-gray-500">{initiative.seguidores?.length || 0}</span>
+                  </div>
                 </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
-              <Heart className="h-4 w-4 text-red-500" />
-              <span className="text-xs">{initiative.favoritos?.length || 0}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Users className="h-4 w-4 text-blue-500" />
-              <span className="text-xs">{initiative.seguidores?.length || 0}</span>
+                {/* Favorite Button */}
+                {currentUserId && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleFavorite}
+                    className="action-buttons h-8 w-8"
+                  >
+                    {isFavorited ? (
+                      <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+                    ) : (
+                      <HeartIcon className="h-4 w-4 text-gray-400 hover:text-red-500" />
+                    )}
+                  </Button>
+                )}
+                
+                {/* Actions Menu */}
+                {showActions && (
+                  <div className="action-buttons">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onEdit?.()
+                          }}
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onDelete?.()
+                          }}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Datas */}
-        <div className="text-xs text-muted-foreground mt-3 pt-3 border-t">
-          <p>
-            Início:{' '}
-            {format(new Date(initiative.data_inicio), 'PP', { locale: ptBR })}
-          </p>
-          {initiative.data_fim && (
-            <p>
-              Fim:{' '}
-              {format(new Date(initiative.data_fim), 'PP', { locale: ptBR })}
-            </p>
-          )}
-        </div>
-
-        {/* Seção de Recursos e Resultados (se existir) */}
-        {(initiative.recursos_necessarios || initiative.resultados_esperados) && (
-          <div className="mt-4 border-t pt-4">
-            {initiative.recursos_necessarios && (
-              <div className="mb-2">
-                <p className="text-xs font-medium">Recursos Necessários:</p>
-                <p className="text-xs text-muted-foreground line-clamp-2">
-                  {initiative.recursos_necessarios}
-                </p>
-              </div>
-            )}
-            {initiative.resultados_esperados && (
-              <div>
-                <p className="text-xs font-medium">Resultados Esperados:</p>
-                <p className="text-xs text-muted-foreground line-clamp-2">
-                  {initiative.resultados_esperados}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+        {/* Hover Effect */}
+        <div className="absolute inset-0 bg-gradient-to-t from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      </Card>
+    </motion.div>
   )
 }

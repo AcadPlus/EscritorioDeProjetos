@@ -1,662 +1,790 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 'use client'
 
-import { useState, use } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
+import { 
+  ArrowLeft, 
+  Share2, 
+  Heart, 
+  HeartOff, 
+  Users, 
+  Calendar, 
+  Target, 
+  Award, 
+  Globe, 
+  UserCheck,
+  DollarSign,
+  Building,
+  GraduationCap,
+  Lightbulb,
+  Rocket,
+  Briefcase,
+  ChevronUp,
+  Loader2,
+  MapPin,
+  Clock,
+  TrendingUp,
+  Zap,
+  CheckCircle,
+  XCircle,
+  PauseCircle,
+  PlayCircle
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Separator } from '@/components/ui/separator'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Progress } from '@/components/ui/progress'
+import { useToast } from '@/hooks/use-toast'
+import { useAuth } from '@/lib/context/AuthContext'
 import { useInitiativesApi } from '@/lib/api/initiatives'
 import { useUserApi } from '@/lib/api/users'
 import { useBusinessApi } from '@/lib/api/business'
-import { useAuth } from '@/lib/context/AuthContext'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Separator } from '@/components/ui/separator'
-import {
-  Calendar,
-  Users,
-  Building2,
-  Tag,
-  Share2,
-  Heart,
-  HeartOff,
-} from 'lucide-react'
-import {
-  IniciativaBase,
-  MembroIniciativa,
-  StatusIniciativa,
-  StatusVinculo,
-  PapelIniciativa,
+import { 
+  IniciativaBase, 
+  StatusIniciativa, 
+  NivelMaturidade, 
+  TipoIniciativa, 
+  StatusVinculo 
 } from '@/lib/types/initiativeTypes'
-import { UserWithType } from '@/lib/types/userTypes'
-import {
-  NegocioResponse,
-  StatusVinculoNegocio,
-} from '@/lib/types/businessTypes'
-import { useUsers, User } from '@/lib/hooks/useUsers'
-import { useDebounce } from '@/lib/hooks/useDebounce'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 import PrivateRoute from '@/components/private_route'
-interface ExtendedIniciativa extends IniciativaBase {
-  owner_id: string
-  participantes: MembroIniciativa[]
-  seguidores: string[]
-  uid: string
-  negocio_id: string
-  palavras_chave: string[]
+
+interface InitiativeDetailPageProps {
+  params: Promise<{ id: string }>
 }
 
-export default function InitiativePublicPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default function InitiativeDetailPage({ params }: InitiativeDetailPageProps) {
+  const { id } = React.use(params)
   const router = useRouter()
-  const {
-    useGetInitiativeById,
+  const { toast } = useToast()
+  const auth = useAuth()
+  
+  const [showScrollTop, setShowScrollTop] = useState(false)
+  const [activeTab, setActiveTab] = useState<'overview' | 'participants' | 'resources'>('overview')
+  
+  const { 
+    useGetInitiativeById, 
+    useFavoriteInitiative, 
+    useUnfavoriteInitiative,
     useFollowInitiative,
-    useUnfollowInitiative,
-    useAddInitiativeMember,
+    useUnfollowInitiative
   } = useInitiativesApi()
   const { useFetchUsers } = useUserApi()
   const { useGetBusinessById } = useBusinessApi()
-  const { userId } = useAuth()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedUsers, setSelectedUsers] = useState<
-    { id: string; role: PapelIniciativa }[]
-  >([])
-  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
-  const debouncedSearch = useDebounce(searchTerm, 500)
-
-  const { id } = use(params)
-  const { data: initiative, isLoading: isLoadingInitiative } =
-    useGetInitiativeById(id) as {
-      data: ExtendedIniciativa | undefined
-      isLoading: boolean
-    }
-  const { data: users } = useFetchUsers()
-  const { data: businessList } = useGetBusinessById(
-    initiative?.negocio_id || '',
-  ) as {
-    data: NegocioResponse | NegocioResponse[]
-  }
-  const business = Array.isArray(businessList)
-    ? businessList[0]
-    : (businessList as NegocioResponse)
-
-  const { data: availableUsers, isLoading: isLoadingUsers } =
-    useUsers(debouncedSearch)
-
+  
+  const { data: initiative, isLoading, error, refetch } = useGetInitiativeById(id)
+  const { data: users = [] } = useFetchUsers()
+  const { data: business } = useGetBusinessById(initiative?.business_id || '')
+  
+  const favoriteMutation = useFavoriteInitiative()
+  const unfavoriteMutation = useUnfavoriteInitiative()
   const followMutation = useFollowInitiative()
   const unfollowMutation = useUnfollowInitiative()
-  const addMember = useAddInitiativeMember()
 
-  if (isLoadingInitiative || !users) {
-    return (
-      <PrivateRoute>
-        <div className="container mx-auto py-8 max-w-4xl">
-          <Skeleton className="h-8 w-[200px]" />
-          <Skeleton className="h-4 w-[300px] mt-4" />
-          <div className="mt-8 space-y-4">
-            <Skeleton className="h-[200px]" />
-          </div>
-        </div>
-      </PrivateRoute>
-    )
-  }
-
-  if (!initiative) {
-    return (
-      <PrivateRoute>
-        <div className="container mx-auto py-8 max-w-4xl">
-          <h1 className="text-2xl font-semibold">Iniciativa não encontrada</h1>
-          <Button
-            onClick={() => router.push('/iniciativas')}
-            className="mt-4"
-          >
-            Voltar para Iniciativas
-          </Button>
-        </div>
-      </PrivateRoute>
-    )
-  }
-
-  const owner = users?.find((u: UserWithType) => u.uid === initiative.owner_id)
-
-  const activeParticipants =
-    initiative.participantes?.filter(
-      (p) => p.status === StatusVinculo.ACEITO,
-    ) || []
-
-  const isFollowing = userId && initiative.seguidores?.includes(userId)
-
-  const handleFollowToggle = () => {
-    if (isFollowing) {
-      unfollowMutation.mutate(initiative.uid)
-    } else {
-      followMutation.mutate(initiative.uid)
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300)
     }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleShare = async () => {
-    try {
-      await navigator.share({
-        title: initiative.titulo,
-        text: initiative.descricao,
-        url: window.location.href,
-      })
-    } catch (error) {
-      console.error('Error sharing:', error)
-    }
-  }
-
-  const handleUserSelect = (userId: string) => {
-    const isSelected = selectedUsers.some((u) => u.id === userId)
-    if (isSelected) {
-      setSelectedUsers(selectedUsers.filter((u) => u.id !== userId))
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: initiative?.titulo,
+          text: initiative?.descricao,
+          url: window.location.href,
+        })
+      } catch (err) {
+        console.error('Erro ao compartilhar:', err)
+      }
     } else {
-      setSelectedUsers([
-        ...selectedUsers,
-        { id: userId, role: PapelIniciativa.MEMBRO },
-      ])
+      await navigator.clipboard.writeText(window.location.href)
+      toast({
+        title: 'Link copiado!',
+        description: 'O link foi copiado para a área de transferência.',
+      })
     }
   }
 
-  const handleRoleChange = (userId: string, role: PapelIniciativa) => {
-    setSelectedUsers(
-      selectedUsers.map((u) => (u.id === userId ? { ...u, role } : u)),
+  const handleFavorite = () => {
+    if (isFavorited) {
+      unfavoriteMutation.mutate(id)
+    } else {
+      favoriteMutation.mutate(id)
+    }
+  }
+
+  const handleFollow = () => {
+    if (isFollowing) {
+      unfollowMutation.mutate(id)
+    } else {
+      followMutation.mutate(id)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <PrivateRoute>
+        <div className="min-h-screen bg-gray-50">
+          <div className="container mx-auto px-4 py-8 max-w-6xl">
+            <Skeleton className="h-8 w-[200px] mb-6" />
+            <div className="space-y-6">
+              <Skeleton className="h-[300px] w-full rounded-xl" />
+              <Skeleton className="h-[200px] w-full rounded-xl" />
+              <Skeleton className="h-[150px] w-full rounded-xl" />
+            </div>
+          </div>
+        </div>
+      </PrivateRoute>
     )
   }
 
-  const handleInviteMembers = async () => {
-    try {
-      for (const user of selectedUsers) {
-        // Verifica se o usuário é membro do negócio antes de convidar
-        const isMemberOfBusiness =
-          business?.membros?.[user.id]?.status === StatusVinculoNegocio.ACEITO
-        if (!isMemberOfBusiness) {
-          console.error(`Usuário ${user.id} não é membro do negócio`)
-          continue
-        }
+  if (error || !initiative) {
+    return (
+      <PrivateRoute>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">
+              Iniciativa não encontrada
+            </h1>
+            <p className="text-gray-600 mb-6">
+              A iniciativa que você está procurando não existe ou foi removida.
+            </p>
+            <Button onClick={() => router.push('/iniciativas')}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar para Iniciativas
+            </Button>
+          </div>
+        </div>
+      </PrivateRoute>
+    )
+  }
 
-        await addMember.mutateAsync({
-          initiativeId: id,
-          userId: user.id,
-          papel: user.role,
-        })
-      }
-      setSelectedUsers([])
-      setIsInviteDialogOpen(false)
-    } catch (error) {
-      console.error('Erro ao convidar membros:', error)
+  const owner = users?.find((u: any) => u.uid === initiative.uid_owner)
+  const activeParticipants = initiative.participantes?.filter(
+    (p) => p.status_vinculo === StatusVinculo.ACEITO
+  ) || []
+  
+  const isFavorited = initiative.favoritos?.includes(auth.userId || '') || false
+  const isFollowing = initiative.seguidores?.includes(auth.userId || '') || false
+  const isOwner = auth.userId === initiative.uid_owner
+
+  const getStatusIcon = (status: StatusIniciativa) => {
+    switch (status) {
+      case StatusIniciativa.ATIVA:
+        return <PlayCircle className="h-5 w-5 text-green-500" />
+      case StatusIniciativa.PAUSADA:
+        return <PauseCircle className="h-5 w-5 text-yellow-500" />
+      case StatusIniciativa.CONCLUIDA:
+        return <CheckCircle className="h-5 w-5 text-blue-500" />
+      case StatusIniciativa.CANCELADA:
+        return <XCircle className="h-5 w-5 text-red-500" />
+      default:
+        return <Clock className="h-5 w-5 text-gray-500" />
     }
   }
 
-  // Filtra apenas membros aceitos do negócio
-  const filteredUsers =
-    availableUsers?.filter((user: User) => {
-      // Verifica se o usuário é membro aceito do negócio
-      const isMemberOfBusiness =
-        business?.membros?.[user.uid]?.status === StatusVinculoNegocio.ACEITO
-      // Verifica se o usuário já é membro da iniciativa
-      const isNotMemberOfInitiative = !initiative.membros?.[user.uid]
-      // Verifica se o nome ou email corresponde à busca
-      const matchesSearch = searchTerm
-        ? user.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-        : true
+  const getStatusColor = (status: StatusIniciativa) => {
+    switch (status) {
+      case StatusIniciativa.ATIVA:
+        return 'bg-green-100 text-green-800 border-green-200'
+      case StatusIniciativa.PAUSADA:
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      case StatusIniciativa.CONCLUIDA:
+        return 'bg-blue-100 text-blue-800 border-blue-200'
+      case StatusIniciativa.CANCELADA:
+        return 'bg-red-100 text-red-800 border-red-200'
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200'
+    }
+  }
 
-      return isMemberOfBusiness && isNotMemberOfInitiative && matchesSearch
-    }) || []
+  const getMaturityColor = (nivel: NivelMaturidade) => {
+    switch (nivel) {
+      case NivelMaturidade.CONCEITO:
+        return 'bg-gradient-to-r from-red-500 to-red-600 text-white'
+      case NivelMaturidade.PROTOTIPO:
+        return 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white'
+      case NivelMaturidade.DEMONSTRACAO:
+        return 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+      case NivelMaturidade.COMERCIALIZACAO:
+        return 'bg-gradient-to-r from-green-500 to-green-600 text-white'
+      default:
+        return 'bg-gradient-to-r from-gray-500 to-gray-600 text-white'
+    }
+  }
 
-  const isOwner = userId === initiative.owner_id
-  const isAdmin = userId === 'admin'
-  const canInvite = isOwner || isAdmin
+  const getTypeIcon = (tipo: TipoIniciativa) => {
+    switch (tipo) {
+      case TipoIniciativa.PESQUISA:
+        return <GraduationCap className="h-5 w-5" />
+      case TipoIniciativa.INOVACAO:
+        return <Lightbulb className="h-5 w-5" />
+      case TipoIniciativa.EMPREENDEDORISMO:
+        return <Rocket className="h-5 w-5" />
+      case TipoIniciativa.EXTENSAO:
+        return <Users className="h-5 w-5" />
+      case TipoIniciativa.DESENVOLVIMENTO:
+        return <Building className="h-5 w-5" />
+      case TipoIniciativa.CONSULTORIA:
+        return <Briefcase className="h-5 w-5" />
+      default:
+        return <Lightbulb className="h-5 w-5" />
+    }
+  }
+
+  const getTypeBadge = (tipo: TipoIniciativa) => {
+    const config = {
+      [TipoIniciativa.PESQUISA]: { bg: 'bg-gradient-to-r from-indigo-500 to-indigo-600', text: 'Pesquisa', icon: '🎓' },
+      [TipoIniciativa.INOVACAO]: { bg: 'bg-gradient-to-r from-purple-500 to-purple-600', text: 'Inovação', icon: '💡' },
+      [TipoIniciativa.EMPREENDEDORISMO]: { bg: 'bg-gradient-to-r from-green-500 to-green-600', text: 'Empreendedorismo', icon: '🚀' },
+      [TipoIniciativa.EXTENSAO]: { bg: 'bg-gradient-to-r from-blue-500 to-blue-600', text: 'Extensão', icon: '🤝' },
+      [TipoIniciativa.DESENVOLVIMENTO]: { bg: 'bg-gradient-to-r from-orange-500 to-orange-600', text: 'Desenvolvimento', icon: '🏗️' },
+      [TipoIniciativa.CONSULTORIA]: { bg: 'bg-gradient-to-r from-teal-500 to-teal-600', text: 'Consultoria', icon: '💼' },
+      [TipoIniciativa.OUTROS]: { bg: 'bg-gradient-to-r from-gray-500 to-gray-600', text: 'Outros', icon: '📋' }
+    }
+    
+    const typeConfig = config[tipo] || { bg: 'bg-gradient-to-r from-gray-500 to-gray-600', text: tipo, icon: '💡' }
+    
+    return (
+      <div className={`${typeConfig.bg} text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 shadow-lg`}>
+        <span>{typeConfig.icon}</span>
+        {typeConfig.text}
+      </div>
+    )
+  }
 
   return (
     <PrivateRoute>
-      <div className="container mx-auto py-8 max-w-4xl">
-        <Card className="overflow-hidden">
-          {/* Cabeçalho da Iniciativa */}
-          <div className="p-6 bg-gradient-to-r from-primary/10 to-primary/5">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold">{initiative.titulo}</h1>
-                <div className="flex flex-col space-y-2 mt-2 text-muted-foreground">
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>
-                      Iniciado em{' '}
-                      {new Date(initiative.data_inicio).toLocaleDateString()}
-                    </span>
-                  </div>
-                  {business && (
-                    <div className="flex items-center space-x-2">
-                      <Building2 className="h-4 w-4" />
-                      <span>
-                        Iniciativa de{' '}
-                        <button
-                          onClick={() =>
-                            router.push(
-                              `/inspecionar-negocio/${business.id}`,
-                            )
-                          }
-                          className="text-zinc-800 hover:text-zinc-600 hover:underline"
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="relative bg-gradient-to-br from-purple-600 via-violet-600 to-purple-700 text-white">
+          {/* Decorative elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          </div>
+
+          <div className="relative z-10 container mx-auto px-4 py-12">
+            <div className="flex items-center justify-between mb-8">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/iniciativas')}
+                className="text-white hover:bg-white/10"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Voltar
+              </Button>
+              
+              <div className="flex items-center gap-3">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleShare}
+                        className="text-white hover:bg-white/10"
+                      >
+                        <Share2 className="h-5 w-5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Compartilhar</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                
+                {auth.userId && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={handleFavorite}
+                          className="text-white hover:bg-white/10"
                         >
-                          {business.nome}
-                        </button>
-                      </span>
+                          {isFavorited ? (
+                            <Heart className="h-5 w-5 fill-current" />
+                          ) : (
+                            <HeartOff className="h-5 w-5" />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{isFavorited ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
+            </div>
+
+            <div className="max-w-4xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex-1">
+                    <h1 className="text-4xl font-bold mb-4">{initiative.titulo}</h1>
+                    <p className="text-xl text-purple-100 mb-6 leading-relaxed">
+                      {initiative.descricao}
+                    </p>
+                  </div>
+                  <div className="ml-6">
+                    {getTypeBadge(initiative.tipo)}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                    <div className="flex items-center gap-3 mb-2">
+                      {getStatusIcon(initiative.status)}
+                      <span className="font-medium">Status</span>
+                    </div>
+                    <p className="text-sm text-purple-100">{initiative.status}</p>
+                  </div>
+                  
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Target className="h-5 w-5 text-green-400" />
+                      <span className="font-medium">Maturidade</span>
+                    </div>
+                    <p className="text-sm text-purple-100">{initiative.nivel_maturidade}</p>
+                  </div>
+                  
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Users className="h-5 w-5 text-blue-400" />
+                      <span className="font-medium">Participantes</span>
+                    </div>
+                    <p className="text-sm text-purple-100">{activeParticipants.length}</p>
+                  </div>
+                  
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Calendar className="h-5 w-5 text-yellow-400" />
+                      <span className="font-medium">Início</span>
+                    </div>
+                    <p className="text-sm text-purple-100">
+                      {format(new Date(initiative.data_inicio), 'PPP', { locale: ptBR })}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Heart className="h-5 w-5 text-red-400" />
+                    <span className="text-sm">{initiative.favoritos?.length || 0} favoritos</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-blue-400" />
+                    <span className="text-sm">{initiative.seguidores?.length || 0} seguidores</span>
+                  </div>
+                  {initiative.aceita_colaboradores && (
+                    <div className="flex items-center gap-2">
+                      <UserCheck className="h-5 w-5 text-green-400" />
+                      <span className="text-sm">Aceita colaboradores</span>
+                    </div>
+                  )}
+                  {initiative.colaboracao_internacional && (
+                    <div className="flex items-center gap-2">
+                      <Globe className="h-5 w-5 text-blue-400" />
+                      <span className="text-sm">Colaboração internacional</span>
                     </div>
                   )}
                 </div>
-              </div>
-              <Badge
-                variant={
-                  initiative.status === StatusIniciativa.ATIVA
-                    ? 'outline'
-                    : 'secondary'
-                }
-                className="ml-4 bg-zinc-100 text-zinc-800 hover:bg-zinc-200"
-              >
-                {initiative.status}
-              </Badge>
+              </motion.div>
             </div>
           </div>
+        </div>
 
-          <Separator />
+        {/* Content */}
+        <div className="container mx-auto px-4 py-8 max-w-6xl">
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
+            <TabsList className="grid w-full grid-cols-3 mb-8">
+              <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+              <TabsTrigger value="participants">Participantes</TabsTrigger>
+              <TabsTrigger value="resources">Recursos</TabsTrigger>
+            </TabsList>
 
-          {/* Corpo da Iniciativa */}
-          <div className="p-6">
-            {/* Descrição */}
-            <div className="prose max-w-none">
-              <p className="text-lg">{initiative.descricao}</p>
-            </div>
+            <TabsContent value="overview" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Main Content */}
+                <div className="lg:col-span-2 space-y-6">
+                  {/* Impact & Target */}
+                  {(initiative.impacto_esperado || initiative.publico_alvo) && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Target className="h-5 w-5 text-green-500" />
+                          Impacto e Público-alvo
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {initiative.impacto_esperado && (
+                          <div>
+                            <h4 className="font-medium text-gray-900 mb-2">Impacto Esperado</h4>
+                            <p className="text-gray-700 leading-relaxed">{initiative.impacto_esperado}</p>
+                          </div>
+                        )}
+                        {initiative.publico_alvo && (
+                          <div>
+                            <h4 className="font-medium text-gray-900 mb-2">Público-alvo</h4>
+                            <p className="text-gray-700 leading-relaxed">{initiative.publico_alvo}</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
 
-            {/* Tags e Informações */}
-            <div className="mt-6 flex flex-wrap gap-2">
-              <Badge
-                variant="outline"
-                className="flex items-center gap-1 bg-zinc-50 text-zinc-800 hover:bg-zinc-100 border-zinc-200"
-              >
-                <Tag className="h-3 w-3" />
-                {initiative.tipo}
-              </Badge>
-              {initiative.palavras_chave?.map((tag: string) => (
-                <Badge
-                  key={tag}
-                  variant="outline"
-                  className="bg-zinc-50 text-zinc-800 hover:bg-zinc-100 border-zinc-200"
-                >
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-
-            {/* Progresso */}
-            <div className="mt-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">
-                  Progresso do Projeto
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {calculateProgress(initiative)}%
-                </span>
-              </div>
-              <Progress
-                value={calculateProgress(initiative)}
-                className="h-2 bg-zinc-200 [&>div]:bg-zinc-700"
-              />
-            </div>
-
-            {/* Participantes e Seguidores */}
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Equipe */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Equipe</h3>
-                  <Badge
-                    variant="outline"
-                    className="flex items-center gap-1 bg-zinc-50 text-zinc-800 hover:bg-zinc-100 border-zinc-200"
-                  >
-                    <Users className="h-3 w-3" />
-                    {activeParticipants.length + 1}
-                  </Badge>
-                </div>
-                <div className="space-y-4">
-                  {/* Líder */}
-                  <Card className="p-4">
-                    <div className="flex items-center space-x-4">
-                      <Avatar>
-                        <AvatarImage
-                          src={owner?.foto_url}
-                          alt={owner?.nome || 'Avatar do usuário'}
-                        />
-                        <AvatarFallback>
-                          {owner?.nome?.charAt(0) || '?'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">
-                          {owner?.nome || 'Líder do Projeto'}
-                        </p>
-                        <p className="text-sm text-muted-foreground">Líder</p>
-                      </div>
-                    </div>
+                  {/* Keywords & Technologies */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Zap className="h-5 w-5 text-purple-500" />
+                        Palavras-chave e Tecnologias
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {initiative.palavras_chave && initiative.palavras_chave.length > 0 && (
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-3">Palavras-chave</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {initiative.palavras_chave.map((keyword, index) => (
+                              <Badge key={index} variant="secondary" className="bg-purple-50 text-purple-700">
+                                {keyword}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {initiative.tecnologias_utilizadas && initiative.tecnologias_utilizadas.length > 0 && (
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-3">Tecnologias Utilizadas</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {initiative.tecnologias_utilizadas.map((tech, index) => (
+                              <Badge key={index} variant="secondary" className="bg-blue-50 text-blue-700">
+                                {tech}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {initiative.areas_conhecimento && initiative.areas_conhecimento.length > 0 && (
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-3">Áreas de Conhecimento</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {initiative.areas_conhecimento.map((area, index) => (
+                              <Badge key={index} variant="outline" className="border-green-200 text-green-700">
+                                {area}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
                   </Card>
 
-                  {/* Membros Ativos */}
-                  {activeParticipants.map((participante: MembroIniciativa) => {
-                    const member = users?.find(
-                      (u: UserWithType) => u.uid === participante.uid,
-                    )
-                    return (
-                      <Card key={participante.uid} className="p-4">
-                        <div className="flex items-center space-x-4">
-                          <Avatar>
-                            <AvatarFallback>
-                              {member?.nome?.charAt(0) || '?'}
-                            </AvatarFallback>
-                          </Avatar>
+                  {/* Financial Information */}
+                  {initiative.orcamento_previsto && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <DollarSign className="h-5 w-5 text-green-500" />
+                          Informações Financeiras
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-600">Orçamento Previsto</span>
+                            <span className="font-semibold">
+                              {new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: initiative.moeda || 'BRL'
+                              }).format(initiative.orcamento_previsto)}
+                            </span>
+                          </div>
+                          {initiative.fonte_financiamento && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-600">Fonte de Financiamento</span>
+                              <span className="font-medium">{initiative.fonte_financiamento}</span>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+
+                {/* Sidebar */}
+                <div className="space-y-6">
+                  {/* Status Card */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Status da Iniciativa</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600">Status</span>
+                          <Badge className={getStatusColor(initiative.status)}>
+                            {initiative.status}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600">Maturidade</span>
+                          <Badge className={getMaturityColor(initiative.nivel_maturidade)}>
+                            {initiative.nivel_maturidade}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600">Tipo</span>
+                          <div className="flex items-center gap-2">
+                            {getTypeIcon(initiative.tipo)}
+                            <span className="font-medium">{initiative.tipo}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Collaboration Features */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Colaboração</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <UserCheck className={`h-5 w-5 ${initiative.aceita_colaboradores ? 'text-green-500' : 'text-gray-400'}`} />
+                          <span className={initiative.aceita_colaboradores ? 'text-green-700' : 'text-gray-500'}>
+                            {initiative.aceita_colaboradores ? 'Aceita colaboradores' : 'Não aceita colaboradores'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Globe className={`h-5 w-5 ${initiative.colaboracao_internacional ? 'text-blue-500' : 'text-gray-400'}`} />
+                          <span className={initiative.colaboracao_internacional ? 'text-blue-700' : 'text-gray-500'}>
+                            {initiative.colaboracao_internacional ? 'Colaboração internacional' : 'Apenas nacional'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Award className={`h-5 w-5 ${initiative.tem_propriedade_intelectual ? 'text-yellow-500' : 'text-gray-400'}`} />
+                          <span className={initiative.tem_propriedade_intelectual ? 'text-yellow-700' : 'text-gray-500'}>
+                            {initiative.tem_propriedade_intelectual ? 'Tem propriedade intelectual' : 'Sem propriedade intelectual'}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Timeline */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Cronograma</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <Calendar className="h-5 w-5 text-green-500" />
                           <div>
-                            <p className="font-medium">
-                              {member?.nome || 'Membro'}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {participante.papel}
+                            <p className="font-medium">Início</p>
+                            <p className="text-sm text-gray-600">
+                              {format(new Date(initiative.data_inicio), 'PPP', { locale: ptBR })}
                             </p>
                           </div>
                         </div>
-                      </Card>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Seguidores */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Seguidores</h3>
-                  <Badge
-                    variant="outline"
-                    className="flex items-center gap-1 bg-zinc-50 text-zinc-800 hover:bg-zinc-100 border-zinc-200"
-                  >
-                    <Heart className="h-3 w-3" />
-                    {initiative.seguidores?.length || 0}
-                  </Badge>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {initiative.seguidores?.map((followerId: string) => {
-                    const follower = users?.find(
-                      (u: UserWithType) => u.uid === followerId,
-                    )
-                    return (
-                      <Avatar
-                        key={followerId}
-                        className="border-2 border-background"
-                      >
-                        <AvatarImage
-                          src={follower?.foto_url}
-                          alt={follower?.nome || 'Avatar do seguidor'}
-                        />
-                        <AvatarFallback>
-                          {follower?.nome?.charAt(0) || '?'}
-                        </AvatarFallback>
-                      </Avatar>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Ações */}
-            <div className="mt-8 flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Button
-                  variant={isFollowing ? 'outline' : 'secondary'}
-                  size="sm"
-                  className={`gap-2 ${
-                    isFollowing
-                      ? 'bg-zinc-100 text-zinc-800 hover:bg-zinc-200 border-zinc-200'
-                      : 'bg-zinc-800 text-white hover:bg-zinc-700'
-                  }`}
-                  onClick={handleFollowToggle}
-                  disabled={
-                    followMutation.isPending || unfollowMutation.isPending
-                  }
-                >
-                  {isFollowing ? (
-                    <>
-                      <HeartOff className="h-4 w-4" />
-                      Deixar de Seguir
-                    </>
-                  ) : (
-                    <>
-                      <Heart className="h-4 w-4" />
-                      Seguir
-                    </>
-                  )}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 bg-zinc-50 text-zinc-800 hover:bg-zinc-100 border-zinc-200"
-                  onClick={handleShare}
-                >
-                  <Share2 className="h-4 w-4" />
-                  Compartilhar
-                </Button>
-              </div>
-              {userId === initiative.owner_id && (
-                <Button
-                  onClick={() =>
-                    router.push(`/minhas-iniciativas/${initiative.uid}`)
-                  }
-                  variant="secondary"
-                  size="sm"
-                  className="gap-2 bg-zinc-800 text-white hover:bg-zinc-700"
-                >
-                  Gerenciar
-                </Button>
-              )}
-            </div>
-
-            {/* Seção de Membros */}
-            <div className="mt-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Membros</h2>
-                {canInvite && (
-                  <Dialog
-                    open={isInviteDialogOpen}
-                    onOpenChange={setIsInviteDialogOpen}
-                  >
-                    <DialogTrigger asChild>
-                      <Button>Convidar Membros</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Convidar Membros</DialogTitle>
-                        <DialogDescription>
-                          Busque membros do negócio para convidar para a
-                          iniciativa.
-                          {availableUsers.length === 0 &&
-                            !isLoadingUsers &&
-                            searchTerm === '' && (
-                              <div className="mt-2 text-yellow-600">
-                                Não há membros disponíveis. Os usuários precisam
-                                ser membros do negócio antes de serem convidados
-                                para a iniciativa.
-                              </div>
-                            )}
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <Input
-                          placeholder="Buscar usuários..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <ScrollArea className="h-[300px]">
-                          {filteredUsers.map((user: User) => {
-                            const isSelected = selectedUsers.some(
-                              (u) => u.id === user.uid,
-                            )
-
-                            return (
-                              <div
-                                key={user.uid}
-                                className="flex items-center justify-between p-2 hover:bg-accent rounded-lg cursor-pointer"
-                                onClick={() => handleUserSelect(user.uid)}
-                              >
-                                <div className="flex items-center space-x-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={isSelected}
-                                    onChange={() => {}}
-                                    className="rounded"
-                                  />
-                                  <span>{user.nome || user.email}</span>
-                                  <Badge>
-                                    {business?.membros?.[user.uid]?.papel ||
-                                      'MEMBRO'}
-                                  </Badge>
-                                </div>
-                                {isSelected && (
-                                  <Select
-                                    value={
-                                      selectedUsers.find(
-                                        (u) => u.id === user.uid,
-                                      )?.role
-                                    }
-                                    onValueChange={(value: PapelIniciativa) =>
-                                      handleRoleChange(user.uid, value)
-                                    }
-                                  >
-                                    <SelectTrigger className="w-[140px]">
-                                      <SelectValue placeholder="Selecione o papel" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {Object.values(PapelIniciativa).map(
-                                        (role) => (
-                                          <SelectItem key={role} value={role}>
-                                            {role}
-                                          </SelectItem>
-                                        ),
-                                      )}
-                                    </SelectContent>
-                                  </Select>
-                                )}
-                              </div>
-                            )
-                          })}
-                          {filteredUsers.length === 0 &&
-                            searchTerm &&
-                            !isLoadingUsers && (
-                              <div className="p-4 text-center text-muted-foreground">
-                                Nenhum membro encontrado com este termo de
-                                busca.
-                              </div>
-                            )}
-                        </ScrollArea>
-                        <div className="flex justify-end space-x-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => setIsInviteDialogOpen(false)}
-                          >
-                            Cancelar
-                          </Button>
-                          <Button
-                            onClick={handleInviteMembers}
-                            disabled={selectedUsers.length === 0}
-                          >
-                            Convidar
-                          </Button>
-                        </div>
+                        {initiative.data_fim && (
+                          <div className="flex items-center gap-3">
+                            <Calendar className="h-5 w-5 text-red-500" />
+                            <div>
+                              <p className="font-medium">Fim</p>
+                              <p className="text-sm text-gray-600">
+                                {format(new Date(initiative.data_fim), 'PPP', { locale: ptBR })}
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </DialogContent>
-                  </Dialog>
+                    </CardContent>
+                  </Card>
+
+                  {/* Owner Information */}
+                  {owner && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Responsável</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-12 w-12">
+                            <AvatarImage src={owner.foto_url} alt={owner.nome} />
+                            <AvatarFallback>{owner.nome.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{owner.nome}</p>
+                            <p className="text-sm text-gray-600">{owner.email}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="participants" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Participantes da Iniciativa</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {activeParticipants.length > 0 ? (
+                    <div className="space-y-4">
+                      {activeParticipants.map((participant) => {
+                        const user = users.find((u: any) => u.uid === participant.uid)
+                        return (
+                          <div key={participant.uid} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <Avatar>
+                                <AvatarImage src={user?.foto_url} alt={user?.nome} />
+                                <AvatarFallback>{user?.nome?.charAt(0) || 'U'}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">{user?.nome || 'Usuário'}</p>
+                                <p className="text-sm text-gray-600">{user?.email}</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <Badge variant="outline">{participant.papel}</Badge>
+                              {participant.dedicacao_horas && (
+                                <p className="text-sm text-gray-600 mt-1">
+                                  {participant.dedicacao_horas}h/semana
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">Nenhum participante ativo encontrado</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="resources" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Resources Needed */}
+                {initiative.recursos_necessarios && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Recursos Necessários</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-700 leading-relaxed">{initiative.recursos_necessarios}</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Expected Results */}
+                {initiative.resultados_esperados && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Resultados Esperados</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-700 leading-relaxed">{initiative.resultados_esperados}</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Success Metrics */}
+                {initiative.metricas_sucesso && initiative.metricas_sucesso.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Métricas de Sucesso</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {initiative.metricas_sucesso.map((metric, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <span className="text-gray-700">{metric}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* ODS Related */}
+                {initiative.ods_relacionados && initiative.ods_relacionados.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>ODS Relacionados</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {initiative.ods_relacionados.map((ods, index) => (
+                          <Badge key={index} variant="outline" className="border-blue-200 text-blue-700">
+                            {ods}
+                          </Badge>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
               </div>
+            </TabsContent>
+          </Tabs>
+        </div>
 
-              {/* Lista de membros */}
-              {initiative.membros &&
-                Object.entries(initiative.membros).map(([userId, membro]) => {
-                  const user = users?.find((u) => u.uid === userId)
-                  return (
-                    <div
-                      key={userId}
-                      className="flex items-center justify-between p-2 hover:bg-accent rounded-lg"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <span>{user?.nome || 'Usuário'}</span>
-                        <Badge>{membro.papel}</Badge>
-                        <Badge
-                          variant={
-                            membro.status === StatusVinculo.ACEITO
-                              ? 'default'
-                              : membro.status === StatusVinculo.PENDENTE
-                                ? 'secondary'
-                                : 'destructive'
-                          }
-                        >
-                          {membro.status}
-                        </Badge>
-                      </div>
-                      {canInvite && userId !== initiative.owner_id && (
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            // Implementar remoção de membro
-                          }}
-                        >
-                          Remover
-                        </Button>
-                      )}
-                    </div>
-                  )
-                })}
-            </div>
-          </div>
-        </Card>
+        {/* Scroll to Top Button */}
+        <AnimatePresence>
+          {showScrollTop && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="fixed bottom-8 right-8 z-50"
+            >
+              <Button
+                size="icon"
+                onClick={scrollToTop}
+                className="rounded-full shadow-lg bg-purple-600 hover:bg-purple-700"
+              >
+                <ChevronUp className="h-5 w-5" />
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </PrivateRoute>
   )
-}
-
-function calculateProgress(initiative: ExtendedIniciativa): number {
-  if (!initiative.data_fim) return 0
-
-  const start = new Date(initiative.data_inicio)
-  const end = new Date(initiative.data_fim)
-  const today = new Date()
-
-  const totalDays = Math.max(
-    1,
-    (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
-  )
-  const daysElapsed = Math.max(
-    0,
-    (today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
-  )
-
-  const progress = (daysElapsed / totalDays) * 100
-  return Math.min(Math.round(progress), 100)
 }
