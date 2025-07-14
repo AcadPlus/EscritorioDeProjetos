@@ -7,7 +7,6 @@ import { useAllUsers } from "@/hooks/allUsers"
 import { useConnectionRequests } from "@/lib/api/connections"
 import type { UserCreateData } from "@/lib/types/userTypes"
 import { ConnectionStatus, RequestType } from "@/lib/types/connectionTypes"
-import { motion } from "framer-motion"
 import { Loader2 } from "lucide-react"
 
 interface AsyncNetworkListProps {
@@ -49,12 +48,13 @@ export function AsyncNetworkList({ searchQuery, roleFilter, setSelectedUser, dis
 
   const isLoading = isLoadingUsers || isLoadingSent || isLoadingReceived || isLoadingConnections
 
+  // Memoizar mapeamento de conexões para melhor performance
   const connections = useMemo(() => {
     if (!sentRequests || !receivedRequests || !userConnections) return []
 
     const connectionMap = new Map()
 
-    // Primeiro, mapear as conexões aceitas (maior prioridade)
+    // Mapear conexões aceitas (maior prioridade)
     userConnections.forEach((id) => {
       connectionMap.set(id, {
         id,
@@ -63,7 +63,7 @@ export function AsyncNetworkList({ searchQuery, roleFilter, setSelectedUser, dis
       })
     })
 
-    // Depois, adicionar solicitações pendentes apenas se não houver conexão aceita
+    // Adicionar solicitações pendentes apenas se não houver conexão aceita
     sentRequests
       .filter((req) => req.status === ConnectionStatus.PENDING)
       .forEach((req) => {
@@ -91,143 +91,132 @@ export function AsyncNetworkList({ searchQuery, roleFilter, setSelectedUser, dis
     return Array.from(connectionMap.values())
   }, [sentRequests, receivedRequests, userConnections])
 
+  // Memoizar usuários filtrados para melhor performance
   const filteredUsers = useMemo(() => {
-    if (!users) return []
-    return users.filter((user: { uid: string | null; nome: string; tipo_usuario: string }) => {
-      const isNotCurrentUser = user.uid !== currentUserId
-      const matchesSearch = user.nome.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesRole = roleFilter === "all" || user.tipo_usuario === roleFilter
-      return matchesSearch && matchesRole && isNotCurrentUser
-    })
-  }, [users, searchQuery, roleFilter, currentUserId])
+    if (!users || !currentUserId) return []
 
-  const categorizedUsers = useMemo(() => {
-    const connected: UserCreateData[] = []
-    const pending: UserCreateData[] = []
-    const all: UserCreateData[] = []
+    // Filtrar usuário atual
+    let userList = users.filter((user) => user.uid !== currentUserId)
 
-    filteredUsers.forEach((user: UserCreateData) => {
-      const connection = connections.find((conn) => conn.id === user.uid)
-      if (connection) {
-        if (connection.status === ConnectionStatus.ACCEPTED) {
-          connected.push(user)
-        } else if (connection.status === ConnectionStatus.PENDING) {
-          pending.push(user)
-        }
-      }
-      all.push(user)
-    })
-
-    return { connected, pending, all }
-  }, [filteredUsers, connections])
-
-  const displayUsers = useMemo(() => {
-    switch (displayMode) {
-      case "connected":
-        return categorizedUsers.connected
-      case "pending":
-        return categorizedUsers.pending
-      default:
-        return categorizedUsers.all
+    // Aplicar filtros de busca e role
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim()
+      userList = userList.filter((user) =>
+        user.nome.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query) ||
+        (user.cidade && user.cidade.toLowerCase().includes(query))
+      )
     }
-  }, [displayMode, categorizedUsers])
 
+    if (roleFilter !== "all") {
+      userList = userList.filter((user) => user.tipo_usuario === roleFilter)
+    }
+
+    // Filtrar por modo de exibição
+    if (displayMode === "connected") {
+      const connectedIds = connections
+        .filter((conn) => conn.status === ConnectionStatus.ACCEPTED)
+        .map((conn) => conn.id)
+      userList = userList.filter((user) => connectedIds.includes(user.uid))
+    } else if (displayMode === "pending") {
+      const pendingIds = connections
+        .filter((conn) => conn.status === ConnectionStatus.PENDING)
+        .map((conn) => conn.id)
+      userList = userList.filter((user) => pendingIds.includes(user.uid))
+    }
+
+    return userList
+  }, [users, currentUserId, searchQuery, roleFilter, connections, displayMode])
+
+  // Memoizar mapeamento de status de conexão
+  const connectionStatusMap = useMemo(() => {
+    const statusMap = new Map()
+    connections.forEach((conn) => {
+      statusMap.set(conn.id, conn)
+    })
+    return statusMap
+  }, [connections])
+
+  // Callback otimizado para ações de conexão
   const handleRequestAction = useCallback(
     async (action: "send" | "accept" | "reject" | "cancel" | "remove", targetId: string, user: UserCreateData) => {
       setLoadingActions((prev) => ({ ...prev, [targetId]: true }))
-      try {
-        if (action === "send") {
-          const existingConnection = connections.find((conn) => conn.id === targetId)
-          if (existingConnection) {
-            console.error("Já existe uma conexão ou solicitação pendente com este usuário")
-            return
-          }
-        }
 
+      try {
         switch (action) {
           case "send":
             await createRequestMutation.mutateAsync(targetId)
             break
           case "accept":
-          case "reject":
+            // Use targetId (requester_id) directly for updateRequest
             await updateRequestMutation.mutateAsync({
               userId: targetId,
-              status: action === "accept" ? ConnectionStatus.ACCEPTED : ConnectionStatus.REJECTED,
+              status: ConnectionStatus.ACCEPTED,
+            })
+            break
+          case "reject":
+            // Use targetId (requester_id) directly for updateRequest
+            await updateRequestMutation.mutateAsync({
+              userId: targetId,
+              status: ConnectionStatus.REJECTED,
             })
             break
           case "cancel":
+            // Use targetId directly for cancelRequest (the target of the sent request)
             await cancelRequestMutation.mutateAsync(targetId)
             break
           case "remove":
+            // Pass both userId and userType for removeConnection
             await removeConnectionMutation.mutateAsync({
               userId: targetId,
               userType: user.tipo_usuario,
             })
             break
-          default:
-            console.error("Invalid action:", action)
         }
       } catch (error) {
-        console.error(`Error performing ${action} action:`, error)
+        console.error(`Failed to ${action} connection:`, error)
       } finally {
         setLoadingActions((prev) => ({ ...prev, [targetId]: false }))
       }
     },
-    [createRequestMutation, updateRequestMutation, cancelRequestMutation, removeConnectionMutation, connections],
+    [
+      createRequestMutation,
+      updateRequestMutation,
+      cancelRequestMutation,
+      removeConnectionMutation,
+      receivedRequests,
+      sentRequests,
+    ]
   )
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <motion.div
-          className="flex items-center justify-center gap-3 py-8"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
-          <span className="text-gray-600 font-medium">Carregando rede de conexões...</span>
-        </motion.div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {[...Array(8)].map((_, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.3 }}
-            >
-              <SkeletonCard />
-            </motion.div>
-          ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {Array.from({ length: 6 }, (_, i) => (
+          <SkeletonCard key={i} />
+        ))}
+      </div>
+    )
+  }
+
+  if (usersError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="text-red-500 mb-4">
+          <Loader2 className="h-12 w-12 mx-auto mb-2" />
+          <p className="text-lg font-semibold">Erro ao carregar usuários</p>
+          <p className="text-sm text-gray-500">Tente novamente mais tarde</p>
         </div>
       </div>
     )
   }
 
-  if (usersError)
-    return (
-      <motion.div
-        className="text-center mt-12 p-8 bg-red-50 rounded-2xl border border-red-100"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Loader2 className="h-8 w-8 text-red-600" />
-        </div>
-        <h3 className="text-lg font-semibold text-red-800 mb-2">Erro ao carregar dados</h3>
-        <p className="text-red-600">{usersError.message}</p>
-      </motion.div>
-    )
-
   return (
     <NetworkList
-      users={displayUsers}
-      connections={connections}
-      currentUserId={currentUserId || ""}
+      users={filteredUsers}
+      connectionStatusMap={connectionStatusMap}
       handleRequestAction={handleRequestAction}
       setSelectedUser={setSelectedUser}
-      viewOption={displayMode}
       loadingActions={loadingActions}
     />
   )
