@@ -306,7 +306,7 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
         >
           <Link href="/" rel="noopener noreferrer">
             <Home className="mr-2 h-4 w-4" />
-            Retornar ao EP
+            Retornar ao Início
             <ChevronRight className="ml-auto h-4 w-4" />
           </Link>
         </Button>
