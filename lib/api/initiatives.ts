@@ -306,6 +306,48 @@ export const useInitiativesApi = () => {
     return data.data
   }
 
+  const deleteInitiative = async (initiativeId: string): Promise<void> => {
+    await fetchWithToken(`${API_BASE_URL}/initiatives/${initiativeId}`, {
+      method: 'DELETE',
+    })
+  }
+
+  const favoriteInitiative = async (initiativeId: string): Promise<void> => {
+    await fetchWithToken(`${API_BASE_URL}/initiatives/${initiativeId}/favorite`, {
+      method: 'POST',
+    })
+  }
+
+  const unfavoriteInitiative = async (initiativeId: string): Promise<void> => {
+    await fetchWithToken(`${API_BASE_URL}/initiatives/${initiativeId}/favorite`, {
+      method: 'DELETE',
+    })
+  }
+
+  const getUserFavoriteInitiatives = async (): Promise<Initiative[]> => {
+    const response = await fetchWithToken(`${API_BASE_URL}/initiatives/favorites`, {
+      requireAuth: true,
+    })
+    const data = await response.json()
+    return data.data
+  }
+
+  const getInitiativesByMaturity = async (nivel: string): Promise<Initiative[]> => {
+    const response = await fetchWithToken(`${API_BASE_URL}/initiatives/by-maturity/${nivel}`, {
+      requireAuth: false,
+    })
+    const data = await response.json()
+    return data.data
+  }
+
+  const getInitiativesAcceptingCollaborators = async (): Promise<Initiative[]> => {
+    const response = await fetchWithToken(`${API_BASE_URL}/initiatives/accepting-collaborators`, {
+      requireAuth: false,
+    })
+    const data = await response.json()
+    return data.data
+  }
+
   const useCreateInitiative = () =>
     useMutation({
       mutationFn: createInitiative,
@@ -376,26 +418,69 @@ export const useInitiativesApi = () => {
 
   const useDeleteInitiative = () =>
     useMutation({
-      mutationFn: (initiativeId: string) =>
-        fetchWithToken(`${API_BASE_URL}/initiatives/${initiativeId}`, {
-          method: 'DELETE',
-        }),
+      mutationFn: deleteInitiative,
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['initiatives'] })
         queryClient.invalidateQueries({ queryKey: ['userInitiatives'] })
         toast({
-          title: 'Iniciativa excluída com sucesso',
-          duration: 5000,
+          title: 'Sucesso',
+          description: 'Iniciativa excluída com sucesso.',
         })
       },
-      onError: (error: Error | { message?: string }) => {
+      onError: (error: any) => {
         toast({
-          title: 'Erro ao excluir iniciativa',
-          description: error?.message || 'Tente novamente mais tarde',
+          title: 'Erro',
+          description: error.message || 'Erro ao excluir iniciativa.',
           variant: 'destructive',
-          duration: 5000,
         })
       },
+    })
+
+  const useFavoriteInitiative = () =>
+    useMutation({
+      mutationFn: favoriteInitiative,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['initiatives'] })
+        queryClient.invalidateQueries({ queryKey: ['favoriteInitiatives'] })
+        toast({
+          title: 'Sucesso',
+          description: 'Iniciativa favoritada com sucesso.',
+        })
+      },
+      onError: (error: any) => {
+        toast({
+          title: 'Erro',
+          description: error.message || 'Erro ao favoritar iniciativa.',
+          variant: 'destructive',
+        })
+      },
+    })
+
+  const useUnfavoriteInitiative = () =>
+    useMutation({
+      mutationFn: unfavoriteInitiative,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['initiatives'] })
+        queryClient.invalidateQueries({ queryKey: ['favoriteInitiatives'] })
+        toast({
+          title: 'Sucesso',
+          description: 'Favorito removido com sucesso.',
+        })
+      },
+      onError: (error: any) => {
+        toast({
+          title: 'Erro',
+          description: error.message || 'Erro ao remover favorito.',
+          variant: 'destructive',
+        })
+      },
+    })
+
+  const useGetUserFavoriteInitiatives = (enabled: boolean = true) =>
+    useQuery({
+      queryKey: ['favoriteInitiatives'],
+      queryFn: getUserFavoriteInitiatives,
+      enabled,
     })
 
   const useInviteMember = () =>
@@ -713,6 +798,20 @@ export const useInitiativesApi = () => {
       },
     })
 
+  const useGetInitiativesByMaturity = (nivel: string, enabled: boolean = true) =>
+    useQuery({
+      queryKey: ['initiatives', 'maturity', nivel],
+      queryFn: () => getInitiativesByMaturity(nivel),
+      enabled: enabled && !!nivel,
+    })
+
+  const useGetInitiativesAcceptingCollaborators = (enabled: boolean = true) =>
+    useQuery({
+      queryKey: ['initiatives', 'accepting-collaborators'],
+      queryFn: getInitiativesAcceptingCollaborators,
+      enabled,
+    })
+
   return {
     useCreateInitiative,
     useGetInitiativeById,
@@ -720,6 +819,9 @@ export const useInitiativesApi = () => {
     useGetUserInitiatives,
     useUpdateInitiative,
     useDeleteInitiative,
+    useFavoriteInitiative,
+    useUnfavoriteInitiative,
+    useGetUserFavoriteInitiatives,
     useInviteMember,
     useRejectInvite,
     useCancelInvite,
@@ -735,5 +837,7 @@ export const useInitiativesApi = () => {
     useGetInitiativesByAdmin,
     useApproveInitiative,
     useRejectInitiative,
+    useGetInitiativesByMaturity,
+    useGetInitiativesAcceptingCollaborators,
   }
 }

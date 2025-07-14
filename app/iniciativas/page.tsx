@@ -6,11 +6,12 @@ import {
   TipoIniciativa,
   PublicStatusIniciativa,
   StatusIniciativa,
+  NivelMaturidade,
 } from '@/lib/types/initiativeTypes'
 import { useState, useMemo } from 'react'
 import { useAuth } from '@/lib/context/AuthContext'
 import { motion } from 'framer-motion'
-import { Sparkles, HandHeart, TrendingUp, Users } from 'lucide-react'
+import { Sparkles, HandHeart, TrendingUp, Users, Heart, Star } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 // Local components
@@ -22,14 +23,21 @@ import { SearchAndSort } from './components/SearchAndSort'
 import InitiativeList from './components/InitiativeList'
 
 export default function InitiativesPage() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const [selectedType, setSelectedType] = useState<TipoIniciativa | undefined>()
+  const [selectedMaturity, setSelectedMaturity] = useState<NivelMaturidade | undefined>()
+  const [showCollaborating, setShowCollaborating] = useState(false)
+  const [showInternational, setShowInternational] = useState(false)
+  const [showWithIP, setShowWithIP] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'alphabetical'>(
-    'recent',
-  )
+  const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'alphabetical'>('recent')
 
-  const { useListInitiatives } = useInitiativesApi()
+  const { 
+    useListInitiatives, 
+    useFavoriteInitiative, 
+    useUnfavoriteInitiative,
+    useGetUserFavoriteInitiatives
+  } = useInitiativesApi()
 
   // Buscar todas as iniciativas de uma vez, sem filtros na API
   const {
@@ -38,6 +46,18 @@ export default function InitiativesPage() {
     error,
     refetch,
   } = useListInitiatives(undefined, undefined, undefined, true)
+
+  // Buscar favoritos do usuário
+  const { data: favoriteInitiatives } = useGetUserFavoriteInitiatives(isAuthenticated)
+
+  // Mutations para favoritos
+  const favoriteMutation = useFavoriteInitiative()
+  const unfavoriteMutation = useUnfavoriteInitiative()
+
+  // Função para verificar se uma iniciativa é favorita
+  const isInitiativeFavorited = (initiativeId: string) => {
+    return favoriteInitiatives?.some(fav => fav.uid === initiativeId) || false
+  }
 
   // Filtra e ordena as iniciativas no front-end
   const filteredAndSortedInitiatives = useMemo(() => {
@@ -49,6 +69,18 @@ export default function InitiativesPage() {
       
       // Filtro por tipo se selecionado
       if (selectedType && initiative.tipo !== selectedType) return false
+      
+      // Filtro por maturidade se selecionado
+      if (selectedMaturity && initiative.nivel_maturidade !== selectedMaturity) return false
+      
+      // Filtro por aceita colaboradores
+      if (showCollaborating && !initiative.aceita_colaboradores) return false
+      
+      // Filtro por colaboração internacional
+      if (showInternational && !initiative.colaboracao_internacional) return false
+      
+      // Filtro por propriedade intelectual
+      if (showWithIP && !initiative.tem_propriedade_intelectual) return false
       
       return true
     })
@@ -62,12 +94,24 @@ export default function InitiativesPage() {
         const palavrasChave = Array.isArray(initiative.palavras_chave)
           ? initiative.palavras_chave
           : []
+        const areasConhecimento = Array.isArray(initiative.areas_conhecimento)
+          ? initiative.areas_conhecimento
+          : []
+        const tecnologias = Array.isArray(initiative.tecnologias_utilizadas)
+          ? initiative.tecnologias_utilizadas
+          : []
 
         return (
           titulo.includes(searchLower) ||
           descricao.includes(searchLower) ||
           palavrasChave.some((keyword) =>
             (keyword?.toLowerCase() || '').includes(searchLower),
+          ) ||
+          areasConhecimento.some((area) =>
+            (area?.toLowerCase() || '').includes(searchLower),
+          ) ||
+          tecnologias.some((tech) =>
+            (tech?.toLowerCase() || '').includes(searchLower),
           )
         )
       })
@@ -91,7 +135,16 @@ export default function InitiativesPage() {
           )
       }
     })
-  }, [initiatives, selectedType, searchTerm, sortBy])
+  }, [
+    initiatives, 
+    selectedType, 
+    selectedMaturity, 
+    showCollaborating, 
+    showInternational, 
+    showWithIP, 
+    searchTerm, 
+    sortBy
+  ])
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -103,6 +156,14 @@ export default function InitiativesPage() {
 
   const handleRetry = () => {
     refetch()
+  }
+
+  const handleFavorite = (initiativeId: string) => {
+    favoriteMutation.mutate(initiativeId)
+  }
+
+  const handleUnfavorite = (initiativeId: string) => {
+    unfavoriteMutation.mutate(initiativeId)
   }
 
   // Loading state
@@ -130,7 +191,7 @@ export default function InitiativesPage() {
             transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
           >
             <p className="text-gray-800 text-lg font-medium">Carregando iniciativas...</p>
-            <p className="text-gray-500 text-sm mt-1">Preparando vitrine</p>
+            <p className="text-gray-500 text-sm mt-1">Preparando vitrine tecnológica</p>
           </motion.div>
         </motion.div>
       </div>
@@ -173,7 +234,16 @@ export default function InitiativesPage() {
       )
     }
 
-    return <InitiativeList initiatives={filteredAndSortedInitiatives} isLoading={isLoading} />
+    return (
+      <InitiativeList 
+        initiatives={filteredAndSortedInitiatives} 
+        isLoading={isLoading}
+        onFavorite={handleFavorite}
+        onUnfavorite={handleUnfavorite}
+        isInitiativeFavorited={isInitiativeFavorited}
+        currentUserId={user?.uid}
+      />
+    )
   }
 
   const renderTabContent = (statusFilter?: StatusIniciativa) => {
@@ -188,6 +258,18 @@ export default function InitiativesPage() {
         // Filtro por tipo se selecionado
         if (selectedType && initiative.tipo !== selectedType) return false
         
+        // Filtro por maturidade se selecionado
+        if (selectedMaturity && initiative.nivel_maturidade !== selectedMaturity) return false
+        
+        // Filtro por aceita colaboradores
+        if (showCollaborating && !initiative.aceita_colaboradores) return false
+        
+        // Filtro por colaboração internacional
+        if (showInternational && !initiative.colaboracao_internacional) return false
+        
+        // Filtro por propriedade intelectual
+        if (showWithIP && !initiative.tem_propriedade_intelectual) return false
+        
         // Filtro por status específico da tab
         if (initiative.status !== statusFilter) return false
         
@@ -199,12 +281,24 @@ export default function InitiativesPage() {
           const palavrasChave = Array.isArray(initiative.palavras_chave)
             ? initiative.palavras_chave
             : []
+          const areasConhecimento = Array.isArray(initiative.areas_conhecimento)
+            ? initiative.areas_conhecimento
+            : []
+          const tecnologias = Array.isArray(initiative.tecnologias_utilizadas)
+            ? initiative.tecnologias_utilizadas
+            : []
 
           return (
             titulo.includes(searchLower) ||
             descricao.includes(searchLower) ||
             palavrasChave.some((keyword) =>
               (keyword?.toLowerCase() || '').includes(searchLower),
+            ) ||
+            areasConhecimento.some((area) =>
+              (area?.toLowerCase() || '').includes(searchLower),
+            ) ||
+            tecnologias.some((tech) =>
+              (tech?.toLowerCase() || '').includes(searchLower),
             )
           )
         }
@@ -240,7 +334,16 @@ export default function InitiativesPage() {
       )
     }
 
-    return <InitiativeList initiatives={filteredInitiatives} isLoading={false} />
+    return (
+      <InitiativeList 
+        initiatives={filteredInitiatives} 
+        isLoading={false}
+        onFavorite={handleFavorite}
+        onUnfavorite={handleUnfavorite}
+        isInitiativeFavorited={isInitiativeFavorited}
+        currentUserId={user?.uid}
+      />
+    )
   }
 
   return (
@@ -268,7 +371,7 @@ export default function InitiativesPage() {
               transition={{ delay: 0.2, duration: 0.5 }}
             >
               <Sparkles className="h-4 w-4 text-white" />
-              <span className="text-sm font-medium text-white">Ecossistema de Inovação UFC</span>
+              <span className="text-sm font-medium text-white">Vitrine Tecnológica UFC</span>
             </motion.div>
 
             {/* Title */}
@@ -280,6 +383,17 @@ export default function InitiativesPage() {
             >
               Vitrine de Iniciativas
             </motion.h1>
+            
+            {/* Subtitle */}
+            <motion.p
+              className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.6 }}
+            >
+              Descubra projetos inovadores de laboratórios, empresas, startups e pesquisadores da UFC
+            </motion.p>
+            
             {/* Stats */}
             <motion.div
               className="flex flex-wrap justify-center gap-8 text-center"
@@ -305,6 +419,13 @@ export default function InitiativesPage() {
                   {initiatives?.filter(i => i.status === StatusIniciativa.CONCLUIDA).length || 0}
                 </span>
                 <span className="text-purple-200">Concluídas</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Star className="h-5 w-5 text-purple-200" />
+                <span className="text-2xl font-bold">
+                  {initiatives?.filter(i => i.aceita_colaboradores).length || 0}
+                </span>
+                <span className="text-purple-200">Colaborativas</span>
               </div>
             </motion.div>
           </motion.div>
@@ -375,6 +496,14 @@ export default function InitiativesPage() {
               setSelectedType={setSelectedType}
               selectedStatus={PublicStatusIniciativa.ATIVA}
               setSelectedStatus={() => {}}
+              selectedMaturity={selectedMaturity}
+              setSelectedMaturity={setSelectedMaturity}
+              showCollaborating={showCollaborating}
+              setShowCollaborating={setShowCollaborating}
+              showInternational={showInternational}
+              setShowInternational={setShowInternational}
+              showWithIP={showWithIP}
+              setShowWithIP={setShowWithIP}
             />
           </motion.div>
 

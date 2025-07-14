@@ -1,13 +1,25 @@
 import { useRouter } from 'next/navigation'
 import { InitiativeCard } from '@/components/initiatives/InitiativeCard'
+import { IniciativaBase } from '@/lib/types/initiativeTypes'
 import { Skeleton } from '@/components/ui/skeleton'
 
 interface InitiativeListProps {
-  initiatives: any[]
+  initiatives: IniciativaBase[]
   isLoading: boolean
+  onFavorite?: (initiativeId: string) => void
+  onUnfavorite?: (initiativeId: string) => void
+  isInitiativeFavorited?: (initiativeId: string) => boolean
+  currentUserId?: string
 }
 
-const InitiativeList = ({ initiatives, isLoading }: InitiativeListProps) => {
+const InitiativeList = ({ 
+  initiatives, 
+  isLoading,
+  onFavorite,
+  onUnfavorite,
+  isInitiativeFavorited,
+  currentUserId
+}: InitiativeListProps) => {
   const router = useRouter()
 
   if (isLoading) {
@@ -27,6 +39,10 @@ const InitiativeList = ({ initiatives, isLoading }: InitiativeListProps) => {
           key={initiative.uid}
           initiative={initiative}
           onClick={() => router.push(`/iniciativas/${initiative.uid}`)}
+          onFavorite={onFavorite ? () => onFavorite(initiative.uid) : undefined}
+          onUnfavorite={onUnfavorite ? () => onUnfavorite(initiative.uid) : undefined}
+          isFavorited={isInitiativeFavorited ? isInitiativeFavorited(initiative.uid) : false}
+          currentUserId={currentUserId}
         />
       ))}
     </div>
