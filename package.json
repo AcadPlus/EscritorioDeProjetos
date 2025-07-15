@@ -64,6 +64,7 @@
     "react-hot-toast": "^2.5.2",
     "react-image-crop": "^11.0.7",
     "react-phone-number-input": "^3.4.11",
+    "react-qr-code": "^2.0.18",
     "react-server-dom-webpack": "^0.0.1",
     "react-toastify": "^11.0.5",
     "reactflow": "^11.11.4",

@@ -24,6 +24,7 @@ import {
   Shield,
   Briefcase,
   GraduationCap,
+  QrCode,
 } from "lucide-react"
 import Image from "next/image"
 import { Card } from "@/components/ui/card"
@@ -59,6 +60,7 @@ import { useConnectionRequests } from "@/lib/api/connections"
 import { ConnectionStatus } from "@/lib/types/connectionTypes"
 import { motion } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
+import QrCodeModal from "./qr-code-modal"
 
 interface ProfilePageProps {
   userId?: string | null
@@ -88,6 +90,7 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
   const [isDeleteImageDialogOpen, setIsDeleteImageDialogOpen] = useState(false)
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false)
+  const [isQrCodeModalOpen, setIsQrCodeModalOpen] = useState(false)
   const [editProfileData, setEditProfileData] = useState({
     nome: "",
     email: "",
@@ -132,6 +135,11 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
   // Determine which user data to display
   const user = isViewingOwnProfile ? currentUser : otherUser?.user
   const isLoading = isViewingOwnProfile ? isCurrentUserLoading : isOtherUserLoading
+
+  const profileLink =
+    typeof window !== "undefined" && isViewingOwnProfile
+      ? `${window.location.origin}/perfil?id=${currentUser?.user?.uid}&type=${currentUser?.user?.tipo_usuario}`
+      : ""
 
   useEffect(() => {
     if (user) {
@@ -762,6 +770,15 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
                           <Button
                             variant="outline"
                             className="flex-1 border-purple-200 text-purple-600 hover:bg-purple-50 bg-transparent"
+                            onClick={() => setIsQrCodeModalOpen(true)}
+                            title="Compartilhar perfil via QR Code"
+                          >
+                            <QrCode className="h-4 w-4 mr-2" />
+                            QR Code
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="flex-1 border-purple-200 text-purple-600 hover:bg-purple-50 bg-transparent"
                             onClick={handleEditProfile}
                           >
                             <PencilIcon className="h-4 w-4 mr-2" />
@@ -1123,6 +1140,21 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
               }}
               imageFile={selectedFile}
               onCropComplete={handleCropComplete}
+            />
+          )}
+
+          {/* QR Code Modal para compartilhar perfil */}
+          {isViewingOwnProfile && user && (
+            <QrCodeModal
+              isOpen={isQrCodeModalOpen}
+              onClose={() => setIsQrCodeModalOpen(false)}
+              user={{
+                nome: user.nome,
+                email: user.email,
+                tipo_usuario: user.tipo_usuario,
+                profile_image_url: user.foto_url || user.profile_image_url || undefined,
+              }}
+              profileLink={profileLink}
             />
           )}
         </>
