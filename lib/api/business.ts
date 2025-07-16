@@ -174,6 +174,14 @@ export const useBusinessApi = () => {
     return data.data
   }
 
+  const getUserBusinessesById = async (userId: string): Promise<NegocioResponse[]> => {
+    const response = await fetchWithToken(`${API_BASE_URL}/business/user/${userId}`, {
+      requireAuth: true,
+    })
+    const data = await response.json()
+    return data.data
+  }
+
   const addBusinessMember = async ({
     businessId,
     userId,
@@ -332,6 +340,15 @@ export const useBusinessApi = () => {
       queryKey: ['user-businesses'],
       queryFn: getUserBusinesses,
     })
+
+  const useGetUserBusinessesById = (userId: string) => {
+    console.log('useGetUserBusinessesById called with:', userId, 'enabled:', !!userId)
+    return useQuery({
+      queryKey: ['user-businesses', userId],
+      queryFn: () => getUserBusinessesById(userId),
+      enabled: !!userId, // Só executa se userId existir
+    })
+  }
 
   const useGetBusiness = (businessId: string) =>
     useQuery({
@@ -492,6 +509,7 @@ export const useBusinessApi = () => {
     useRejectBusiness,
     useGetBusinessesByAdmin,
     useGetUserBusinesses,
+    useGetUserBusinessesById,
     useGetBusiness,
     useUpdateBusinessPhotos,
     useAddBusinessMember,

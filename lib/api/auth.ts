@@ -61,7 +61,9 @@ export const useAuthApi = () => {
     localStorage.setItem('userType', data.data.user_type)
     localStorage.setItem('userUid', data.data.user_uid)
     localStorage.setItem('userIsAdmin', data.data.is_admin)
-
+    // Compatibilidade: manter chave legada
+    localStorage.setItem('token', data.data.access_token)
+    
     return data.data
   }
 
@@ -90,6 +92,8 @@ export const useAuthApi = () => {
     localStorage.setItem('refreshToken', data.data.refresh_token)
     localStorage.setItem('userType', data.data.user_type)
     localStorage.setItem('userUid', data.data.user_uid)
+    // Compatibilidade: manter chave legada
+    localStorage.setItem('token', data.data.access_token)
 
     return data.data
   }

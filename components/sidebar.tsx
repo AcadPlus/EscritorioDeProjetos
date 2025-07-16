@@ -23,6 +23,7 @@ import {
   CalendarCheck,
   ChevronDown,
   Sparkles,
+  MessageCircle,
 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -95,6 +96,7 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
   const comunidadeItems = React.useMemo(
     () => [
       { name: 'Rede', icon: Network, href: '/rede' },
+      { name: 'Mensagens', icon: MessageCircle, href: '/mensagens' },
       {
         name: 'Notificações',
         icon: ({ className, ...props }: IconProps) => (

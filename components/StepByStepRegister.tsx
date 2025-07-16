@@ -230,7 +230,9 @@ export function StepByStepRegister({
 
   const handleSubmit = async () => {
     try {
-      await createUserMutation.mutateAsync(formData)
+      // Limpar campos undefined antes de enviar
+      const cleanedFormData = cleanUserData(formData)
+      await createUserMutation.mutateAsync(cleanedFormData)
       onRegisterSuccess()
     } catch (error: any) {
       if (error.response?.status === 400) {
@@ -282,9 +284,9 @@ export function StepByStepRegister({
           <EmailVerificationStep
             email={formData.email}
             verificationCode={verificationCode}
-            isVerifying={verifyCodeMutation.isLoading}
+            isVerifying={verifyCodeMutation.isPending}
             isEmailVerified={isEmailVerified}
-            isSendingCode={sendCodeMutation.isLoading}
+            isSendingCode={sendCodeMutation.isPending}
             showCodeInput={showCodeInput}
             emailError={errors.email_verification}
             onSendCode={handleSendVerificationCode}
@@ -429,4 +431,48 @@ function utilValidatePassword(password: string): string | null {
 
 function validatePassword(password: string): boolean {
   return utilValidatePassword(password) === null
+}
+
+// Função para limpar dados undefined antes de enviar
+function cleanUserData(data: UserCreateData): UserCreateData {
+  const cleaned: any = {}
+  
+  // Campos base obrigatórios para todos os tipos
+  cleaned.nome = data.nome
+  cleaned.email = data.email
+  cleaned.senha = data.senha
+  cleaned.telefone = data.telefone
+  cleaned.tipo_usuario = data.tipo_usuario
+  cleaned.conexoes = data.conexoes || []
+  cleaned.negocios = data.negocios || []
+  
+  // Campos opcionais comuns
+  if (data.foto_url) cleaned.foto_url = data.foto_url
+  if (data.redes_sociais) cleaned.redes_sociais = data.redes_sociais
+  
+  if (data.tipo_usuario === PublicUserType.EXTERNO) {
+    const externoData = data as any
+    // Para usuários externos, apenas adicionar empresa e cargo se não estiverem vazios
+    if (externoData.empresa && externoData.empresa.trim() !== '') {
+      cleaned.empresa = externoData.empresa.trim()
+    }
+    if (externoData.cargo && externoData.cargo.trim() !== '') {
+      cleaned.cargo = externoData.cargo.trim()
+    }
+  } else if (data.tipo_usuario === PublicUserType.ESTUDANTE) {
+    const estudanteData = data as any
+    // Campos obrigatórios para estudantes
+    cleaned.curso = estudanteData.curso
+    cleaned.campus = estudanteData.campus
+    cleaned.matricula = estudanteData.matricula
+  } else if (data.tipo_usuario === PublicUserType.PESQUISADOR) {
+    const pesquisadorData = data as any
+    // Campos obrigatórios para pesquisadores
+    cleaned.lattes = pesquisadorData.lattes
+    cleaned.siape = pesquisadorData.siape
+    cleaned.palavras_chave = pesquisadorData.palavras_chave || []
+    cleaned.campus = pesquisadorData.campus
+  }
+  
+  return cleaned as UserCreateData
 }

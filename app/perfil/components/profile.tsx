@@ -43,6 +43,8 @@ import {
 import { UserType } from "@/lib/types/userTypes"
 import { useRouter } from "next/navigation"
 import { useUserApi } from "@/lib/api/users"
+import { useBusinessApi } from "@/lib/api/business"
+import { useInitiativesApi } from "@/lib/api/initiatives"
 import { useRef, useState, useEffect } from "react"
 import { toast } from "sonner"
 import { ImageCropModal } from "@/components/ImageCropModal"
@@ -61,6 +63,10 @@ import { ConnectionStatus } from "@/lib/types/connectionTypes"
 import { motion } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
 import QrCodeModal from "./qr-code-modal"
+import { BusinessCard } from "@/components/business-card"
+import { InitiativeCard } from "@/components/initiatives/InitiativeCard"
+import ProfileBusinessItem from "./profile-business-item"
+import ProfileInitiativeItem from "./profile-initiative-item"
 
 interface ProfilePageProps {
   userId?: string | null
@@ -81,6 +87,9 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
 
   const { useCreateRequest, useUpdateRequest, useCancelRequest, useRemoveConnection, useGetConnectionStatus } =
     useConnectionRequests()
+
+  const { useGetUserBusinessesById } = useBusinessApi()
+  const { useGetUserInitiativesById } = useInitiativesApi()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -117,6 +126,84 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
   const { data: connectionStatus, isLoading: isConnectionStatusLoading } = useGetConnectionStatus(userId || "", {
     enabled: !!userId && !!currentUser,
   })
+
+  // Fetch user businesses and initiatives
+  const getCurrentUserId = () => {
+    return currentUser?.user?.uid || localStorage.getItem('userId')
+  }
+  
+  const targetUserId = isViewingOwnProfile ? getCurrentUserId() : userId
+  
+  console.log('Debug ProfilePage:', {
+    isViewingOwnProfile,
+    currentUserUid: currentUser?.user?.uid,
+    localStorageUserId: localStorage.getItem('userId'),
+    paramUserId: userId,
+    targetUserId,
+    isCurrentUserLoading,
+  })
+  
+  const { data: userBusinesses = [], isLoading: isBusinessesLoading } = useGetUserBusinessesById(
+    targetUserId || ""
+  )
+  const { data: userInitiatives = [], isLoading: isInitiativesLoading } = useGetUserInitiativesById(
+    targetUserId || ""
+  )
+
+  // Debug logs para verificar os dados
+  console.log('=== DEBUG INITIATIVES ===')
+  console.log('targetUserId:', targetUserId)
+  console.log('isInitiativesLoading:', isInitiativesLoading)
+  console.log('userBusinesses:', userBusinesses)
+  console.log('userInitiatives:', userInitiatives)
+  console.log('userInitiatives.length:', userInitiatives?.length)
+  console.log('typeof userInitiatives:', typeof userInitiatives)
+  console.log('Array.isArray(userInitiatives):', Array.isArray(userInitiatives))
+
+  // Garantir que os arrays sejam válidos antes da filtragem
+  const safeUserBusinesses = Array.isArray(userBusinesses) ? userBusinesses : []
+  const safeUserInitiatives = Array.isArray(userInitiatives) ? userInitiatives : []
+  
+  console.log('safeUserBusinesses:', safeUserBusinesses)
+  console.log('safeUserInitiatives:', safeUserInitiatives)
+
+  // Garantir que os arrays tenham IDs únicos - versão menos restritiva
+  const uniqueBusinesses = safeUserBusinesses.filter((business: any, index: number, self: any[]) => {
+    if (!business) {
+      console.log('Business filtrado (null/undefined):', business)
+      return false
+    }
+    if (!business.id) {
+      console.log('Business sem ID:', business)
+      // Permitir negócios sem ID, usando o index como fallback
+      return true
+    }
+    const isDuplicate = self.findIndex((b: any) => b && b.id === business.id) !== index
+    if (isDuplicate) {
+      console.log('Business duplicado filtrado:', business)
+    }
+    return !isDuplicate
+  })
+  
+  const uniqueInitiatives = safeUserInitiatives.filter((initiative: any, index: number, self: any[]) => {
+    if (!initiative) {
+      console.log('Initiative filtrada (null/undefined):', initiative)
+      return false
+    }
+    if (!initiative.id) {
+      console.log('Initiative sem ID:', initiative)
+      // Permitir iniciativas sem ID, usando o index como fallback
+      return true
+    }
+    const isDuplicate = self.findIndex((i: any) => i && i.id === initiative.id) !== index
+    if (isDuplicate) {
+      console.log('Initiative duplicada filtrada:', initiative)
+    }
+    return !isDuplicate
+  })
+
+  console.log('uniqueBusinesses após filtro:', uniqueBusinesses)
+  console.log('uniqueInitiatives após filtro:', uniqueInitiatives)
 
   // Connection mutations
   const sendConnectionMutation = useCreateRequest()
@@ -794,7 +881,16 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
                           </Button>
                         </>
                       ) : (
-                        <div className="w-full">{renderConnectionActionButton()}</div>
+                        <>
+                          <Button
+                            size="sm"
+                            className="bg-purple-600 hover:bg-purple-700 text-white mt-2"
+                            onClick={() => router.push(`/mensagens?uid=${user.uid}`)}
+                          >
+                            Enviar mensagem
+                          </Button>
+                          <div className="w-full">{renderConnectionActionButton()}</div>
+                        </>
                       )}
                     </motion.div>
                   </div>
@@ -834,6 +930,106 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
                   <p className="text-sm text-gray-500">negócios favoritos</p>
                 </div>
               </div>
+            </Card>
+          </motion.div>
+
+          {/* User Businesses Section */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+          >
+            <Card className="p-6 shadow-lg border border-purple-100 bg-white">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <Building2 className="h-5 w-5 text-purple-600" />
+                  </div>
+                  {isViewingOwnProfile ? 'Meus Negócios' : 'Negócios'}
+                </h2>
+                <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+                  {uniqueBusinesses.length} {uniqueBusinesses.length === 1 ? 'negócio' : 'negócios'}
+                </Badge>
+              </div>
+              
+              {isBusinessesLoading ? (
+                <div className="flex gap-4 overflow-x-auto pb-2">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={`business-skeleton-${i}`} className="min-w-[220px] h-32 bg-purple-50 rounded-lg p-4 animate-pulse"></div>
+                  ))}
+                </div>
+              ) : uniqueBusinesses.length > 0 ? (
+                <div className="flex gap-4 overflow-x-auto pb-2">
+                  {uniqueBusinesses.slice(0, 8).map((business: any, index: number) => {
+                    const businessKey = business.id || business.uid || business.created_at || `business-${index}-${business.nome || 'unnamed'}`
+                    return (
+                      <ProfileBusinessItem key={businessKey} business={business} />
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-12 h-12 mx-auto mb-4 bg-purple-100 rounded-full flex items-center justify-center">
+                    <Building2 className="h-6 w-6 text-purple-400" />
+                  </div>
+                  <p className="text-gray-500 mb-2">
+                    {isViewingOwnProfile ? 'Você ainda não possui negócios' : 'Este usuário não possui negócios'}
+                  </p>
+                  <p className="text-sm text-gray-400">
+                    {isViewingOwnProfile ? 'Crie seu primeiro negócio para aparecer aqui' : 'Negócios aparecerão aqui quando disponíveis'}
+                  </p>
+                </div>
+              )}
+            </Card>
+          </motion.div>
+
+          {/* User Initiatives Section */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Card className="p-6 shadow-lg border border-purple-100 bg-white">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <GraduationCap className="h-5 w-5 text-purple-600" />
+                  </div>
+                  {isViewingOwnProfile ? 'Minhas Iniciativas' : 'Iniciativas'}
+                </h2>
+                <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+                  {uniqueInitiatives.length} {uniqueInitiatives.length === 1 ? 'iniciativa' : 'iniciativas'}
+                </Badge>
+              </div>
+              
+              {isInitiativesLoading ? (
+                <div className="flex gap-4 overflow-x-auto pb-2">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={`initiative-skeleton-${i}`} className="min-w-[220px] h-32 bg-purple-50 rounded-lg p-4 animate-pulse"></div>
+                  ))}
+                </div>
+              ) : uniqueInitiatives.length > 0 ? (
+                <div className="flex gap-4 overflow-x-auto pb-2">
+                  {uniqueInitiatives.slice(0, 8).map((initiative: any, index: number) => {
+                    const initiativeKey = initiative.id || initiative.uid || initiative.created_at || `initiative-${index}-${initiative.titulo || initiative.nome || 'unnamed'}`
+                    return (
+                      <ProfileInitiativeItem key={initiativeKey} initiative={initiative} />
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-12 h-12 mx-auto mb-4 bg-purple-100 rounded-full flex items-center justify-center">
+                    <GraduationCap className="h-6 w-6 text-purple-400" />
+                  </div>
+                  <p className="text-gray-500 mb-2">
+                    {isViewingOwnProfile ? 'Você ainda não possui iniciativas' : 'Este usuário não possui iniciativas'}
+                  </p>
+                  <p className="text-sm text-gray-400">
+                    {isViewingOwnProfile ? 'Crie sua primeira iniciativa para aparecer aqui' : 'Iniciativas aparecerão aqui quando disponíveis'}
+                  </p>
+                </div>
+              )}
             </Card>
           </motion.div>
 

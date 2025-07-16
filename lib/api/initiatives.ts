@@ -77,6 +77,14 @@ export const useInitiativesApi = () => {
     return data.data
   }
 
+  const getUserInitiativesById = async (userId: string): Promise<Initiative[]> => {
+    const response = await fetchWithToken(`${API_BASE_URL}/initiatives/user/${userId}`, {
+      requireAuth: false,
+    })
+    const data = await response.json()
+    return data.data
+  }
+
   const updateInitiative = async ({
     initiativeId,
     updateData,
@@ -256,7 +264,7 @@ export const useInitiativesApi = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ tipo: TipoNotificacao.REMOCAO_INICIATIVA }),
+        body: JSON.stringify({ tipo: TipoNotificacao.REJEICAO_INICIATIVA }),
       },
     )
     const data = await response.json()
@@ -812,6 +820,16 @@ export const useInitiativesApi = () => {
       enabled,
     })
 
+  const useGetUserInitiativesById = (userId: string) => {
+    console.log('useGetUserInitiativesById called with:', userId, 'enabled:', !!userId && userId.trim() !== '')
+    return useQuery({
+      queryKey: ['userInitiativesById', userId],
+      queryFn: () => getUserInitiativesById(userId),
+      enabled: !!userId && userId.trim() !== '', // Melhor validação
+      retry: false,
+    })
+  }
+
   return {
     useCreateInitiative,
     useGetInitiativeById,
@@ -839,5 +857,6 @@ export const useInitiativesApi = () => {
     useRejectInitiative,
     useGetInitiativesByMaturity,
     useGetInitiativesAcceptingCollaborators,
+    useGetUserInitiativesById,
   }
 }

@@ -24,4 +24,7 @@ api.interceptors.response.use(
     }
     return Promise.reject(error);
   }
-); 
+);
+
+// Reexport the shared axios instance configured in the parent file
+export { api } from '../api' 
