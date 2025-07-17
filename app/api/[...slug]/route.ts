@@ -22,22 +22,26 @@ export async function handler(req: NextRequest) {
     const headersToForward = new Headers();
 
     // Encaminha o Content-Type original da requisição.
-    if (req.headers.has('Content-Type')) {
-      headersToForward.set('Content-Type', req.headers.get('Content-Type'));
+    const contentType = req.headers.get('Content-Type');
+    if (contentType) {
+      headersToForward.set('Content-Type', contentType);
     }
 
     // Encaminha o token de autorização, se existir.
-    if (req.headers.has('Authorization')) {
-      headersToForward.set('Authorization', req.headers.get('Authorization'));
+    const authHeader = req.headers.get('Authorization');
+    if (authHeader) {
+      headersToForward.set('Authorization', authHeader);
     }
 
     const response = await fetch(url.toString(), {
       method: req.method,
-      headers: headersToForward, // Usa os headers encaminhados
-      body: req.body,
-      // Garante que o fetch não use cache interno
+      headers: headersToForward,
+      body:
+        req.method !== 'GET' && req.method !== 'HEAD' ? (req as any).body : undefined,
       cache: 'no-store',
-    });
+      // Necessário pelo Edge runtime quando há body
+      duplex: 'half',
+    } as RequestInit);
 
     return response;
   } catch (error) {

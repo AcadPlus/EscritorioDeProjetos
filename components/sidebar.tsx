@@ -96,7 +96,8 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
   const comunidadeItems = React.useMemo(
     () => [
       { name: 'Rede', icon: Network, href: '/rede' },
-      { name: 'Mensagens', icon: MessageCircle, href: '/mensagens' },
+      { name: 'Conversas', icon: MessageCircle, href: '/conversas' },
+      { name: 'Reuniões', icon: CalendarCheck, href: '/reunioes' },
       {
         name: 'Notificações',
         icon: ({ className, ...props }: IconProps) => (

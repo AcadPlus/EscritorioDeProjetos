@@ -85,11 +85,20 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
     useGetUserById,
   } = useUserApi()
 
-  const { useCreateRequest, useUpdateRequest, useCancelRequest, useRemoveConnection, useGetConnectionStatus } =
-    useConnectionRequests()
+  const {
+    useCreateRequest,
+    useUpdateRequest,
+    useCancelRequest,
+    useRemoveConnection,
+    useGetConnectionStatus,
+    useGetUserConnections,
+  } = useConnectionRequests()
 
   const { useGetUserBusinessesById } = useBusinessApi()
   const { useGetUserInitiativesById } = useInitiativesApi()
+
+  // Obter conexões atualizadas
+  const { data: connectionIds = [] } = useGetUserConnections()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -463,6 +472,14 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
     }
   }
 
+  // Verificar se o usuário atual está conectado com o perfil visualizado
+  const isConnected = () => {
+    if (!userId) return false
+    
+    // Usar connectionIds como fonte principal (mesmo que página de conversas)
+    return connectionIds.includes(userId)
+  }
+
   // Render connection action button based on connection status
   const renderConnectionActionButton = () => {
     if (isConnectionStatusLoading) {
@@ -474,9 +491,8 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
       )
     }
 
-    // Verificar se o usuário atual tem o ID do usuário visualizado em suas conexões
-    const userConnections = currentUser?.user?.conexoes || []
-    if (userConnections.includes(userId)) {
+    // Usar a mesma lógica da função isConnected()
+    if (isConnected()) {
       return (
         <Button
           variant="outline"
@@ -882,13 +898,35 @@ export default function ProfilePage({ userId, userType }: ProfilePageProps) {
                         </>
                       ) : (
                         <>
-                          <Button
-                            size="sm"
-                            className="bg-purple-600 hover:bg-purple-700 text-white mt-2"
-                            onClick={() => router.push(`/mensagens?uid=${user.uid}`)}
-                          >
-                            Enviar mensagem
-                          </Button>
+                          {/* Botão de Enviar Mensagem Melhorado */}
+                          {isConnected() ? (
+                            <Button
+                              size="sm"
+                              className="bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white mt-2 shadow-lg hover:shadow-purple-500/25 transition-all duration-200 w-full group"
+                              onClick={() => router.push(`/conversas?uid=${user.uid}`)}
+                            >
+                              <Mail className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                              Enviar mensagem
+                            </Button>
+                          ) : (
+                            <div className="mt-2">
+                              <div className="relative">
+                                <Button
+                                  size="sm"
+                                  disabled
+                                  className="bg-gray-200 text-gray-400 cursor-not-allowed w-full border border-gray-300 hover:bg-gray-200"
+                                  title="Você precisa estar conectado para enviar mensagens"
+                                >
+                                  <Mail className="h-4 w-4 mr-2 opacity-50" />
+                                  Enviar mensagem
+                                  <Shield className="h-3 w-3 ml-auto opacity-50" />
+                                </Button>
+                              </div>
+                              <p className="text-xs text-gray-500 mt-1 text-center italic">
+                                🔒 Conecte-se primeiro para enviar mensagens
+                              </p>
+                            </div>
+                          )}
                           <div className="w-full">{renderConnectionActionButton()}</div>
                         </>
                       )}

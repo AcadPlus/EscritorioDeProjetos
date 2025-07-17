@@ -6,6 +6,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Toaster as SonnerToaster } from 'sonner'
 import { Toaster } from '@/components/ui/toaster'
 import PlatformLayoutClient from './platform-layout-client'
+import '@livekit/components-styles'
 
 const poppins = Poppins({
   subsets: ['latin'],
