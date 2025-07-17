@@ -38,12 +38,12 @@ export const useEventsApi = () => {
   }
 
   const listEvents = async (status?: EventStatus): Promise<Event[]> => {
-    const url = new URL(`${API_BASE_URL}/events/`)
+    let url = `${API_BASE_URL}/events/`
     if (status) {
-      url.searchParams.append('stts', status)
+      url += `?stts=${encodeURIComponent(status)}`
     }
     
-    const response = await fetchWithToken(url.toString(), {
+    const response = await fetchWithToken(url, {
       requireAuth: false,
     })
     const data = await response.json()

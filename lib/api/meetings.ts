@@ -73,9 +73,11 @@ export const useMeetingApi = () => {
   const listMeetings = async (
     status?: MeetingStatus,
   ): Promise<Meeting[]> => {
-    const url = new URL(`${API_BASE_URL}/meetings/`)
-    if (status) url.searchParams.append('status', status)
-    const response = await fetchWithToken(url.toString())
+    let url = `${API_BASE_URL}/meetings/`
+    if (status) {
+      url += `?status=${encodeURIComponent(status)}`
+    }
+    const response = await fetchWithToken(url)
     const data = await response.json()
     return data.data.meetings as Meeting[]
   }
