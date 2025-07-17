@@ -67,7 +67,7 @@ const LoadingState = () => (
 )
 
 // -------------------- Estado de Erro --------------------
-const ErrorState = ({ onRetry }: { onRetry: () => void }) => (
+const ErrorState = ({ onRetry, errorDetails }: { onRetry: () => void; errorDetails?: string }) => (
   <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
     <Card className="p-8 max-w-md w-full">
       <div className="text-center space-y-4">
@@ -75,6 +75,12 @@ const ErrorState = ({ onRetry }: { onRetry: () => void }) => (
         <div className="space-y-2">
           <p className="text-lg font-medium text-gray-900">Não foi possível carregar as mensagens</p>
           <p className="text-sm text-gray-500">Ocorreu um erro ao tentar carregar suas conversas. Por favor, tente novamente.</p>
+          {errorDetails && (
+            <details className="text-xs text-red-500 mt-2">
+              <summary className="cursor-pointer">Detalhes técnicos</summary>
+              <p className="mt-1 text-left">{errorDetails}</p>
+            </details>
+          )}
         </div>
         <Button onClick={onRetry} variant="default" className="w-full sm:w-auto">
           <RefreshCw className="w-4 h-4 mr-2" />
@@ -164,7 +170,7 @@ export default function ConversasPage() {
   // APIs
   const { useThreads, useCreateThread } = useMessagesApi()
   const { useGetUserConnections } = useConnectionRequests()
-  const { data: allUsers, isLoading: isLoadingUsers } = useAllUsers()
+  const { data: allUsers, isLoading: isLoadingUsers, error: usersError } = useAllUsers()
 
   // Queries
   const {
@@ -173,23 +179,61 @@ export default function ConversasPage() {
     hasNextPage,
     isLoading: isLoadingThreads,
     isError: isErrorThreads,
+    error: threadsError,
     refetch: refetchThreads,
   } = useThreads()
 
-  const { data: connectionIds = [], isLoading: isLoadingConnections } = useGetUserConnections()
+  const { 
+    data: connectionIds = [], 
+    isLoading: isLoadingConnections, 
+    error: connectionsError 
+  } = useGetUserConnections()
+  
   const { mutateAsync: createThread, isPending: isCreatingThread } = useCreateThread()
 
   const threads = threadsData?.pages.flatMap((page: any) => page.threads) ?? []
 
-  // Conexões filtradas
+  // Debug logs melhorados
+  useEffect(() => {
+    console.log('=== DEBUG CONVERSAS DETALHADO ===');
+    console.log('isLoadingThreads:', isLoadingThreads);
+    console.log('isErrorThreads:', isErrorThreads);
+    console.log('threadsError:', threadsError);
+    console.log('threadsData:', threadsData);
+    console.log('threads length:', threads.length);
+    console.log('isLoadingConnections:', isLoadingConnections);
+    console.log('connectionsError:', connectionsError);
+    console.log('connectionIds:', connectionIds);
+    console.log('isLoadingUsers:', isLoadingUsers);
+    console.log('usersError:', usersError);
+    console.log('allUsers length:', allUsers?.length);
+    console.log('userId:', userId);
+    console.log('==================================');
+  }, [
+    isLoadingThreads, isErrorThreads, threadsError, threadsData, threads.length,
+    isLoadingConnections, connectionsError, connectionIds,
+    isLoadingUsers, usersError, allUsers?.length, userId
+  ]);
+
+  // Conexões filtradas com proteção contra erro
   const connectedUsers = useMemo(() => {
-    if (!allUsers || !connectionIds.length) return []
-    // Mapear cada id de conexão ao objeto de usuário correspondente, se disponível
-    const list = connectionIds
-      .filter((id) => id !== userId) // evitar incluir o próprio usuário
-      .map((id) => allUsers?.find((u: any) => u.uid === id))
-      .filter(Boolean) as any[]
-    return list
+    if (!allUsers || !connectionIds.length) {
+      console.log('connectedUsers: retornando array vazio - allUsers:', !!allUsers, 'connectionIds:', connectionIds.length);
+      return []
+    }
+    
+    try {
+      const list = connectionIds
+        .filter((id) => id !== userId)
+        .map((id) => allUsers?.find((u: any) => u.uid === id))
+        .filter(Boolean) as any[]
+      
+      console.log('connectedUsers: calculado com sucesso -', list.length, 'usuários');
+      return list
+    } catch (error) {
+      console.error('Erro ao calcular connectedUsers:', error);
+      return []
+    }
   }, [allUsers, connectionIds, userId])
 
   const filteredConnections = useMemo(() => {
@@ -198,32 +242,28 @@ export default function ConversasPage() {
     return connectedUsers.filter((u: any) => u.nome.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))
   }, [connectedUsers, searchQuery])
 
-  // Conversas filtradas
+  // Conversas filtradas com proteção contra erro
   const filteredThreads = useMemo(() => {
     if (!searchQuery.trim()) return threads
-    const q = searchQuery.toLowerCase()
-    return threads.filter((thread: any) => {
-      const otherId = (thread.participantes || []).find((pid: string) => pid !== userId)
-      const otherUser = allUsers?.find((u: any) => u.uid === otherId)
-      const userName = otherUser?.nome || ''
-      const userEmail = otherUser?.email || ''
-      const lastMessage = thread.last_message || ''
-      
-      return userName.toLowerCase().includes(q) || 
-             userEmail.toLowerCase().includes(q) || 
-             lastMessage.toLowerCase().includes(q)
-    })
+    
+    try {
+      const q = searchQuery.toLowerCase()
+      return threads.filter((thread: any) => {
+        const otherId = (thread.participantes || []).find((pid: string) => pid !== userId)
+        const otherUser = allUsers?.find((u: any) => u.uid === otherId)
+        const userName = otherUser?.nome || ''
+        const userEmail = otherUser?.email || ''
+        const lastMessage = thread.last_message || ''
+        
+        return userName.toLowerCase().includes(q) || 
+               userEmail.toLowerCase().includes(q) || 
+               lastMessage.toLowerCase().includes(q)
+      })
+    } catch (error) {
+      console.error('Erro ao filtrar threads:', error);
+      return threads
+    }
   }, [threads, searchQuery, allUsers, userId])
-
-  useEffect(() => {
-    console.log('--- DEBUG CONVERSAS ---');
-    console.log('isLoadingConnections:', isLoadingConnections);
-    console.log('connectionIds:', connectionIds);
-    console.log('isLoadingUsers:', isLoadingUsers);
-    console.log('allUsers:', allUsers);
-    console.log('connectedUsers:', connectedUsers);
-    console.log('-----------------------');
-  }, [connectionIds, allUsers, connectedUsers, isLoadingConnections, isLoadingUsers]);
 
   // Auto abrir modal se uid na query
   useEffect(() => {
@@ -286,10 +326,26 @@ export default function ConversasPage() {
     }
   }
 
+  const handleRetry = () => {
+    console.log('Tentando novamente...');
+    refetchThreads()
+  }
+
+  // Condições de loading e error mais específicas
   const isLoading = isLoadingThreads || isLoadingConnections || isLoadingUsers
+  const hasError = isErrorThreads && !isLoading
+  
+  // Detalhes do erro para debug
+  const errorDetails = [
+    threadsError && `Threads: ${threadsError.message}`,
+    connectionsError && `Connections: ${connectionsError.message}`,
+    usersError && `Users: ${usersError.message}`
+  ].filter(Boolean).join('; ')
+
+  console.log('Renderização - isLoading:', isLoading, 'hasError:', hasError, 'errorDetails:', errorDetails);
 
   if (isLoading) return <LoadingState />
-  if (isErrorThreads) return <ErrorState onRetry={refetchThreads} />
+  if (hasError) return <ErrorState onRetry={handleRetry} errorDetails={errorDetails} />
 
   return (
     <PrivateRoute>
