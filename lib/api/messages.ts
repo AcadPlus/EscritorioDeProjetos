@@ -73,12 +73,11 @@ export const useMessagesApi = () => {
     pageParam?: string,
     limit = 20,
   ): Promise<PaginatedThreads> => {
-    const url = new URL(`${API_BASE_URL}/messages/threads`)
-    url.searchParams.set('limit', String(limit))
+    let url = `${API_BASE_URL}/messages/threads?limit=${limit}`
     if (pageParam) {
-      url.searchParams.set('last_key', pageParam)
+      url += `&last_key=${encodeURIComponent(pageParam)}`
     }
-    const response = await fetchWithToken(url.toString(), { method: 'GET' })
+    const response = await fetchWithToken(url, { method: 'GET' })
     const data = await response.json()
     return data.data as PaginatedThreads
   }
@@ -105,14 +104,11 @@ export const useMessagesApi = () => {
     pageParam?: string,
     limit = 50,
   ): Promise<PaginatedMessages> => {
-    const url = new URL(
-      `${API_BASE_URL}/messages/threads/${threadId}/messages`,
-    )
-    url.searchParams.set('limit', String(limit))
+    let url = `${API_BASE_URL}/messages/threads/${threadId}/messages?limit=${limit}`
     if (pageParam) {
-      url.searchParams.set('last_key', pageParam)
+      url += `&last_key=${encodeURIComponent(pageParam)}`
     }
-    const response = await fetchWithToken(url.toString(), { method: 'GET' })
+    const response = await fetchWithToken(url, { method: 'GET' })
     const data = await response.json()
     return data.data as PaginatedMessages
   }
@@ -130,7 +126,8 @@ export const useMessagesApi = () => {
     useInfiniteQuery({
       queryKey: ['threads'],
       queryFn: ({ pageParam }) => listThreads(pageParam as string | undefined, limit),
-      getNextPageParam: (lastPage) => lastPage.next ?? undefined,
+      getNextPageParam: (lastPage: PaginatedThreads) => lastPage.next ?? undefined,
+      initialPageParam: undefined as string | undefined,
     })
 
   const useSendMessage = (threadId: string) =>
@@ -147,7 +144,8 @@ export const useMessagesApi = () => {
       queryKey: ['messages', threadId],
       queryFn: ({ pageParam }) =>
         listMessages(threadId, pageParam as string | undefined, limit),
-      getNextPageParam: (lastPage) => lastPage.next ?? undefined,
+      getNextPageParam: (lastPage: PaginatedMessages) => lastPage.next ?? undefined,
+      initialPageParam: undefined as string | undefined,
     })
 
   return {
