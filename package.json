@@ -53,7 +53,6 @@
     "livekit-client": "^2.15.2",
     "lucide": "^0.399.0",
     "lucide-react": "^0.399.0",
-    "mina-scheduler": "^1.0.4",
     "mongodb": "^6.10.0",
     "mongoose": "^8.3.4",
     "multer": "^1.4.5-lts.1",
