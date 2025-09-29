@@ -58,7 +58,7 @@ export default function LandingPage() {
                 className="group relative inline-flex h-12 items-center justify-center rounded-lg border border-purple-500/50 bg-transparent px-8 text-sm font-semibold text-purple-200 shadow-sm transition-all duration-300 hover:bg-purple-500/10 hover:border-purple-400 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-900 backdrop-blur-sm"
                 prefetch={false}
               >
-                <span className="relative z-10">Acessar Plataforma</span>
+                <span className="relative z-10">Quero me conectar!</span>
               </Link>
             </div>
           </div>

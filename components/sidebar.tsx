@@ -86,11 +86,7 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
   const vitrinesItems = React.useMemo(() => [
     { name: 'Negócios', icon: Briefcase, href: '/negocios' },
     { name: 'Iniciativas', icon: HandshakeIcon, href: '/iniciativas' },
-  ], [])
-
-  const nextUpdateItems = React.useMemo(() => [
-    { name: 'Laboratórios', icon: Pickaxe, href: '' },
-    { name: 'Competências', icon: GraduationCap, href: '' },
+    { name: 'Laboratórios', icon: Pickaxe, href: '/laboratorios' },
   ], [])
 
   const comunidadeItems = React.useMemo(
@@ -146,6 +142,7 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
       icon: HandshakeIcon,
       href: '/minhas-iniciativas',
     },
+    { name: 'Meus Laboratórios', icon: Pickaxe, href: '/meus-laboratorios' },
     { name: 'Perfil do Usuário', icon: UserCircle, href: '/perfil' },
   ], [])
 
@@ -273,7 +270,6 @@ export function MainSidebar({ className, onClose }: MainSidebarProps) {
           <SidebarNavItem title="Vitrines" items={vitrinesItems} />
           <SidebarNavItem title="Comunidade" items={comunidadeItems} />
           <SidebarNavItem title="Pessoal" items={personalItems} />
-          <SidebarNavItem title="Em breve" items={nextUpdateItems} />
           {isAdmin && (
             <SidebarNavItem title="Administrativo" items={adminItems} />
           )}

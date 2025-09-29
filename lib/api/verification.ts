@@ -68,3 +68,72 @@ export function isValidEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(email)
 }
+
+// Password Reset API
+interface PasswordResetParams {
+  email: string
+  code: string
+  newPassword: string
+}
+
+export const usePasswordResetApi = () => {
+  const sendPasswordResetCode = async (email: string) => {
+    const response = await fetch(`${API_BASE_URL}/verification/password-reset/send-code`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    })
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error('Muitas tentativas. Tente novamente mais tarde.')
+      }
+      throw new Error('Falha ao enviar código de recuperação')
+    }
+
+    return response.json()
+  }
+
+  const verifyPasswordResetCode = async ({ email, code, newPassword }: PasswordResetParams) => {
+    const response = await fetch(`${API_BASE_URL}/verification/password-reset/verify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        code,
+        new_password: newPassword
+      }),
+    })
+
+    if (!response.ok) {
+      if (response.status === 400) {
+        throw new Error('Código inválido ou expirado')
+      }
+      if (response.status === 429) {
+        throw new Error('Muitas tentativas. Tente novamente mais tarde.')
+      }
+      throw new Error('Falha ao redefinir senha')
+    }
+
+    return response.json()
+  }
+
+  const useSendPasswordResetCode = () =>
+    useMutation({
+      mutationFn: sendPasswordResetCode,
+    })
+
+  const useVerifyPasswordResetCode = () =>
+    useMutation({
+      mutationFn: verifyPasswordResetCode,
+    })
+
+  return {
+    useSendPasswordResetCode,
+    useVerifyPasswordResetCode,
+  }
+}

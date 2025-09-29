@@ -17,10 +17,12 @@ import { useAuth } from '@/lib/context/AuthContext'
 import type { SelectableUserType } from '@/lib/types/userTypes'
 import { StepByStepRegister } from '@/components/StepByStepRegister'
 import { LoginForm } from './components/LoginForm'
+import { PasswordResetModal } from './components/PasswordResetModal'
 import { motion } from 'framer-motion'
 
 export default function LoginScreen() {
   const [isRegistering, setIsRegistering] = useState(false)
+  const [isPasswordResetOpen, setIsPasswordResetOpen] = useState(false)
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const router = useRouter()
@@ -53,6 +55,12 @@ export default function LoginScreen() {
   const handleRegisterSuccess = () => {
     setIsRegistering(false)
     setSuccessMessage('Cadastro realizado com sucesso. Por favor, faça login.')
+  }
+
+  const handleForgotPassword = () => {
+    setIsPasswordResetOpen(true)
+    setError('')
+    setSuccessMessage('')
   }
 
   const platformFeatures = [
@@ -142,6 +150,7 @@ export default function LoginScreen() {
                       onSubmit={handleLogin}
                       error={error}
                       successMessage={successMessage}
+                      onForgotPassword={handleForgotPassword}
                     />
                   )}
                 </CardContent>
@@ -398,6 +407,12 @@ export default function LoginScreen() {
           </div>
         </div>
       </div>
+
+      {/* Password Reset Modal */}
+      <PasswordResetModal
+        isOpen={isPasswordResetOpen}
+        onClose={() => setIsPasswordResetOpen(false)}
+      />
     </div>
   )
 }

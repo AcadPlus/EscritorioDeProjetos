@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Eye, EyeOff, LogIn, AlertCircle, CheckCircle, User, GraduationCap, Crown, Briefcase } from 'lucide-react'
+import { Eye, EyeOff, LogIn, AlertCircle, CheckCircle, User, GraduationCap, Crown, Briefcase, KeyRound } from 'lucide-react'
 import { UserType } from '@/lib/types/userTypes'
 import { motion } from 'framer-motion'
 
@@ -10,9 +10,10 @@ interface LoginFormProps {
   onSubmit: (email: string, password: string, userType: UserType) => void
   error: string
   successMessage: string
+  onForgotPassword?: () => void
 }
 
-export function LoginForm({ onSubmit, error, successMessage }: LoginFormProps) {
+export function LoginForm({ onSubmit, error, successMessage, onForgotPassword }: LoginFormProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -103,7 +104,7 @@ export function LoginForm({ onSubmit, error, successMessage }: LoginFormProps) {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="border-purple-200 focus:border-purple-500 focus:ring-purple-500 transition-colors"
+            className="bg-white border-purple-200 focus:border-purple-500 focus:ring-purple-500 focus:ring-2 transition-colors text-gray-900 placeholder:text-gray-500"
             placeholder="Digite seu email"
             required
           />
@@ -154,7 +155,7 @@ export function LoginForm({ onSubmit, error, successMessage }: LoginFormProps) {
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="pr-10 border-purple-200 focus:border-purple-500 focus:ring-purple-500 transition-colors"
+            className="pr-10 bg-white border-purple-200 focus:border-purple-500 focus:ring-purple-500 focus:ring-2 transition-colors text-gray-900 placeholder:text-gray-500"
             placeholder="Digite sua senha"
             required
           />
@@ -204,6 +205,26 @@ export function LoginForm({ onSubmit, error, successMessage }: LoginFormProps) {
           )}
         </Button>
       </motion.div>
+
+      {/* Forgot Password Link */}
+      {onForgotPassword && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+          className="text-center"
+        >
+          <Button
+            type="button"
+            variant="link"
+            className="text-purple-600 hover:text-purple-700 font-medium p-0"
+            onClick={onForgotPassword}
+          >
+            <KeyRound className="h-4 w-4 mr-2" />
+            Esqueci minha senha
+          </Button>
+        </motion.div>
+      )}
 
       {/* Messages */}
       {error && (
