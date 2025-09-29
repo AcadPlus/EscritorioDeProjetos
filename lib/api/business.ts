@@ -20,18 +20,27 @@ export const fetchPublicBusinessesForServer = async (
   const API_BASE_URL_LOCAL =
   process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
 
+  const url = `${API_BASE_URL_LOCAL}/business/?status=${status}`;
+  console.log('Fetching URL:', url);
+
   try {
-    const response = await fetch(
-      `${API_BASE_URL_LOCAL}/business/?status=${status}`,
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+    const response = await fetch(url,
       {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
+        signal: controller.signal,
         // Adicionar cache revalidate para Server Components se desejado
         // next: { revalidate: 60 } // Revalida a cada 60 segundos, por exemplo
       },
     );
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       console.error(
@@ -46,7 +55,12 @@ export const fetchPublicBusinessesForServer = async (
     const data = await response.json();
     return data.data as NegocioResponse[];
   } catch (error) {
-    console.error('Error fetching public businesses for server:', error);
+    // Handle timeout/abort errors gracefully during build
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.warn('Server-side fetch timed out, falling back to client-side loading');
+    } else {
+      console.error('Error fetching public businesses for server:', error);
+    }
     return null;
   }
 };

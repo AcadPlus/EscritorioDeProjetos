@@ -34,13 +34,21 @@ export const fetchPublicLaboratoriosForServer = async (
 
     const queryString = queryParams.toString()
     const url = `${API_BASE_URL_LOCAL}/laboratorios/${queryString ? `?${queryString}` : ''}`
+    console.log('Fetching URL:', url);
+
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
+      signal: controller.signal,
     })
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       console.error(
@@ -54,7 +62,12 @@ export const fetchPublicLaboratoriosForServer = async (
     const data = await response.json()
     return data.data as LaboratorioResponse[]
   } catch (error) {
-    console.error('Error fetching public laboratorios for server:', error)
+    // Handle timeout/abort errors gracefully during build
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.warn('Server-side fetch timed out, falling back to client-side loading')
+    } else {
+      console.error('Error fetching public laboratorios for server:', error)
+    }
     return null
   }
 }
